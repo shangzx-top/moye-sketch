@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 模型管理 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item active" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">2</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">模型ECG-2.0.1性能下降</a></li>
+                        <li><a class="dropdown-item" href="#">模型MED-1.5.0接入完成</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="model-management">
+                <div class="page-header mb-4">
+                    <h1>AI 模型管理</h1>
+                    <div class="page-description">管理和配置系统中使用的AI模型，包括模型接入、版本控制和置信度计算规则</div>
+                </div>
+
+                <!-- 管理导航标签 -->
+                <div class="management-tabs mb-4">
+                    <div class="nav nav-tabs" id="modelTabs" role="tablist">
+                        <button class="nav-link active" id="model-list-tab" data-bs-toggle="tab" data-bs-target="#model-list" type="button" role="tab" aria-controls="model-list" aria-selected="true">
+                            <i class="fas fa-robot mr-2"></i>模型列表
+                        </button>
+                        <button class="nav-link" id="model-versions-tab" data-bs-toggle="tab" data-bs-target="#model-versions" type="button" role="tab" aria-controls="model-versions" aria-selected="false">
+                            <i class="fas fa-code-branch mr-2"></i>版本控制
+                        </button>
+                        <button class="nav-link" id="confidence-rules-tab" data-bs-toggle="tab" data-bs-target="#confidence-rules" type="button" role="tab" aria-controls="confidence-rules" aria-selected="false">
+                            <i class="fas fa-chart-line mr-2"></i>置信度计算规则
+                        </button>
+                        <button class="nav-link" id="model-perf-tab" data-bs-toggle="tab" data-bs-target="#model-perf" type="button" role="tab" aria-controls="model-perf" aria-selected="false">
+                            <i class="fas fa-tachometer-alt mr-2"></i>模型性能监控
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 标签内容区域 -->
+                <div class="tab-content" id="modelTabsContent">
+                    <!-- 模型列表 -->
+                    <div class="tab-pane fade show active" id="model-list" role="tabpanel" aria-labelledby="model-list-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">AI 模型列表</h4>
+                                        <div class="total-count">共 12 个模型</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="搜索模型...">
+                                                    <button class="btn btn-outline-secondary">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select class="form-control">
+                                                    <option value="all">所有类型</option>
+                                                    <option value="text">文本模型</option>
+                                                    <option value="image">图像模型</option>
+                                                    <option value="medical">医学大模型</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 text-right">
+                                                <button class="btn btn-primary" id="add-model-btn">
+                                                    <i class="fas fa-plus-circle"></i> 接入新模型
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="model-list">
+                                    <div class="model-item">
+                                        <div class="model-header">
+                                            <div class="model-info">
+                                                <div class="model-name">
+                                                    <i class="fas fa-heartbeat text-red-500"></i>
+                                                    <span>心电图分析模型</span>
+                                                    <span class="model-version">v2.0.1</span>
+                                                </div>
+                                                <div class="model-type">
+                                                    <span class="type-badge">医学大模型</span>
+                                                    <span class="type-badge">图像模型</span>
+                                                </div>
+                                            </div>
+                                            <div class="model-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="model-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">配置</button>
+                                                <button class="btn btn-sm btn-warning">禁用</button>
+                                                <button class="btn btn-sm btn-danger" disabled>删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="model-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">描述：</span>
+                                                <span class="detail-value">用于心电图数据的自动分析和诊断</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">当前版本：</span>
+                                                <span class="detail-value">v2.0.1 (活跃)</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">平均置信度：</span>
+                                                <span class="detail-value">92.8%</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">接入时间：</span>
+                                                <span class="detail-value">2024-01-01</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">最近更新：</span>
+                                                <span class="detail-value">2024-01-15</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="model-item">
+                                        <div class="model-header">
+                                            <div class="model-info">
+                                                <div class="model-name">
+                                                    <i class="fas fa-file-alt text-blue-500"></i>
+                                                    <span>医疗文本解析模型</span>
+                                                    <span class="model-version">v3.1.0</span>
+                                                </div>
+                                                <div class="model-type">
+                                                    <span class="type-badge">文本模型</span>
+                                                    <span class="type-badge">医学大模型</span>
+                                                </div>
+                                            </div>
+                                            <div class="model-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="model-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">配置</button>
+                                                <button class="btn btn-sm btn-warning">禁用</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="model-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">描述：</span>
+                                                <span class="detail-value">用于医学文本的结构化解析和信息提取</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">当前版本：</span>
+                                                <span class="detail-value">v3.1.0 (活跃)</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">平均置信度：</span>
+                                                <span class="detail-value">94.2%</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">接入时间：</span>
+                                                <span class="detail-value">2023-12-15</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">最近更新：</span>
+                                                <span class="detail-value">2024-01-10</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="model-item">
+                                        <div class="model-header">
+                                            <div class="model-info">
+                                                <div class="model-name">
+                                                    <i class="fas fa-stethoscope text-green-500"></i>
+                                                    <span>医学影像分析模型</span>
+                                                    <span class="model-version">v1.5.0</span>
+                                                </div>
+                                                <div class="model-type">
+                                                    <span class="type-badge">图像模型</span>
+                                                    <span class="type-badge">医学大模型</span>
+                                                </div>
+                                            </div>
+                                            <div class="model-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="model-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">配置</button>
+                                                <button class="btn btn-sm btn-warning">禁用</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="model-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">描述：</span>
+                                                <span class="detail-value">用于X光片、CT等医学影像的自动分析</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">当前版本：</span>
+                                                <span class="detail-value">v1.5.0 (活跃)</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">平均置信度：</span>
+                                                <span class="detail-value">89.6%</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">接入时间：</span>
+                                                <span class="detail-value">2024-01-05</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">最近更新：</span>
+                                                <span class="detail-value">2024-01-12</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="model-item">
+                                        <div class="model-header">
+                                            <div class="model-info">
+                                                <div class="model-name">
+                                                    <i class="fas fa-language text-purple-500"></i>
+                                                    <span>多语言翻译模型</span>
+                                                    <span class="model-version">v4.0.2</span>
+                                                </div>
+                                                <div class="model-type">
+                                                    <span class="type-badge">文本模型</span>
+                                                </div>
+                                            </div>
+                                            <div class="model-status">
+                                                <span class="status-badge inactive">禁用</span>
+                                            </div>
+                                            <div class="model-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">配置</button>
+                                                <button class="btn btn-sm btn-success">启用</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="model-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">描述：</span>
+                                                <span class="detail-value">用于医学术语的多语言翻译和标准化</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">当前版本：</span>
+                                                <span class="detail-value">v4.0.2</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">平均置信度：</span>
+                                                <span class="detail-value">91.5%</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">接入时间：</span>
+                                                <span class="detail-value">2023-11-20</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">最近更新：</span>
+                                                <span class="detail-value">2023-12-30</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="pagination justify-content-center">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 版本控制 -->
+                    <div class="tab-pane fade" id="model-versions" role="tabpanel" aria-labelledby="model-versions-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">模型版本管理</h4>
+                                        <div class="version-description">管理模型的不同版本及其配置</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <select class="form-control">
+                                                    <option value="ecg">心电图分析模型</option>
+                                                    <option value="text">医疗文本解析模型</option>
+                                                    <option value="image">医学影像分析模型</option>
+                                                    <option value="translate">多语言翻译模型</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 text-right">
+                                                <button class="btn btn-primary">
+                                                    <i class="fas fa-plus-circle"></i> 部署新版本
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="version-list">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;"></th>
+                                                <th>版本号</th>
+                                                <th>状态</th>
+                                                <th>部署时间</th>
+                                                <th>部署人员</th>
+                                                <th>性能指标</th>
+                                                <th>描述</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><span class="version-badge latest">最新</span></td>
+                                                <td>v2.0.1</td>
+                                                <td><span class="status-badge active">活跃</span></td>
+                                                <td>2024-01-15</td>
+                                                <td>admin002 (李管理员)</td>
+                                                <td>准确率: 92.8%</td>
+                                                <td>修复了心率检测的边缘情况处理</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">配置</button>
+                                                    <button class="btn btn-sm btn-warning" disabled>回滚</button>
+                                                    <button class="btn btn-sm btn-danger" disabled>删除</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td>v2.0.0</td>
+                                                <td><span class="status-badge inactive">不活跃</span></td>
+                                                <td>2024-01-01</td>
+                                                <td>admin001 (张管理员)</td>
+                                                <td>准确率: 91.5%</td>
+                                                <td>重构了模型架构，提升了整体性能</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">配置</button>
+                                                    <button class="btn btn-sm btn-warning">回滚</button>
+                                                    <button class="btn btn-sm btn-danger">删除</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td>v1.5.3</td>
+                                                <td><span class="status-badge inactive">不活跃</span></td>
+                                                <td>2023-12-10</td>
+                                                <td>admin001 (张管理员)</td>
+                                                <td>准确率: 90.2%</td>
+                                                <td>优化了异常心电图识别算法</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">配置</button>
+                                                    <button class="btn btn-sm btn-warning">回滚</button>
+                                                    <button class="btn btn-sm btn-danger">删除</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td>v1.5.2</td>
+                                                <td><span class="status-badge inactive">不活跃</span></td>
+                                                <td>2023-11-25</td>
+                                                <td>admin002 (李管理员)</td>
+                                                <td>准确率: 89.7%</td>
+                                                <td>修复了部分数据兼容性问题</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">配置</button>
+                                                    <button class="btn btn-sm btn-warning">回滚</button>
+                                                    <button class="btn btn-sm btn-danger">删除</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="version-stats">
+                                            <span class="stat-item">当前活跃版本：v2.0.1</span>
+                                            <span class="stat-item">历史版本总数：12</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <div class="pagination">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <li class="page-item disabled">
+                                                        <a class="page-link" href="#" aria-label="Previous">
+                                                            <span aria-hidden="true">&laquo;</span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="#" aria-label="Next">
+                                                            <span aria-hidden="true">&raquo;</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 置信度计算规则 -->
+                    <div class="tab-pane fade" id="confidence-rules" role="tabpanel" aria-labelledby="confidence-rules-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">置信度计算规则</h4>
+                                        <div class="rule-description">配置不同模型和场景的置信度计算方法</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <select class="form-control">
+                                                    <option value="ecg">心电图分析模型</option>
+                                                    <option value="text">医疗文本解析模型</option>
+                                                    <option value="image">医学影像分析模型</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 text-right">
+                                                <button class="btn btn-primary">
+                                                    <i class="fas fa-plus-circle"></i> 添加规则
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="rule-list">
+                                    <div class="rule-item">
+                                        <div class="rule-header">
+                                            <div class="rule-name">
+                                                <i class="fas fa-calculator text-blue-500"></i>
+                                                <span>心率检测置信度计算</span>
+                                            </div>
+                                            <div class="rule-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="rule-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="rule-config">
+                                            <div class="config-item">
+                                                <span class="config-label">计算方法：</span>
+                                                <span class="config-value">加权平均值 (信号质量: 0.4, 波形匹配: 0.3, 历史一致性: 0.3)</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">阈值设置：</span>
+                                                <span class="config-value">高置信度: ≥90%, 中置信度: 70-89%, 低置信度: <70%</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">影响因素：</span>
+                                                <span class="config-value">信号噪声、基线漂移、数据完整性、特征清晰度</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">创建时间：</span>
+                                                <span class="config-value">2024-01-10</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">最近修改：</span>
+                                                <span class="config-value">2024-01-15</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="rule-item">
+                                        <div class="rule-header">
+                                            <div class="rule-name">
+                                                <i class="fas fa-calculator text-blue-500"></i>
+                                                <span>心律异常检测置信度计算</span>
+                                            </div>
+                                            <div class="rule-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="rule-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="rule-config">
+                                            <div class="config-item">
+                                                <span class="config-label">计算方法：</span>
+                                                <span class="config-value">多特征融合算法 (特征匹配度: 0.5, 模型置信度: 0.3, 领域规则: 0.2)</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">阈值设置：</span>
+                                                <span class="config-value">高置信度: ≥85%, 中置信度: 65-84%, 低置信度: <65%</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">影响因素：</span>
+                                                <span class="config-value">异常特征数量、异常程度、数据质量、个体差异</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">创建时间：</span>
+                                                <span class="config-value">2024-01-05</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">最近修改：</span>
+                                                <span class="config-value">2024-01-12</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="rule-item">
+                                        <div class="rule-header">
+                                            <div class="rule-name">
+                                                <i class="fas fa-calculator text-blue-500"></i>
+                                                <span>ST段分析置信度计算</span>
+                                            </div>
+                                            <div class="rule-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="rule-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="rule-config">
+                                            <div class="config-item">
+                                                <span class="config-label">计算方法：</span>
+                                                <span class="config-value">形态特征评估 (偏移量: 0.3, 斜率: 0.25, 长度: 0.25, 稳定性: 0.2)</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">阈值设置：</span>
+                                                <span class="config-value">高置信度: ≥88%, 中置信度: 75-87%, 低置信度: <75%</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">影响因素：</span>
+                                                <span class="config-value">基线稳定性、信号噪声、电极接触质量、患者体位</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">创建时间：</span>
+                                                <span class="config-value">2024-01-01</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">最近修改：</span>
+                                                <span class="config-value">2024-01-10</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <button class="btn btn-outline-secondary">
+                                            <i class="fas fa-undo"></i> 恢复默认规则
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button class="btn btn-secondary">
+                                            <i class="fas fa-download"></i> 导出规则配置
+                                        </button>
+                                        <button class="btn btn-secondary ml-2">
+                                            <i class="fas fa-upload"></i> 导入规则配置
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模型性能监控 -->
+                    <div class="tab-pane fade" id="model-perf" role="tabpanel" aria-labelledby="model-perf-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">模型性能监控</h4>
+                                        <div class="perf-description">监控和分析AI模型的运行性能和准确率</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <select class="form-control">
+                                                    <option value="ecg">心电图分析模型</option>
+                                                    <option value="text">医疗文本解析模型</option>
+                                                    <option value="image">医学影像分析模型</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select class="form-control">
+                                                    <option value="day">今日</option>
+                                                    <option value="week">本周</option>
+                                                    <option value="month">本月</option>
+                                                    <option value="quarter">本季度</option>
+                                                    <option value="custom">自定义</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 text-right">
+                                                <button class="btn btn-primary">
+                                                    <i class="fas fa-refresh"></i> 刷新数据
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- 性能指标卡片 -->
+                                <div class="performance-cards mb-6">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card performance-card">
+                                                <div class="card-body">
+                                                    <div class="performance-title">平均置信度</div>
+                                                    <div class="performance-value">92.8%</div>
+                                                    <div class="performance-change positive">
+                                                        <i class="fas fa-arrow-up"></i> 1.3%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card performance-card">
+                                                <div class="card-body">
+                                                    <div class="performance-title">准确率</div>
+                                                    <div class="performance-value">91.5%</div>
+                                                    <div class="performance-change positive">
+                                                        <i class="fas fa-arrow-up"></i> 0.8%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card performance-card">
+                                                <div class="card-body">
+                                                    <div class="performance-title">召回率</div>
+                                                    <div class="performance-value">89.7%</div>
+                                                    <div class="performance-change negative">
+                                                        <i class="fas fa-arrow-down"></i> 0.5%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card performance-card">
+                                                <div class="card-body">
+                                                    <div class="performance-title">F1分数</div>
+                                                    <div class="performance-value">90.6%</div>
+                                                    <div class="performance-change positive">
+                                                        <i class="fas fa-arrow-up"></i> 0.2%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 图表区域 -->
+                                <div class="charts-area">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">置信度趋势</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="confidence-trend-chart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">置信度分布</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="confidence-distribution-chart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">错误分析</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="error-analysis-chart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5 class="card-title">处理耗时</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="processing-time-chart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 性能告警列表 -->
+                                <div class="performance-alerts mt-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h5 class="card-title">性能告警</h5>
+                                                </div>
+                                                <div class="col-md-6 text-right">
+                                                    <select class="form-control" style="display: inline-block; width: auto;">
+                                                        <option value="all">所有告警</option>
+                                                        <option value="critical">严重</option>
+                                                        <option value="warning">警告</option>
+                                                        <option value="info">信息</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>告警时间</th>
+                                                        <th>告警级别</th>
+                                                        <th>告警类型</th>
+                                                        <th>影响范围</th>
+                                                        <th>描述</th>
+                                                        <th>处理状态</th>
+                                                        <th>操作</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>2024-01-18 14:30:22</td>
+                                                        <td><span class="alert-level critical">严重</span></td>
+                                                        <td>性能下降</td>
+                                                        <td>心率检测模块</td>
+                                                        <td>模型置信度低于阈值(90%)，当前为87.5%</td>
+                                                        <td><span class="status-badge pending">待处理</span></td>
+                                                        <td><button class="btn btn-sm btn-primary">处理</button></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2024-01-18 10:15:45</td>
+                                                        <td><span class="alert-level warning">警告</span></td>
+                                                        <td>超时</td>
+                                                        <td>整体处理流程</td>
+                                                        <td>部分请求处理时间超过5秒阈值</td>
+                                                        <td><span class="status-badge processing">处理中</span></td>
+                                                        <td><button class="btn btn-sm btn-primary">查看</button></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2024-01-17 16:45:12</td>
+                                                        <td><span class="alert-level info">信息</span></td>
+                                                        <td>版本更新</td>
+                                                        <td>全部功能</td>
+                                                        <td>模型ECG-2.0.1更新成功</td>
+                                                        <td><span class="status-badge resolved">已解决</span></td>
+                                                        <td><button class="btn btn-sm btn-primary">详情</button></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2024-01-17 09:30:55</td>
+                                                        <td><span class="alert-level warning">警告</span></td>
+                                                        <td>资源紧张</td>
+                                                        <td>计算资源</td>
+                                                        <td>GPU使用率超过80%，建议优化资源分配</td>
+                                                        <td><span class="status-badge resolved">已解决</span></td>
+                                                        <td><button class="btn btn-sm btn-primary">详情</button></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 接入新模型模态框 -->
+    <div class="modal fade" id="add-model-modal" tabindex="-1" role="dialog" aria-labelledby="add-model-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-model-modal-label">接入新模型</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="model-name-input">模型名称</label>
+                        <input type="text" class="form-control" id="model-name-input" placeholder="请输入模型名称">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="model-version-input">版本号</label>
+                            <input type="text" class="form-control" id="model-version-input" placeholder="请输入版本号">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="model-type-select">模型类型</label>
+                            <select class="form-control" id="model-type-select">
+                                <option value="">请选择模型类型</option>
+                                <option value="text">文本模型</option>
+                                <option value="image">图像模型</option>
+                                <option value="medical">医学大模型</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="model-description-input">模型描述</label>
+                        <textarea class="form-control" id="model-description-input" rows="3" placeholder="请输入模型描述..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="model-access-type">接入方式</label>
+                            <select class="form-control" id="model-access-type">
+                                <option value="api">API调用</option>
+                                <option value="local">本地部署</option>
+                                <option value="cloud">云服务</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="model-provider">模型提供商</label>
+                            <input type="text" class="form-control" id="model-provider" placeholder="请输入模型提供商">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="model-endpoint">API 端点</label>
+                        <input type="text" class="form-control" id="model-endpoint" placeholder="https://api.example.com/model">
+                    </div>
+                    <div class="form-group">
+                        <label for="model-auth">认证信息</label>
+                        <input type="text" class="form-control" id="model-auth" placeholder="API Key 或认证信息">
+                    </div>
+                    <div class="form-group">
+                        <label>模型参数配置</label>
+                        <div class="json-editor" id="model-params-editor">
+                            <textarea class="form-control" rows="5" placeholder="{
+  "param1": "value1",
+  "param2": "value2",
+  ...
+}"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-check-label">
+                            <input type="checkbox" class="form-check-input"> 启用模型
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">测试连接</button>
+                    <button type="button" class="btn btn-primary">接入模型</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模型详情模态框 -->
+    <div class="modal fade" id="model-detail-modal" tabindex="-1" role="dialog" aria-labelledby="model-detail-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="model-detail-modal-label">模型详情 - 心电图分析模型 v2.0.1</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="model-detail-section">
+                        <h6>基本信息</h6>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">模型名称：</span>
+                                <span class="detail-value">心电图分析模型</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">版本号：</span>
+                                <span class="detail-value">v2.0.1</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">模型类型：</span>
+                                <span class="detail-value">医学大模型, 图像模型</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">当前状态：</span>
+                                <span class="detail-value"><span class="status-badge active">启用</span></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">提供商：</span>
+                                <span class="detail-value">医疗AI实验室</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">接入时间：</span>
+                                <span class="detail-value">2024-01-01</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">最近更新：</span>
+                                <span class="detail-value">2024-01-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">部署方式：</span>
+                                <span class="detail-value">本地部署</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="model-detail-section mt-4">
+                        <h6>性能指标</h6>
+                        <div class="performance-grid">
+                            <div class="performance-item">
+                                <span class="performance-label">平均置信度：</span>
+                                <span class="performance-value">92.8%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">准确率：</span>
+                                <span class="performance-value">91.5%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">召回率：</span>
+                                <span class="performance-value">89.7%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">F1分数：</span>
+                                <span class="performance-value">90.6%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">TPR：</span>
+                                <span class="performance-value">90.2%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">FPR：</span>
+                                <span class="performance-value">2.1%</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">平均响应时间：</span>
+                                <span class="performance-value">1.2秒</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">日处理量：</span>
+                                <span class="performance-value">约5,000条</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="model-detail-section mt-4">
+                        <h6>接入配置</h6>
+                        <div class="config-grid">
+                            <div class="config-item">
+                                <span class="config-label">接入方式：</span>
+                                <span class="config-value">本地部署</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">部署路径：</span>
+                                <span class="config-value">/opt/models/ecg-analysis/</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">API端点：</span>
+                                <span class="config-value">http://localhost:8501/v1/models/ecg:predict</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">模型输入格式：</span>
+                                <span class="config-value">JSON (心电图纸数据)</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">模型输出格式：</span>
+                                <span class="config-value">JSON (分析结果)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="model-detail-section mt-4">
+                        <h6>功能描述</h6>
+                        <p>该模型用于心电图数据的自动分析和诊断，能够检测心率、心律异常、ST段变化等多种心电图特征。模型基于深度学习算法，经过大量临床数据训练，适用于多种心电图纸类型和采样频率。</p>
+                        <div class="supported-features mt-2">
+                            <h7>支持的分析功能：</h7>
+                            <ul>
+                                <li>心率检测和计算</li>
+                                <li>心律异常识别（如房颤、早搏等）</li>
+                                <li>ST段偏移分析</li>
+                                <li>QRS波群分析</li>
+                                <li>T波和P波识别</li>
+                                <li>心电图节律分类</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">编辑配置</button>
+                    <button type="button" class="btn btn-warning">禁用模型</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/model_management.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 点击接入新模型按钮打开模态框
+            document.getElementById('add-model-btn').addEventListener('click', function() {
+                const addModelModal = new bootstrap.Modal(document.getElementById('add-model-modal'));
+                addModelModal.show();
+            });
+
+            // 模型列表中查看按钮点击事件
+            const viewButtons = document.querySelectorAll('.model-actions .btn-primary');
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modelDetailModal = new bootstrap.Modal(document.getElementById('model-detail-modal'));
+                    modelDetailModal.show();
+                });
+            });
+
+            // 初始化图表
+            initCharts();
+        });
+
+        function initCharts() {
+            // 置信度趋势图
+            const confidenceTrendCtx = document.getElementById('confidence-trend-chart').getContext('2d');
+            new Chart(confidenceTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: '平均置信度',
+                        data: [92.5, 92.3, 93.1, 92.8, 92.6, 92.8],
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 85,
+                            max: 95,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 置信度分布图
+            const confidenceDistributionCtx = document.getElementById('confidence-distribution-chart').getContext('2d');
+            new Chart(confidenceDistributionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['<70%', '70-79%', '80-89%', '90-94%', '95-100%'],
+                    datasets: [{
+                        label: '数据占比',
+                        data: [3, 5, 15, 45, 32],
+                        backgroundColor: [
+                            '#dc3545',
+                            '#ffc107',
+                            '#28a745',
+                            '#007bff',
+                            '#17a2b8'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 错误分析图
+            const errorAnalysisCtx = document.getElementById('error-analysis-chart').getContext('2d');
+            new Chart(errorAnalysisCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['心率检测错误', '心律分类错误', 'ST段分析错误', 'QRS波识别错误', '其他错误'],
+                    datasets: [{
+                        data: [25, 35, 20, 15, 5],
+                        backgroundColor: [
+                            '#dc3545',
+                            '#ffc107',
+                            '#28a745',
+                            '#007bff',
+                            '#6c757d'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+
+            // 处理耗时图
+            const processingTimeCtx = document.getElementById('processing-time-chart').getContext('2d');
+            new Chart(processingTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: '平均处理时间 (秒)',
+                        data: [1.1, 1.0, 1.3, 1.5, 1.4, 1.2],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 3
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

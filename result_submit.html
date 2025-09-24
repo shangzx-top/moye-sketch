@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>结果提交 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item active" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">4</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有2个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">3个工单即将到期</a></li>
+                        <li><a class="dropdown-item" href="#">有5个工单已完成</a></li>
+                        <li><a class="dropdown-item" href="#">外部平台API连接异常</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="result-submit">
+                <div class="task-header mb-4">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h1>结果提交</h1>
+                            <div class="task-info">
+                                <span class="task-name">当前任务：心电图数据扩展</span>
+                                <span class="task-id">DS-2024-006</span>
+                                <span class="task-status">
+                                    <span class="badge bg-info">进行中</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-file-export"></i> 生成报告
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务进度条 -->
+                <div class="task-progress mb-4">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">1</div>
+                                <div class="step-name">维度定义</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">2</div>
+                                <div class="step-name">数据预填充</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">3</div>
+                                <div class="step-name">数据清洗</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">4</div>
+                                <div class="step-name">工单发布</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step active">
+                                <div class="step-circle">5</div>
+                                <div class="step-name">结果提交</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-time">
+                                <span>剩余时间：10天</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务总结统计 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">任务总结统计</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="summary-metric">
+                                    <div class="metric-icon bg-primary">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="metric-value">2,450</div>
+                                    <div class="metric-label">数据总量</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="summary-metric">
+                                    <div class="metric-icon bg-success">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="metric-value">98.2%</div>
+                                    <div class="metric-label">清洗率</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="summary-metric">
+                                    <div class="metric-icon bg-info">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <div class="metric-value">85.7%</div>
+                                    <div class="metric-label">AI覆盖率</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="summary-metric">
+                                    <div class="metric-icon bg-warning">
+                                        <i class="fas fa-user-edit"></i>
+                                    </div>
+                                    <div class="metric-value">14.3%</div>
+                                    <div class="metric-label">人工干预率</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 任务执行明细 -->
+                        <div class="summary-details mt-4">
+                            <div class="detail-section">
+                                <h6>维度定义</h6>
+                                <div class="detail-row">
+                                    <div class="detail-item">
+                                        <span class="detail-label">总维度数：</span>
+                                        <span class="detail-value">28</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">核心维度：</span>
+                                        <span class="detail-value">12</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">扩展维度：</span>
+                                        <span class="detail-value">16</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">定义版本：</span>
+                                        <span class="detail-value">v2.1</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h6>数据预填充</h6>
+                                <div class="detail-row">
+                                    <div class="detail-item">
+                                        <span class="detail-label">预填充总量：</span>
+                                        <span class="detail-value">2,450</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">平均置信度：</span>
+                                        <span class="detail-value">87.6%</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">高置信度(>90%)：</span>
+                                        <span class="detail-value">1,856 (75.8%)</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">低置信度(<50%)：</span>
+                                        <span class="detail-value">132 (5.4%)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h6>数据清洗</h6>
+                                <div class="detail-row">
+                                    <div class="detail-item">
+                                        <span class="detail-label">清洗完成：</span>
+                                        <span class="detail-value">2,406</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">人工修改：</span>
+                                        <span class="detail-value">351 (14.3%)</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">AI修正：</span>
+                                        <span class="detail-value">215 (8.8%)</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">待处理：</span>
+                                        <span class="detail-value">44</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h6>工单发布</h6>
+                                <div class="detail-row">
+                                    <div class="detail-item">
+                                        <span class="detail-label">发布工单：</span>
+                                        <span class="detail-value">120</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">已完成工单：</span>
+                                        <span class="detail-value">42</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">处理中工单：</span>
+                                        <span class="detail-value">28</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">待处理工单：</span>
+                                        <span class="detail-value">50</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 质量报告 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">质量报告</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">AI置信度分布</h5>
+                                    <canvas id="confidenceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">人工修改率分析</h5>
+                                    <canvas id="manualEditChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">工单完成情况</h5>
+                                    <canvas id="workorderCompletionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 质量评估明细 -->
+                        <div class="quality-details mt-4">
+                            <div class="quality-metrics">
+                                <div class="metric-category">
+                                    <h6>数据完整性</h6>
+                                    <div class="metric-item">
+                                        <div class="metric-name">字段完整度</div>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" style="width: 96%;"></div>
+                                        </div>
+                                        <div class="metric-value">96%</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-name">记录完整度</div>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" style="width: 98.2%;"></div>
+                                        </div>
+                                        <div class="metric-value">98.2%</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-category">
+                                    <h6>数据一致性</h6>
+                                    <div class="metric-item">
+                                        <div class="metric-name">字段格式一致性</div>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" style="width: 97.5%;"></div>
+                                        </div>
+                                        <div class="metric-value">97.5%</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-name">逻辑一致性</div>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" style="width: 94.3%;"></div>
+                                        </div>
+                                        <div class="metric-value">94.3%</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-category">
+                                    <h6>数据准确性</h6>
+                                    <div class="metric-item">
+                                        <div class="metric-name">AI预填充准确率</div>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" style="width: 87.6%;"></div>
+                                        </div>
+                                        <div class="metric-value">87.6%</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-name">人工修正准确率</div>
+                                        <div class="metric-bar">
+                                            <div class="metric-fill" style="width: 99.2%;"></div>
+                                        </div>
+                                        <div class="metric-value">99.2%</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 质量问题列表 -->
+                            <div class="quality-issues mt-4">
+                                <h6>发现的质量问题</h6>
+                                <div class="issues-list">
+                                    <div class="issue-item">
+                                        <div class="issue-level high">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <div class="issue-content">
+                                            <div class="issue-title">44条记录存在严重缺失字段</div>
+                                            <div class="issue-description">需要通过工单系统补充或人工审核确认</div>
+                                        </div>
+                                        <div class="issue-action">
+                                            <button class="btn btn-sm btn-danger">查看详情</button>
+                                        </div>
+                                    </div>
+                                    <div class="issue-item">
+                                        <div class="issue-level medium">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="issue-content">
+                                            <div class="issue-title">25条记录存在逻辑冲突</div>
+                                            <div class="issue-description">主要集中在诊断结论与检查指标之间的矛盾</div>
+                                        </div>
+                                        <div class="issue-action">
+                                            <button class="btn btn-sm btn-warning">查看详情</button>
+                                        </div>
+                                    </div>
+                                    <div class="issue-item">
+                                        <div class="issue-level low">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <div class="issue-content">
+                                            <div class="issue-title">50条记录存在格式不统一</div>
+                                            <div class="issue-description">主要是日期格式和数值单位不一致</div>
+                                        </div>
+                                        <div class="issue-action">
+                                            <button class="btn btn-sm btn-info">查看详情</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 导出结果 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title mb-0">导出结果</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-history"></i> 查看历史导出
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="export-options">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="export-format">导出格式</label>
+                                        <select class="form-control" id="export-format">
+                                            <option value="csv">CSV</option>
+                                            <option value="json">JSON</option>
+                                            <option value="parquet">Parquet</option>
+                                            <option value="excel">Excel</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="export-fields">导出字段</label>
+                                        <select class="form-control" id="export-fields">
+                                            <option value="all">全部字段</option>
+                                            <option value="core">核心字段</option>
+                                            <option value="custom">自定义字段</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="export-compression">压缩方式</label>
+                                        <select class="form-control" id="export-compression">
+                                            <option value="none">无压缩</option>
+                                            <option value="gzip">GZIP</option>
+                                            <option value="zip">ZIP</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 导出选项 -->
+                            <div class="export-settings mt-4">
+                                <div class="settings-group">
+                                    <h6>导出选项</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="include-header" checked>
+                                        <label class="form-check-label" for="include-header">包含字段名</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="include-metadata">
+                                        <label class="form-check-label" for="include-metadata">包含元数据</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="export-confidences">
+                                        <label class="form-check-label" for="export-confidences">包含AI置信度</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="export-audit">
+                                        <label class="form-check-label" for="export-audit">包含审计记录</label>
+                                    </div>
+                                </div>
+
+                                <div class="settings-group">
+                                    <h6>数据筛选</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="filter-completed" checked>
+                                        <label class="form-check-label" for="filter-completed">仅导出已完成数据</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="filter-quality">
+                                        <label class="form-check-label" for="filter-quality">仅导出高质量数据</label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confidence-threshold">最低置信度阈值</label>
+                                        <input type="range" class="form-range" id="confidence-threshold" min="0" max="100" value="60">
+                                        <span class="range-value">60%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 导出操作 -->
+                            <div class="export-actions mt-4">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-file-export"></i> 立即导出
+                                </button>
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-calendar-alt"></i> 定时导出
+                                </button>
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-external-link-alt"></i> 导出到外部系统
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 历史导出记录 -->
+                        <div class="export-history mt-6">
+                            <h6>最近导出记录</h6>
+                            <div class="history-list">
+                                <div class="history-item">
+                                    <div class="history-info">
+                                        <div class="history-file">ecg_extended_data_v2.1.csv</div>
+                                        <div class="history-meta">
+                                            <span class="meta-item">CSV</span>
+                                            <span class="meta-item">全部字段</span>
+                                            <span class="meta-item">12.5MB</span>
+                                        </div>
+                                    </div>
+                                    <div class="history-time">2024-01-18 14:30:15</div>
+                                    <div class="history-action">
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="history-item">
+                                    <div class="history-info">
+                                        <div class="history-file">ecg_extended_data_v2.0.json.gz</div>
+                                        <div class="history-meta">
+                                            <span class="meta-item">JSON</span>
+                                            <span class="meta-item">核心字段</span>
+                                            <span class="meta-item">8.7MB</span>
+                                        </div>
+                                    </div>
+                                    <div class="history-time">2024-01-17 10:45:30</div>
+                                    <div class="history-action">
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="history-item">
+                                    <div class="history-info">
+                                        <div class="history-file">ecg_extended_data_v1.9.parquet</div>
+                                        <div class="history-meta">
+                                            <span class="meta-item">Parquet</span>
+                                            <span class="meta-item">全部字段</span>
+                                            <span class="meta-item">6.2MB</span>
+                                        </div>
+                                    </div>
+                                    <div class="history-time">2024-01-16 16:20:45</div>
+                                    <div class="history-action">
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 管理员审核 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">管理员审核</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="review-section">
+                            <div class="review-status">
+                                <div class="status-icon">
+                                    <i class="fas fa-clock text-warning"></i>
+                                </div>
+                                <div class="status-info">
+                                    <div class="status-text">待审核</div>
+                                    <div class="status-desc">请管理员审核并签发最终数据</div>
+                                </div>
+                            </div>
+
+                            <!-- 审核表单 -->
+                            <div class="review-form mt-4">
+                                <div class="form-group">
+                                    <label for="review-comments">审核意见</label>
+                                    <textarea class="form-control" id="review-comments" rows="5" placeholder="请输入审核意见..."></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="review-result">审核结果</label>
+                                    <select class="form-control" id="review-result">
+                                        <option value="pending">待审核</option>
+                                        <option value="approved">审核通过</option>
+                                        <option value="rejected">审核不通过</option>
+                                        <option value="partial">部分通过</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="rejection-reason" style="display: none;">拒绝原因</label>
+                                    <textarea class="form-control" id="rejection-reason" rows="3" placeholder="请输入拒绝原因..." style="display: none;"></textarea>
+                                </div>
+
+                                <!-- 版本信息 -->
+                                <div class="version-info mt-4">
+                                    <h6>版本信息</h6>
+                                    <div class="form-group">
+                                        <label for="version-number">版本号</label>
+                                        <input type="text" class="form-control" id="version-number" value="v2.1" placeholder="请输入版本号">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="version-description">版本描述</label>
+                                        <textarea class="form-control" id="version-description" rows="3" placeholder="请输入版本变更描述...">心电图数据扩展项目第二版，包含28个维度字段，对2450条记录进行了完整扩展和清洗。</textarea>
+                                    </div>
+                                </div>
+
+                                <!-- 审核操作 -->
+                                <div class="review-actions mt-4">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-check-circle"></i> 通过并签发
+                                    </button>
+                                    <button class="btn btn-danger">
+                                        <i class="fas fa-times-circle"></i> 拒绝
+                                    </button>
+                                    <button class="btn btn-secondary">
+                                        <i class="fas fa-undo"></i> 返回修改
+                                    </button>
+                                    <button class="btn btn-outline-secondary">
+                                        <i class="fas fa-history"></i> 查看历史审核
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 版本历史记录 -->
+                        <div class="version-history mt-6">
+                            <h6>版本历史记录</h6>
+                            <div class="version-list">
+                                <div class="version-item">
+                                    <div class="version-header">
+                                        <div class="version-number">v2.0</div>
+                                        <div class="version-status">
+                                            <span class="status-badge draft">草稿</span>
+                                        </div>
+                                    </div>
+                                    <div class="version-meta">
+                                        <span class="meta-item">创建人：管理员</span>
+                                        <span class="meta-item">创建时间：2024-01-17 10:45:30</span>
+                                    </div>
+                                    <div class="version-desc">
+                                        心电图数据扩展项目第二版草稿，包含28个维度字段，对2450条记录进行了扩展和清洗。
+                                    </div>
+                                    <div class="version-actions">
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-eye"></i> 查看详情
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-file-export"></i> 导出
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="version-item">
+                                    <div class="version-header">
+                                        <div class="version-number">v1.9</div>
+                                        <div class="version-status">
+                                            <span class="status-badge approved">已签发</span>
+                                        </div>
+                                    </div>
+                                    <div class="version-meta">
+                                        <span class="meta-item">创建人：管理员</span>
+                                        <span class="meta-item">创建时间：2024-01-16 16:20:45</span>
+                                        <span class="meta-item">审核人：张主任</span>
+                                        <span class="meta-item">审核时间：2024-01-16 18:05:20</span>
+                                    </div>
+                                    <div class="version-desc">
+                                        心电图数据扩展项目第一版最终版，包含26个维度字段，对2400条记录进行了扩展和清洗。
+                                    </div>
+                                    <div class="version-actions">
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-eye"></i> 查看详情
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-file-export"></i> 导出
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-history"></i> 查看审核记录
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 定时导出模态框 -->
+    <div class="modal fade" id="scheduled-export-modal" tabindex="-1" role="dialog" aria-labelledby="scheduled-export-modal-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scheduled-export-modal-label">定时导出设置</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="schedule-name">任务名称</label>
+                        <input type="text" class="form-control" id="schedule-name" placeholder="请输入定时任务名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="schedule-frequency">执行频率</label>
+                        <select class="form-control" id="schedule-frequency">
+                            <option value="daily">每天</option>
+                            <option value="weekly">每周</option>
+                            <option value="monthly">每月</option>
+                            <option value="custom">自定义</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="schedule-time">执行时间</label>
+                        <input type="time" class="form-control" id="schedule-time">
+                    </div>
+                    <div class="form-group">
+                        <label for="schedule-start-date">开始日期</label>
+                        <input type="date" class="form-control" id="schedule-start-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="schedule-end-date">结束日期</label>
+                        <input type="date" class="form-control" id="schedule-end-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="notification-emails">通知邮箱</label>
+                        <input type="email" class="form-control" id="notification-emails" placeholder="多个邮箱用逗号分隔">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="include-latest-data">
+                        <label class="form-check-label" for="include-latest-data">仅包含新增/更新的数据</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">保存设置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/result_submit.js"></script>
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // AI置信度分布直方图
+            const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+            const confidenceChart = new Chart(confidenceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-20%', '20-40%', '40-60%', '60-80%', '80-90%', '90-95%', '95-100%'],
+                    datasets: [{
+                        label: '数据量',
+                        data: [32, 56, 158, 387, 654, 879, 284],
+                        backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '数据量'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '置信度区间'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 人工修改率分析饼图
+            const manualEditCtx = document.getElementById('manualEditChart').getContext('2d');
+            const manualEditChart = new Chart(manualEditCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['AI直接通过', 'AI修正后通过', '人工修改后通过', '人工全新录入'],
+                    datasets: [{
+                        data: [65.7, 20.0, 10.3, 4.0],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.7)',
+                            'rgba(0, 123, 255, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(220, 53, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(0, 123, 255, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // 工单完成情况折线图
+            const workorderCompletionCtx = document.getElementById('workorderCompletionChart').getContext('2d');
+            const workorderCompletionChart = new Chart(workorderCompletionCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1/13', '1/14', '1/15', '1/16', '1/17', '1/18'],
+                    datasets: [{
+                        label: '发布工单',
+                        data: [20, 25, 30, 15, 15, 15],
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        tension: 0.1
+                    }, {
+                        label: '完成工单',
+                        data: [5, 10, 15, 10, 12, 10],
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '工单数量'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '日期'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 监听审核结果选择变化
+            document.getElementById('review-result').addEventListener('change', function() {
+                const rejectionReason = document.getElementById('rejection-reason');
+                const rejectionLabel = rejectionReason.previousElementSibling;
+                if (this.value === 'rejected') {
+                    rejectionReason.style.display = 'block';
+                    rejectionLabel.style.display = 'block';
+                } else {
+                    rejectionReason.style.display = 'none';
+                    rejectionLabel.style.display = 'none';
+                }
+            });
+
+            // 监听置信度阈值滑块变化
+            document.getElementById('confidence-threshold').addEventListener('input', function() {
+                this.nextElementSibling.textContent = this.value + '%';
+            });
+        });
+    </script>
+</body>
+</html>

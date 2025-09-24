@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工单发布 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item active" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">4</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有2个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">3个工单即将到期</a></li>
+                        <li><a class="dropdown-item" href="#">有5个工单已完成</a></li>
+                        <li><a class="dropdown-item" href="#">外部平台API连接异常</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="work-order">
+                <div class="task-header mb-4">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h1>工单发布</h1>
+                            <div class="task-info">
+                                <span class="task-name">当前任务：心电图数据扩展</span>
+                                <span class="task-id">DS-2024-006</span>
+                                <span class="task-status">
+                                    <span class="badge bg-info">进行中</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus-circle"></i> 新建工单
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务进度条 -->
+                <div class="task-progress mb-4">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">1</div>
+                                <div class="step-name">维度定义</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">2</div>
+                                <div class="step-name">数据预填充</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">3</div>
+                                <div class="step-name">数据清洗</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step active">
+                                <div class="step-circle">4</div>
+                                <div class="step-name">工单发布</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step">
+                                <div class="step-circle">5</div>
+                                <div class="step-name">结果提交</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-time">
+                                <span>剩余时间：15天</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工单状态统计 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">工单状态统计</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="status-metric">
+                                    <div class="metric-value">15</div>
+                                    <div class="metric-label">待发布</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="status-metric">
+                                    <div class="metric-value">35</div>
+                                    <div class="metric-label">已发布</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="status-metric">
+                                    <div class="metric-value">28</div>
+                                    <div class="metric-label">处理中</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="status-metric">
+                                    <div class="metric-value">42</div>
+                                    <div class="metric-label">已完成</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">工单状态分布</h5>
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">工单优先级分布</h5>
+                                    <canvas id="priorityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工单列表 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title mb-0">工单列表</h4>
+                                <div class="total-count">共 120 个工单</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <select class="form-control">
+                                            <option value="all">全部状态</option>
+                                            <option value="pending">待发布</option>
+                                            <option value="published">已发布</option>
+                                            <option value="processing">处理中</option>
+                                            <option value="completed">已完成</option>
+                                            <option value="rejected">已拒绝</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-control">
+                                            <option value="all">全部优先级</option>
+                                            <option value="high">高</option>
+                                            <option value="medium">中</option>
+                                            <option value="low">低</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-control">
+                                            <option value="10">10个/页</option>
+                                            <option value="20">20个/页</option>
+                                            <option value="50">50个/页</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 text-right">
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-download"></i> 导出工单
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 工单表格 -->
+                        <div class="work-order-list">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"></th>
+                                        <th>工单ID</th>
+                                        <th>关联数据ID</th>
+                                        <th>缺失字段</th>
+                                        <th>优先级</th>
+                                        <th>发布时间</th>
+                                        <th>截止时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" class="order-select"></td>
+                                        <td>WO-2024-00156</td>
+                                        <td>PT-2024-00126</td>
+                                        <td>
+                                            <div class="missing-fields">
+                                                <div class="field-item">诊断结论</div>
+                                                <div class="field-item">进一步检查建议</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="priority-badge high">高</span></td>
+                                        <td>2024-01-16</td>
+                                        <td>2024-01-20</td>
+                                        <td><span class="status-badge published">已发布</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-secondary">编辑</button>
+                                            <button class="btn btn-sm btn-danger">撤销</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="order-select"></td>
+                                        <td>WO-2024-00157</td>
+                                        <td>PT-2024-00132</td>
+                                        <td>
+                                            <div class="missing-fields">
+                                                <div class="field-item">ST段分析</div>
+                                                <div class="field-item">异常类型</div>
+                                                <div class="field-item">初步诊断</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="priority-badge medium">中</span></td>
+                                        <td>2024-01-16</td>
+                                        <td>2024-01-22</td>
+                                        <td><span class="status-badge processing">处理中</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-secondary">编辑</button>
+                                            <button class="btn btn-sm btn-warning">提醒</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="order-select"></td>
+                                        <td>WO-2024-00158</td>
+                                        <td>PT-2024-00145</td>
+                                        <td>
+                                            <div class="missing-fields">
+                                                <div class="field-item">T波分析</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="priority-badge low">低</span></td>
+                                        <td>2024-01-17</td>
+                                        <td>2024-01-24</td>
+                                        <td><span class="status-badge pending">待发布</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-secondary">编辑</button>
+                                            <button class="btn btn-sm btn-success">发布</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="order-select"></td>
+                                        <td>WO-2024-00159</td>
+                                        <td>PT-2024-00167</td>
+                                        <td>
+                                            <div class="missing-fields">
+                                                <div class="field-item">临床建议</div>
+                                                <div class="field-item">随访建议</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="priority-badge medium">中</span></td>
+                                        <td>2024-01-17</td>
+                                        <td>2024-01-23</td>
+                                        <td><span class="status-badge completed">已完成</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-secondary">查看结果</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="order-select"></td>
+                                        <td>WO-2024-00160</td>
+                                        <td>PT-2024-00189</td>
+                                        <td>
+                                            <div class="missing-fields">
+                                                <div class="field-item">节律</div>
+                                                <div class="field-item">异常类型</div>
+                                                <div class="field-item">诊断结论</div>
+                                                <div class="field-item">进一步检查建议</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="priority-badge high">高</span></td>
+                                        <td>2024-01-18</td>
+                                        <td>2024-01-21</td>
+                                        <td><span class="status-badge published">已发布</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-secondary">编辑</button>
+                                            <button class="btn btn-sm btn-warning">提醒</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 批量操作工具栏 -->
+                        <div class="batch-operations mt-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="select-all-orders">
+                                <label class="form-check-label" for="select-all-orders">全选</label>
+                            </div>
+                            <span class="selected-count">已选择 0 项</span>
+                            <div class="operation-buttons ml-3">
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-paper-plane"></i> 批量发布
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-undo"></i> 批量撤销
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-tags"></i> 批量修改优先级
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-download"></i> 批量导出
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 分页 -->
+                        <div class="pagination justify-content-center mt-4">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">5</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="processing-stats">
+                                    <span class="stat-item">待发布：15 个</span>
+                                    <span class="stat-item">已发布：35 个</span>
+                                    <span class="stat-item">处理中：28 个</span>
+                                    <span class="stat-item">已完成：42 个</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button class="btn btn-secondary">上一步</button>
+                                <button class="btn btn-primary">下一步</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 外部平台对接配置 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title mb-0">外部平台对接配置</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-cog"></i> 配置管理
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="platform-connections">
+                            <div class="connection-item">
+                                <div class="connection-header">
+                                    <div class="connection-name">
+                                        <i class="fas fa-plug text-primary"></i>
+                                        <span>医学专家协作平台</span>
+                                    </div>
+                                    <div class="connection-status">
+                                        <span class="status-online">在线</span>
+                                    </div>
+                                </div>
+                                <div class="connection-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">API 地址：</span>
+                                        <span class="detail-value">https://api.medexpert.com/v1/workorder</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">连接状态：</span>
+                                        <span class="detail-value">正常</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">最近同步：</span>
+                                        <span class="detail-value">2024-01-18 14:30:15</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">工单同步数：</span>
+                                        <span class="detail-value">32 个</span>
+                                    </div>
+                                </div>
+                                <div class="connection-actions">
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-redo-alt"></i> 手动同步
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-eye"></i> 查看日志
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="connection-item">
+                                <div class="connection-header">
+                                    <div class="connection-name">
+                                        <i class="fas fa-plug text-primary"></i>
+                                        <span>电子病历系统</span>
+                                    </div>
+                                    <div class="connection-status">
+                                        <span class="status-offline">离线</span>
+                                    </div>
+                                </div>
+                                <div class="connection-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">API 地址：</span>
+                                        <span class="detail-value">https://api.emr-system.com/v2/integration</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">连接状态：</span>
+                                        <span class="detail-value text-danger">连接失败</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">错误信息：</span>
+                                        <span class="detail-value text-danger">认证失败，请检查API密钥</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">最近同步：</span>
+                                        <span class="detail-value">2024-01-15 09:15:30</span>
+                                    </div>
+                                </div>
+                                <div class="connection-actions">
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-redo-alt"></i> 重连
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-cog"></i> 编辑配置
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="connection-item">
+                                <div class="connection-header">
+                                    <div class="connection-name">
+                                        <i class="fas fa-file-excel"></i>
+                                        <span>Excel 导出服务</span>
+                                    </div>
+                                    <div class="connection-status">
+                                        <span class="status-online">在线</span>
+                                    </div>
+                                </div>
+                                <div class="connection-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">导出路径：</span>
+                                        <span class="detail-value">/shared/export/workorders/</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">连接状态：</span>
+                                        <span class="detail-value">正常</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">最近导出：</span>
+                                        <span class="detail-value">2024-01-17 16:45:22</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">导出文件数：</span>
+                                        <span class="detail-value">5 个</span>
+                                    </div>
+                                </div>
+                                <div class="connection-actions">
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-folder-open"></i> 查看文件
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-cog"></i> 编辑配置
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建工单模态框 -->
+    <div class="modal fade" id="new-workorder-modal" tabindex="-1" role="dialog" aria-labelledby="new-workorder-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="new-workorder-modal-label">新建工单</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 左侧：工单基本信息 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="workorder-title">工单标题</label>
+                                <input type="text" class="form-control" id="workorder-title" placeholder="请输入工单标题">
+                            </div>
+                            <div class="form-group">
+                                <label for="related-data">关联数据ID</label>
+                                <input type="text" class="form-control" id="related-data" placeholder="请输入关联数据ID">
+                            </div>
+                            <div class="form-group">
+                                <label for="workorder-priority">优先级</label>
+                                <select class="form-control" id="workorder-priority">
+                                    <option value="high">高</option>
+                                    <option value="medium" selected>中</option>
+                                    <option value="low">低</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="due-date">截止日期</label>
+                                <input type="date" class="form-control" id="due-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="assigned-to">指派给</label>
+                                <select class="form-control" id="assigned-to">
+                                    <option value="">请选择处理人员</option>
+                                    <option value="expert1">李医生 (心内科专家)</option>
+                                    <option value="expert2">王医生 (心电图专家)</option>
+                                    <option value="expert3">张医生 (心脏科专家)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="workorder-platform">发布平台</label>
+                                <select class="form-control" id="workorder-platform">
+                                    <option value="">请选择发布平台</option>
+                                    <option value="medexpert">医学专家协作平台</option>
+                                    <option value="emr">电子病历系统</option>
+                                    <option value="local">仅平台内部</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧：缺失字段和问题描述 -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>缺失字段</label>
+                                <div class="missing-fields-editor">
+                                    <div class="field-item">
+                                        <input type="text" class="form-control" placeholder="字段名称">
+                                        <button class="btn btn-danger btn-sm remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="field-item">
+                                        <input type="text" class="form-control" placeholder="字段名称">
+                                        <button class="btn btn-danger btn-sm remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm add-field">
+                                        <i class="fas fa-plus"></i> 添加字段
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="workorder-description">问题描述</label>
+                                <textarea class="form-control" id="workorder-description" rows="5" placeholder="请详细描述问题和需要补充的信息..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="workorder-attachment">附件上传</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="workorder-attachment">
+                                        <label class="custom-file-label" for="workorder-attachment">选择文件</label>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">支持格式：PDF、JPG、PNG，最大文件大小：10MB</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关联数据预览 -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="data-preview">
+                                <div class="preview-header">
+                                    <i class="fas fa-eye"></i>
+                                    <span>关联数据预览</span>
+                                </div>
+                                <div class="preview-content">
+                                    <div class="field-group mini">
+                                        <div class="field-label">病人ID：</div>
+                                        <div class="field-value">PT-2024-00126</div>
+                                    </div>
+                                    <div class="field-group mini">
+                                        <div class="field-label">检测日期：</div>
+                                        <div class="field-value">2024-01-16</div>
+                                    </div>
+                                    <div class="field-group mini">
+                                        <div class="field-label">AI预填充状态：</div>
+                                        <div class="field-value">部分完成</div>
+                                    </div>
+                                    <div class="field-group mini">
+                                        <div class="field-label">总体置信度：</div>
+                                        <div class="field-value">65%</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-expand"></i> 查看完整数据
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">保存草稿</button>
+                    <button type="button" class="btn btn-success">发布工单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工单详情模态框 -->
+    <div class="modal fade" id="workorder-detail-modal" tabindex="-1" role="dialog" aria-labelledby="workorder-detail-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="workorder-detail-modal-label">工单详情 - WO-2024-00156</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 左侧：工单基本信息 -->
+                        <div class="col-md-6">
+                            <div class="detail-section">
+                                <h6>工单基本信息</h6>
+                                <div class="detail-item">
+                                    <span class="detail-label">工单ID：</span>
+                                    <span class="detail-value">WO-2024-00156</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">工单标题：</span>
+                                    <span class="detail-value">心电图数据缺失字段补充</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">关联数据ID：</span>
+                                    <span class="detail-value">PT-2024-00126</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">优先级：</span>
+                                    <span class="priority-badge high">高</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">发布时间：</span>
+                                    <span class="detail-value">2024-01-16 15:30:45</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">截止时间：</span>
+                                    <span class="detail-value">2024-01-20 18:00:00</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">当前状态：</span>
+                                    <span class="status-badge published">已发布</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">发布平台：</span>
+                                    <span class="detail-value">医学专家协作平台</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">发布人：</span>
+                                    <span class="detail-value">管理员</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">处理人：</span>
+                                    <span class="detail-value">李医生 (心内科专家)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧：缺失字段和问题描述 -->
+                        <div class="col-md-6">
+                            <div class="detail-section">
+                                <h6>缺失字段</h6>
+                                <div class="missing-fields">
+                                    <div class="field-item">诊断结论</div>
+                                    <div class="field-item">进一步检查建议</div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h6>问题描述</h6>
+                                <div class="description-content">
+                                    <p>该心电图数据中，诊断结论和进一步检查建议字段缺失。患者为65岁女性，有高血压病史10年，活动后出现胸闷气短症状。心电图显示窦性心动过缓，ST段压低0.1mV，T波低平。请结合临床情况，补充诊断结论和进一步检查建议。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h6>附件</h6>
+                                <div class="attachment-list">
+                                    <div class="attachment-item">
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                        <span>心电图原图.pdf</span>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                    <div class="attachment-item">
+                                        <i class="fas fa-file-image text-primary"></i>
+                                        <span>患者临床记录.jpg</span>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 处理记录 -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="detail-section">
+                                <h6>处理记录</h6>
+                                <div class="process-log">
+                                    <div class="log-item">
+                                        <div class="log-time">2024-01-16 15:30:45</div>
+                                        <div class="log-actor">管理员</div>
+                                        <div class="log-action">创建工单并发布</div>
+                                    </div>
+                                    <div class="log-item">
+                                        <div class="log-time">2024-01-16 16:45:20</div>
+                                        <div class="log-actor">系统</div>
+                                        <div class="log-action">工单已同步至医学专家协作平台</div>
+                                    </div>
+                                    <div class="log-item">
+                                        <div class="log-time">2024-01-17 09:10:35</div>
+                                        <div class="log-actor">李医生</div>
+                                        <div class="log-action">已接单</div>
+                                    </div>
+                                    <div class="log-item">
+                                        <div class="log-time">2024-01-17 14:20:18</div>
+                                        <div class="log-actor">李医生</div>
+                                        <div class="log-action">已补充诊断结论，待审核</div>
+                                        <div class="log-comment">
+                                            <p>诊断结论：异常心电图（考虑心肌缺血可能）</p>
+                                            <p>进一步检查建议：建议行24小时动态心电图、心脏超声及冠脉CTA检查</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 审核表单 -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="review-form">
+                                <h6>审核意见</h6>
+                                <div class="form-group">
+                                    <label for="review-comments">审核意见</label>
+                                    <textarea class="form-control" id="review-comments" rows="3" placeholder="请输入审核意见..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="review-result">审核结果</label>
+                                    <select class="form-control" id="review-result">
+                                        <option value="pending">待审核</option>
+                                        <option value="approved">审核通过</option>
+                                        <option value="rejected">审核不通过</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-warning">提醒处理</button>
+                    <button type="button" class="btn btn-primary">保存审核意见</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/work_order.js"></script>
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 工单状态分布饼图
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            const statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['待发布', '已发布', '处理中', '已完成'],
+                    datasets: [{
+                        data: [15, 35, 28, 42],
+                        backgroundColor: [
+                            'rgba(108, 117, 125, 0.7)',
+                            'rgba(0, 123, 255, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(40, 167, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(108, 117, 125, 1)',
+                            'rgba(0, 123, 255, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(40, 167, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+
+            // 工单优先级分布柱状图
+            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            const priorityChart = new Chart(priorityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['高', '中', '低'],
+                    datasets: [{
+                        label: '工单数量',
+                        data: [40, 50, 30],
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(108, 117, 125, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(220, 53, 69, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(108, 117, 125, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '工单数量'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '优先级'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

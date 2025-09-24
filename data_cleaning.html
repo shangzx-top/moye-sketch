@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据清洗工作台 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --cardiology-red: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .ecg-viewer {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .ecg-canvas-container {
+            padding: 20px;
+            background: #2c3e50;
+            height: 200px;
+            position: relative;
+        }
+        
+        .ecg-canvas {
+            background: #1a2530;
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .ecg-controls {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .dimension-container {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+        }
+        
+        .dimension-container:last-child {
+            border-bottom: none;
+        }
+        
+        .dimension-label {
+            width: 220px;
+            flex-shrink: 0;
+            font-weight: 600;
+            color: #2c3e50;
+            padding-right: 20px;
+        }
+        
+        .dimension-content {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        
+        .dimension-value {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .ai-suggestion {
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .highlight {
+            background-color: #fffde7;
+        }
+        
+        .missing-data {
+            background-color: #ffebee;
+        }
+        
+        .dependency-warning {
+            background-color: #fff3e0;
+            border-left: 4px solid var(--warning-color);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .key-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .stats-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .progress {
+            height: 10px;
+        }
+        
+        .action-btn {
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .footer-actions {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .ecg-marker {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: var(--cardiology-red);
+            top: 0;
+            z-index: 10;
+        }
+        
+        .ecg-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--cardiology-red);
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            cursor: pointer;
+        }
+        
+        .ecg-annotation {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 30;
+        }
+        
+        .medical-tag {
+            display: inline-block;
+            background: #e8f4fd;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .cardiology-color {
+            color: var(--cardiology-red);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item active" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，清洗人员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">2</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有2个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">新分配了5条待清洗数据</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="data-cleaning">
+                <div class="task-header mb-4">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h1>数据清洗工作台</h1>
+                            <div class="task-info">
+                                <span class="task-name">当前任务：心电图数据扩展</span>
+                                <span class="task-id">DS-2024-006</span>
+                                <span class="task-status">
+                                    <span class="badge bg-info">进行中</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <div class="mode-switch">
+                                <button class="btn btn-primary">单条清洗</button>
+                                <button class="btn btn-outline-secondary">批量清洗</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- 数据校准区 -->
+        <div class="data-card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary me-2">记录ID: HR-2023-08752</span>
+                    <span>心电图数据维度校准</span>
+                </div>
+                <div>
+                    <span class="badge bg-warning status-badge">待校准</span>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <!-- 基础信息 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        患者基本信息
+                        <div class="key-hint">F1</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">张某某, 52岁, 男性, 病历号: PT-2023-15432</div>
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 心率 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        心率 (BPM)
+                        <div class="key-hint">F2</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">78 BPM (正常范围: 60-100)</div>
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 节律 -->
+                <div class="dimension-container highlight">
+                    <div class="dimension-label">
+                        节律分析
+                        <div class="key-hint">F3</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value text-muted">窦性心律，偶发房性早搏</div>
+                        
+                        <!-- AI建议 -->
+                        <div class="ai-suggestion">
+                            <h6><i class="bi bi-lightbulb"></i> AI分析建议</h6>
+                            <p>根据波形分析，建议节律描述为：<strong>窦性心律，心率78次/分，PR间期正常，QRS波群时限正常，ST段无明显偏移，T波形态正常</strong></p>
+                            <div>
+                                <button class="btn btn-sm btn-success action-btn">
+                                    <i class="bi bi-check-lg"></i> 接受建议
+                                    <span class="key-hint">Enter</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary action-btn">
+                                    <i class="bi bi-arrow-repeat"></i> 重新分析
+                                    <span class="key-hint">R</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 人工校准 -->
+                        <div class="mt-3">
+                            <label class="form-label">人工校准</label>
+                            <select class="form-select">
+                                <option>窦性心律</option>
+                                <option>心房颤动</option>
+                                <option>心房扑动</option>
+                                <option>室上性心动过速</option>
+                                <option>室性心动过速</option>
+                                <option>房室传导阻滞</option>
+                                <option selected>窦性心律，偶发房性早搏</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <span class="badge bg-warning">需校准</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- P波 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        P波特征
+                        <div class="key-hint">F4</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">形态正常，时限80ms，振幅0.1mV</div>
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PR间期 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        PR间期
+                        <div class="key-hint">F5</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">160ms (正常范围: 120-200ms)</div>
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- QRS波群 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        QRS波群
+                        <div class="key-hint">F6</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">时限90ms，形态正常，无异常Q波</div>
+                        
+                        <!-- 依赖提示 -->
+                        <div class="dependency-warning">
+                            <i class="bi bi-info-circle"></i> 此维度数据依赖于"节律分析"，修改前请确认节律分析已校准
+                        </div>
+                        
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ST段 -->
+                <div class="dimension-container missing-data">
+                    <div class="dimension-label">
+                        ST段分析
+                        <div class="key-hint">F7</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="alert alert-warning p-2 mb-3" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> 该维度数据缺失，请选择补全方式
+                        </div>
+                        
+                        <!-- AI生成 -->
+                        <div class="ai-suggestion">
+                            <h6><i class="bi bi-lightbulb"></i> AI分析建议</h6>
+                            <p>根据波形分析，ST段特征为：<strong>无明显偏移，与基线持平，无显著抬高或压低</strong></p>
+                            <div>
+                                <button class="btn btn-sm btn-success action-btn">
+                                    <i class="bi bi-check-lg"></i> 接受建议
+                                    <span class="key-hint">Enter</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary action-btn">
+                                    <i class="bi bi-arrow-repeat"></i> 重新分析
+                                    <span class="key-hint">R</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <span class="badge bg-danger">数据缺失</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- T波 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        T波特征
+                        <div class="key-hint">F8</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">形态正常，与QRS主波方向一致</div>
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- QT间期 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        QT间期
+                        <div class="key-hint">F9</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value">380ms (校正后QTc: 420ms)</div>
+                        <div class="d-flex">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 异常标记 -->
+                <div class="dimension-container">
+                    <div class="dimension-label">
+                        异常标记
+                        <div class="key-hint">F10</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="medical-tag">偶发房性早搏</div>
+                        <div class="medical-tag">左室高电压</div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus-circle"></i> 添加异常标记
+                            </button>
+                        </div>
+                        
+                        <div class="d-flex mt-2">
+                            <span class="badge bg-success">已验证</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 临床印象 -->
+                <div class="dimension-container highlight">
+                    <div class="dimension-label">
+                        临床印象
+                        <div class="key-hint">F11</div>
+                    </div>
+                    <div class="dimension-content">
+                        <div class="dimension-value text-muted">大致正常心电图，偶发房性早搏</div>
+                        
+                        <!-- AI建议 -->
+                        <div class="ai-suggestion">
+                            <h6><i class="bi bi-lightbulb"></i> AI诊断建议</h6>
+                            <p>根据全面分析，临床印象建议为：<strong>窦性心律，心率78次/分，偶发房性早搏，左室高电压，建议临床随访</strong></p>
+                            <div>
+                                <button class="btn btn-sm btn-success action-btn">
+                                    <i class="bi bi-check-lg"></i> 接受建议
+                                    <span class="key-hint">Enter</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary action-btn">
+                                    <i class="bi bi-arrow-repeat"></i> 重新生成
+                                    <span class="key-hint">R</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 人工校准 -->
+                        <div class="mt-3">
+                            <label class="form-label">人工诊断</label>
+                            <textarea class="form-control" rows="2">大致正常心电图，偶发房性早搏</textarea>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <span class="badge bg-warning">需校准</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-light d-flex justify-content-between">
+                <div>
+                    <button class="btn btn-outline-secondary" id="prevBtn">
+                        <i class="bi bi-skip-backward"></i> 上一条 (P)
+                    </button>
+                    <button class="btn btn-outline-secondary" id="nextBtn">
+                        <i class="bi bi-skip-forward"></i> 下一条 (N)
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-outline-danger me-2">
+                        <i class="bi bi-flag"></i> 标记问题 (F)
+                    </button>
+                    <button class="btn btn-success" id="completeBtn">
+                        <i class="bi bi-check-lg"></i> 完成校准 (S)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+               
+
+                <!-- 审计追踪 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title mb-0">审计追踪</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-history"></i> 查看完整历史
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="audit-log">
+                            <div class="log-item">
+                                <div class="log-time">2024-01-16 10:30:25</div>
+                                <div class="log-actor">系统</div>
+                                <div class="log-action">数据预填充完成</div>
+                            </div>
+                            <div class="log-item">
+                                <div class="log-time">2024-01-16 14:45:10</div>
+                                <div class="log-actor">张三 (清洗人员)</div>
+                                <div class="log-action">认领数据进行清洗</div>
+                            </div>
+                            <div class="log-item">
+                                <div class="log-time">2024-01-16 15:10:38</div>
+                                <div class="log-actor">李四 (管理员)</div>
+                                <div class="log-action">修改数据分配</div>
+                            </div>
+                            <div class="log-item">
+                                <div class="log-time">2024-01-16 15:15:03</div>
+                                <div class="log-actor">王五 (清洗人员)</div>
+                                <div class="log-action">认领数据进行清洗</div>
+                                <div class="log-detail">当前操作人</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量清洗模态框 -->
+    <div class="modal fade" id="batch-cleaning-modal" tabindex="-1" role="dialog" aria-labelledby="batch-cleaning-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batch-cleaning-modal-label">批量清洗模式</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <select class="form-control">
+                                <option value="all">全部数据</option>
+                                <option value="assigned-to-me">分配给我的数据</option>
+                                <option value="unassigned">未分配数据</option>
+                                <option value="low-confidence">低置信度(&lt;70%)</option>
+                                <option value="missing-data">含缺失数据</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-control">
+                                <option value="50">50条/页</option>
+                                <option value="100">100条/页</option>
+                                <option value="200">200条/页</option>
+                                <option value="500">500条/页</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <div class="batch-actions">
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-user-plus"></i> 批量分配
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-check-circle"></i> 批量确认
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-ticket-alt"></i> 批量发工单
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 批量数据列表 -->
+                    <div class="batch-data-list">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;"><input type="checkbox" id="select-all-batch"></th>
+                                    <th>ID</th>
+                                    <th>病人ID</th>
+                                    <th>检测日期</th>
+                                    <th>置信度</th>
+                                    <th>缺失字段</th>
+                                    <th>当前状态</th>
+                                    <th>负责人</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="batch-select"></td>
+                                    <td>1</td>
+                                    <td>PT-2024-00126</td>
+                                    <td>2024-01-16</td>
+                                    <td><span class="confidence-badge low">65%</span></td>
+                                    <td>2</td>
+                                    <td><span class="badge bg-warning">待清洗</span></td>
+                                    <td>王五</td>
+                                    <td><button class="btn btn-sm btn-primary">清洗</button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="batch-select"></td>
+                                    <td>2</td>
+                                    <td>PT-2024-00127</td>
+                                    <td>2024-01-17</td>
+                                    <td><span class="confidence-badge high">92%</span></td>
+                                    <td>0</td>
+                                    <td><span class="badge bg-info">待确认</span></td>
+                                    <td>张三</td>
+                                    <td><button class="btn btn-sm btn-primary">清洗</button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="batch-select"></td>
+                                    <td>3</td>
+                                    <td>PT-2024-00128</td>
+                                    <td>2024-01-17</td>
+                                    <td><span class="confidence-badge medium">82%</span></td>
+                                    <td>1</td>
+                                    <td><span class="badge bg-secondary">未分配</span></td>
+                                    <td>-</td>
+                                    <td><button class="btn btn-sm btn-primary">清洗</button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="batch-select"></td>
+                                    <td>4</td>
+                                    <td>PT-2024-00129</td>
+                                    <td>2024-01-18</td>
+                                    <td><span class="confidence-badge low">68%</span></td>
+                                    <td>2</td>
+                                    <td><span class="badge bg-info">待确认</span></td>
+                                    <td>李四</td>
+                                    <td><button class="btn btn-sm btn-primary">清洗</button></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="batch-select"></td>
+                                    <td>5</td>
+                                    <td>PT-2024-00130</td>
+                                    <td>2024-01-18</td>
+                                    <td><span class="confidence-badge high">95%</span></td>
+                                    <td>0</td>
+                                    <td><span class="badge bg-success">已完成</span></td>
+                                    <td>张三</td>
+                                    <td><button class="btn btn-sm btn-primary">清洗</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <div class="pagination justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                <li class="page-item"><a class="page-link" href="#">5</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务分配模态框 -->
+    <div class="modal fade" id="task-assignment-modal" tabindex="-1" role="dialog" aria-labelledby="task-assignment-modal-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="task-assignment-modal-label">任务分配</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="assignment-info">
+                        <div class="info-item">
+                            <span class="info-label">选择项数：</span>
+                            <span class="info-value">3 条</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">平均置信度：</span>
+                            <span class="info-value">72%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">缺失字段数：</span>
+                            <span class="info-value">1-2</span>
+                        </div>
+                    </div>
+                    
+                    <div class="assignee-selection mt-4">
+                        <label>分配给：</label>
+                        <select class="form-control">
+                            <option value="">请选择负责人</option>
+                            <option value="zhangsan">张三 (清洗人员)</option>
+                            <option value="lisi">李四 (清洗人员)</option>
+                            <option value="wangwu">王五 (清洗人员)</option>
+                            <option value="zhaoliu">赵六 (高级清洗人员)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="assignment-notes mt-4">
+                        <label>备注：</label>
+                        <textarea class="form-control" rows="3" placeholder="请输入分配说明或注意事项..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">确认分配</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/data_cleaning.js"></script>
+</body>
+</html>

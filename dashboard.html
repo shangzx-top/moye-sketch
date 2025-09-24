@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link active" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">3</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有3个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">新的任务已发布</a></li>
+                        <li><a class="dropdown-item" href="#">系统将于明天进行维护</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="dashboard">
+                <h1 class="mb-4">仪表盘</h1>
+                
+                <!-- 关键指标卡片 -->
+                <div class="row mb-4">
+                    <div class="col-md-2">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-primary">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="metric-title">总任务数</div>
+                                <div class="metric-value">24</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 5%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="metric-title">已完成</div>
+                                <div class="metric-value">16</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 8%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-warning">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <div class="metric-title">进行中</div>
+                                <div class="metric-value">8</div>
+                                <div class="metric-change"><i class="fas fa-arrow-down text-danger"></i> 2%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-danger">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="metric-title">紧急工单</div>
+                                <div class="metric-value">3</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-danger"></i> 1</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-info">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="metric-title">活跃用户</div>
+                                <div class="metric-value">15</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 2</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-secondary">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="metric-title">数据总量</div>
+                                <div class="metric-value">1.2M</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 12%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 全局进度和各阶段完成率 -->
+                <div class="row mb-4">
+                    <!-- 全局进度 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">全局进度</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="global-progress">
+                                    <div class="progress-stage">
+                                        <div class="stage-icon bg-success">
+                                            <i class="fas fa-store"></i>
+                                        </div>
+                                        <div class="stage-name">任务市场</div>
+                                        <div class="stage-progress">
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="progress-text">100%</div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-arrow">
+                                        <i class="fas fa-arrow-right text-success"></i>
+                                    </div>
+                                    <div class="progress-stage">
+                                        <div class="stage-icon bg-success">
+                                            <i class="fas fa-project-diagram"></i>
+                                        </div>
+                                        <div class="stage-name">维度定义</div>
+                                        <div class="stage-progress">
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="progress-text">100%</div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-arrow">
+                                        <i class="fas fa-arrow-right text-success"></i>
+                                    </div>
+                                    <div class="progress-stage">
+                                        <div class="stage-icon bg-success">
+                                            <i class="fas fa-magic"></i>
+                                        </div>
+                                        <div class="stage-name">数据预填充</div>
+                                        <div class="stage-progress">
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="progress-text">100%</div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-arrow">
+                                        <i class="fas fa-arrow-right text-warning"></i>
+                                    </div>
+                                    <div class="progress-stage">
+                                        <div class="stage-icon bg-warning">
+                                            <i class="fas fa-tint-slash"></i>
+                                        </div>
+                                        <div class="stage-name">数据清洗</div>
+                                        <div class="stage-progress">
+                                            <div class="progress">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="progress-text">75%</div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-arrow">
+                                        <i class="fas fa-arrow-right text-secondary"></i>
+                                    </div>
+                                    <div class="progress-stage">
+                                        <div class="stage-icon bg-secondary">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="stage-name">结果提交</div>
+                                        <div class="stage-progress">
+                                            <div class="progress">
+                                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="progress-text">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 各阶段完成率 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">各阶段完成率</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="stageCompletionChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工单处理情况和AI模型性能 -->
+                <div class="row mb-4">
+                    <!-- 工单处理情况 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">工单处理情况</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="workOrderChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI模型性能 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">AI 模型性能</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="modelPerformanceChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 活跃任务列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">活跃任务列表</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>任务ID</th>
+                                        <th>任务名称</th>
+                                        <th>当前阶段</th>
+                                        <th>进度</th>
+                                        <th>负责人</th>
+                                        <th>截止日期</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>DS-2024-006</td>
+                                        <td>心电图数据扩展</td>
+                                        <td><span class="badge bg-warning">数据清洗</span></td>
+                                        <td>
+                                            <div class="progress w-50">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </td>
+                                        <td>李四</td>
+                                        <td>2024-06-30</td>
+                                        <td><button class="btn btn-sm btn-primary">查看详情</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>DS-2024-007</td>
+                                        <td>产品评论情感分析</td>
+                                        <td><span class="badge bg-success">数据预填充</span></td>
+                                        <td>
+                                            <div class="progress w-50">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </td>
+                                        <td>王五</td>
+                                        <td>2024-07-15</td>
+                                        <td><button class="btn btn-sm btn-primary">查看详情</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>DS-2024-008</td>
+                                        <td>用户画像构建</td>
+                                        <td><span class="badge bg-info">维度定义</span></td>
+                                        <td>
+                                            <div class="progress w-50">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </td>
+                                        <td>赵六</td>
+                                        <td>2024-07-30</td>
+                                        <td><button class="btn btn-sm btn-primary">查看详情</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

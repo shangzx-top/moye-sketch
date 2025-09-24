@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户 & 权限管理 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item active" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">4</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有2个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">3个工单即将到期</a></li>
+                        <li><a class="dropdown-item" href="#">有5个工单已完成</a></li>
+                        <li><a class="dropdown-item" href="#">外部平台API连接异常</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="user-management">
+                <div class="page-header mb-4">
+                    <h1>用户 & 权限管理</h1>
+                    <div class="page-description">管理平台用户、角色和权限配置，确保系统安全运行</div>
+                </div>
+
+                <!-- 管理导航标签 -->
+                <div class="management-tabs mb-4">
+                    <div class="nav nav-tabs" id="managementTabs" role="tablist">
+                        <button class="nav-link active" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button" role="tab" aria-controls="roles" aria-selected="true">
+                            <i class="fas fa-user-tag mr-2"></i>角色管理
+                        </button>
+                        <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="false">
+                            <i class="fas fa-users mr-2"></i>用户管理
+                        </button>
+                        <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#permissions" type="button" role="tab" aria-controls="permissions" aria-selected="false">
+                            <i class="fas fa-key mr-2"></i>权限配置
+                        </button>
+                        <button class="nav-link" id="task-allocation-tab" data-bs-toggle="tab" data-bs-target="#task-allocation" type="button" role="tab" aria-controls="task-allocation" aria-selected="false">
+                            <i class="fas fa-tasks mr-2"></i>任务分配规则
+                        </button>
+                        <button class="nav-link" id="audit-log-tab" data-bs-toggle="tab" data-bs-target="#audit-log" type="button" role="tab" aria-controls="audit-log" aria-selected="false">
+                            <i class="fas fa-history mr-2"></i>历史操作日志
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 标签内容区域 -->
+                <div class="tab-content" id="managementTabsContent">
+                    <!-- 角色管理 -->
+                    <div class="tab-pane fade show active" id="roles" role="tabpanel" aria-labelledby="roles-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">角色列表</h4>
+                                        <div class="total-count">共 8 个角色</div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button class="btn btn-primary" id="add-role-btn">
+                                            <i class="fas fa-plus-circle"></i> 新建角色
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="role-list">
+                                    <div class="role-item">
+                                        <div class="role-header">
+                                            <div class="role-info">
+                                                <div class="role-name">
+                                                    <i class="fas fa-user-shield text-primary"></i>
+                                                    <span>管理员</span>
+                                                </div>
+                                                <div class="role-desc">系统管理员，拥有所有权限</div>
+                                            </div>
+                                            <div class="role-count">
+                                                <span class="count-label">成员数量：</span>
+                                                <span class="count-value">3</span>
+                                            </div>
+                                            <div class="role-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger" disabled>删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="role-permissions">
+                                            <span class="permission-tag">用户管理</span>
+                                            <span class="permission-tag">数据管理</span>
+                                            <span class="permission-tag">任务管理</span>
+                                            <span class="permission-tag">系统配置</span>
+                                            <span class="permission-tag">审计查看</span>
+                                            <span class="permission-tag">...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="role-item">
+                                        <div class="role-header">
+                                            <div class="role-info">
+                                                <div class="role-name">
+                                                    <i class="fas fa-user-md text-success"></i>
+                                                    <span>审核员</span>
+                                                </div>
+                                                <div class="role-desc">负责数据质量审核和结果确认</div>
+                                            </div>
+                                            <div class="role-count">
+                                                <span class="count-label">成员数量：</span>
+                                                <span class="count-value">5</span>
+                                            </div>
+                                            <div class="role-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="role-permissions">
+                                            <span class="permission-tag">数据审核</span>
+                                            <span class="permission-tag">结果确认</span>
+                                            <span class="permission-tag">质量报告</span>
+                                            <span class="permission-tag">...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="role-item">
+                                        <div class="role-header">
+                                            <div class="role-info">
+                                                <div class="role-name">
+                                                    <i class="fas fa-user-edit text-info"></i>
+                                                    <span>清洗人员</span>
+                                                </div>
+                                                <div class="role-desc">负责数据清洗和工单处理</div>
+                                            </div>
+                                            <div class="role-count">
+                                                <span class="count-label">成员数量：</span>
+                                                <span class="count-value">12</span>
+                                            </div>
+                                            <div class="role-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="role-permissions">
+                                            <span class="permission-tag">数据清洗</span>
+                                            <span class="permission-tag">工单处理</span>
+                                            <span class="permission-tag">数据查看</span>
+                                            <span class="permission-tag">...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="role-item">
+                                        <div class="role-header">
+                                            <div class="role-info">
+                                                <div class="role-name">
+                                                    <i class="fas fa-user-tie text-warning"></i>
+                                                    <span>项目负责人</span>
+                                                </div>
+                                                <div class="role-desc">负责项目整体管理和协调</div>
+                                            </div>
+                                            <div class="role-count">
+                                                <span class="count-label">成员数量：</span>
+                                                <span class="count-value">4</span>
+                                            </div>
+                                            <div class="role-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="role-permissions">
+                                            <span class="permission-tag">项目管理</span>
+                                            <span class="permission-tag">任务分配</span>
+                                            <span class="permission-tag">进度查看</span>
+                                            <span class="permission-tag">...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="pagination justify-content-center">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户管理 -->
+                    <div class="tab-pane fade" id="users" role="tabpanel" aria-labelledby="users-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">用户列表</h4>
+                                        <div class="total-count">共 32 个用户</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="搜索用户...">
+                                                    <button class="btn btn-outline-secondary">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <select class="form-control">
+                                                    <option value="all">所有角色</option>
+                                                    <option value="admin">管理员</option>
+                                                    <option value="auditor">审核员</option>
+                                                    <option value="cleaner">清洗人员</option>
+                                                    <option value="manager">项目负责人</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 text-right">
+                                                <button class="btn btn-primary">
+                                                    <i class="fas fa-plus-circle"></i> 新建用户
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="user-list">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;"></th>
+                                                <th>用户ID</th>
+                                                <th>用户名</th>
+                                                <th>姓名</th>
+                                                <th>角色</th>
+                                                <th>所属部门</th>
+                                                <th>状态</th>
+                                                <th>创建时间</th>
+                                                <th>上次登录</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><input type="checkbox" class="user-select"></td>
+                                                <td>UID-2024-0001</td>
+                                                <td>admin001</td>
+                                                <td>张管理员</td>
+                                                <td><span class="role-tag admin">管理员</span></td>
+                                                <td>数据管理部</td>
+                                                <td><span class="status-badge active">活跃</span></td>
+                                                <td>2024-01-01</td>
+                                                <td>2024-01-18 15:30</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">编辑</button>
+                                                    <button class="btn btn-sm btn-warning">禁用</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" class="user-select"></td>
+                                                <td>UID-2024-0002</td>
+                                                <td>admin002</td>
+                                                <td>李管理员</td>
+                                                <td><span class="role-tag admin">管理员</span></td>
+                                                <td>数据管理部</td>
+                                                <td><span class="status-badge active">活跃</span></td>
+                                                <td>2024-01-01</td>
+                                                <td>2024-01-17 09:45</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">编辑</button>
+                                                    <button class="btn btn-sm btn-warning">禁用</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" class="user-select"></td>
+                                                <td>UID-2024-0005</td>
+                                                <td>auditor001</td>
+                                                <td>王医生</td>
+                                                <td><span class="role-tag auditor">审核员</span></td>
+                                                <td>心内科</td>
+                                                <td><span class="status-badge active">活跃</span></td>
+                                                <td>2024-01-05</td>
+                                                <td>2024-01-18 14:20</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">编辑</button>
+                                                    <button class="btn btn-sm btn-warning">禁用</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" class="user-select"></td>
+                                                <td>UID-2024-0008</td>
+                                                <td>cleaner001</td>
+                                                <td>赵数据</td>
+                                                <td><span class="role-tag cleaner">清洗人员</span></td>
+                                                <td>数据处理组</td>
+                                                <td><span class="status-badge active">活跃</span></td>
+                                                <td>2024-01-08</td>
+                                                <td>2024-01-18 16:10</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">编辑</button>
+                                                    <button class="btn btn-sm btn-warning">禁用</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" class="user-select"></td>
+                                                <td>UID-2024-0012</td>
+                                                <td>manager001</td>
+                                                <td>陈项目</td>
+                                                <td><span class="role-tag manager">项目负责人</span></td>
+                                                <td>研发部</td>
+                                                <td><span class="status-badge active">活跃</span></td>
+                                                <td>2024-01-10</td>
+                                                <td>2024-01-18 13:50</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary">查看</button>
+                                                    <button class="btn btn-sm btn-secondary">编辑</button>
+                                                    <button class="btn btn-sm btn-warning">禁用</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="select-all-users">
+                                            <label class="form-check-label" for="select-all-users">全选</label>
+                                        </div>
+                                        <span class="selected-count">已选择 0 项</span>
+                                        <div class="operation-buttons ml-3">
+                                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                <i class="fas fa-user-lock"></i> 批量禁用
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                <i class="fas fa-user-unlock"></i> 批量启用
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                <i class="fas fa-user-edit"></i> 批量修改角色
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                <i class="fas fa-download"></i> 导出用户
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <div class="pagination">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <li class="page-item disabled">
+                                                        <a class="page-link" href="#" aria-label="Previous">
+                                                            <span aria-hidden="true">&laquo;</span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="#" aria-label="Next">
+                                                            <span aria-hidden="true">&raquo;</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 权限配置 -->
+                    <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">权限配置</h4>
+                                        <div class="permission-description">为不同角色配置系统功能访问权限</div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <select class="form-control" style="display: inline-block; width: auto;">
+                                            <option value="admin">管理员</option>
+                                            <option value="auditor">审核员</option>
+                                            <option value="cleaner">清洗人员</option>
+                                            <option value="manager">项目负责人</option>
+                                        </select>
+                                        <button class="btn btn-primary ml-2">
+                                            <i class="fas fa-save"></i> 保存配置
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="permission-config">
+                                    <!-- 系统管理权限 -->
+                                    <div class="permission-group">
+                                        <div class="permission-group-header">
+                                            <input type="checkbox" class="permission-group-checkbox" checked>
+                                            <label>系统管理</label>
+                                        </div>
+                                        <div class="permission-group-body">
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>用户管理</label>
+                                                <div class="permission-desc">管理系统用户，包括添加、编辑、删除用户等</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>角色管理</label>
+                                                <div class="permission-desc">管理系统角色，包括创建、编辑、删除角色等</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>权限配置</label>
+                                                <div class="permission-desc">配置系统权限，包括功能访问控制等</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>系统设置</label>
+                                                <div class="permission-desc">配置系统参数、接口等</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 数据管理权限 -->
+                                    <div class="permission-group">
+                                        <div class="permission-group-header">
+                                            <input type="checkbox" class="permission-group-checkbox" checked>
+                                            <label>数据管理</label>
+                                        </div>
+                                        <div class="permission-group-body">
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>数据上传</label>
+                                                <div class="permission-desc">上传原始数据到系统</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>数据查看</label>
+                                                <div class="permission-desc">查看系统中的所有数据</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>数据导出</label>
+                                                <div class="permission-desc">导出系统中的数据</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>数据删除</label>
+                                                <div class="permission-desc">删除系统中的数据</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 任务管理权限 -->
+                                    <div class="permission-group">
+                                        <div class="permission-group-header">
+                                            <input type="checkbox" class="permission-group-checkbox" checked>
+                                            <label>任务管理</label>
+                                        </div>
+                                        <div class="permission-group-body">
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>任务发布</label>
+                                                <div class="permission-desc">发布新的数据处理任务</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>任务分配</label>
+                                                <div class="permission-desc">分配任务给不同用户</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>任务监控</label>
+                                                <div class="permission-desc">监控任务进度和状态</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>任务审核</label>
+                                                <div class="permission-desc">审核任务结果</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 工单管理权限 -->
+                                    <div class="permission-group">
+                                        <div class="permission-group-header">
+                                            <input type="checkbox" class="permission-group-checkbox" checked>
+                                            <label>工单管理</label>
+                                        </div>
+                                        <div class="permission-group-body">
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>工单创建</label>
+                                                <div class="permission-desc">创建新的工单</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>工单处理</label>
+                                                <div class="permission-desc">处理系统中的工单</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>工单审核</label>
+                                                <div class="permission-desc">审核工单处理结果</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>工单统计</label>
+                                                <div class="permission-desc">查看工单统计报表</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI模型权限 -->
+                                    <div class="permission-group">
+                                        <div class="permission-group-header">
+                                            <input type="checkbox" class="permission-group-checkbox" checked>
+                                            <label>AI模型管理</label>
+                                        </div>
+                                        <div class="permission-group-body">
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>模型配置</label>
+                                                <div class="permission-desc">配置AI模型参数</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>模型测试</label>
+                                                <div class="permission-desc">测试AI模型性能</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>模型监控</label>
+                                                <div class="permission-desc">监控AI模型运行状态</div>
+                                            </div>
+                                            <div class="permission-item">
+                                                <input type="checkbox" class="permission-checkbox" checked>
+                                                <label>模型更新</label>
+                                                <div class="permission-desc">更新AI模型版本</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <button class="btn btn-outline-secondary">
+                                            <i class="fas fa-undo"></i> 恢复默认设置
+                                        </button>
+                                        <button class="btn btn-outline-secondary ml-2">
+                                            <i class="fas fa-copy"></i> 复制权限配置
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button class="btn btn-secondary">取消</button>
+                                        <button class="btn btn-primary">
+                                            <i class="fas fa-save"></i> 保存配置
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 任务分配规则 -->
+                    <div class="tab-pane fade" id="task-allocation" role="tabpanel" aria-labelledby="task-allocation-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">任务分配规则</h4>
+                                        <div class="rule-description">配置系统自动任务分配规则</div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button class="btn btn-primary">
+                                            <i class="fas fa-plus-circle"></i> 新建规则
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="rule-list">
+                                    <div class="rule-item">
+                                        <div class="rule-header">
+                                            <div class="rule-name">
+                                                <i class="fas fa-tasks text-primary"></i>
+                                                <span>按专业领域分配</span>
+                                            </div>
+                                            <div class="rule-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="rule-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="rule-config">
+                                            <div class="config-item">
+                                                <span class="config-label">适用范围：</span>
+                                                <span class="config-value">心电图数据清洗任务</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">分配策略：</span>
+                                                <span class="config-value">根据用户专业领域和历史表现</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">优先级：</span>
+                                                <span class="config-value">高</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">创建时间：</span>
+                                                <span class="config-value">2024-01-05</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">最近修改：</span>
+                                                <span class="config-value">2024-01-15</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="rule-item">
+                                        <div class="rule-header">
+                                            <div class="rule-name">
+                                                <i class="fas fa-tasks text-primary"></i>
+                                                <span>按工作量均衡分配</span>
+                                            </div>
+                                            <div class="rule-status">
+                                                <span class="status-badge active">启用</span>
+                                            </div>
+                                            <div class="rule-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="rule-config">
+                                            <div class="config-item">
+                                                <span class="config-label">适用范围：</span>
+                                                <span class="config-value">所有数据处理任务</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">分配策略：</span>
+                                                <span class="config-value">根据用户当前工作量和历史效率</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">优先级：</span>
+                                                <span class="config-value">中</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">创建时间：</span>
+                                                <span class="config-value">2024-01-01</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">最近修改：</span>
+                                                <span class="config-value">2024-01-10</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="rule-item">
+                                        <div class="rule-header">
+                                            <div class="rule-name">
+                                                <i class="fas fa-tasks text-primary"></i>
+                                                <span>按用户组分配</span>
+                                            </div>
+                                            <div class="rule-status">
+                                                <span class="status-badge inactive">禁用</span>
+                                            </div>
+                                            <div class="rule-actions">
+                                                <button class="btn btn-sm btn-primary">查看</button>
+                                                <button class="btn btn-sm btn-secondary">编辑</button>
+                                                <button class="btn btn-sm btn-danger">删除</button>
+                                            </div>
+                                        </div>
+                                        <div class="rule-config">
+                                            <div class="config-item">
+                                                <span class="config-label">适用范围：</span>
+                                                <span class="config-value">批量数据处理任务</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">分配策略：</span>
+                                                <span class="config-value">按用户组和项目需求分配</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">优先级：</span>
+                                                <span class="config-value">低</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">创建时间：</span>
+                                                <span class="config-value">2023-12-28</span>
+                                            </div>
+                                            <div class="config-item">
+                                                <span class="config-label">最近修改：</span>
+                                                <span class="config-value">2024-01-03</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <button class="btn btn-outline-secondary">
+                                            <i class="fas fa-sync-alt"></i> 刷新分配规则
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button class="btn btn-outline-secondary">
+                                            <i class="fas fa-history"></i> 查看分配日志
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 历史操作日志 -->
+                    <div class="tab-pane fade" id="audit-log" role="tabpanel" aria-labelledby="audit-log-tab">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="card-title mb-0">历史操作日志</h4>
+                                        <div class="log-description">记录系统所有用户的操作行为</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="搜索操作...">
+                                                    <button class="btn btn-outline-secondary">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select class="form-control">
+                                                    <option value="all">所有操作类型</option>
+                                                    <option value="login">登录操作</option>
+                                                    <option value="data">数据操作</option>
+                                                    <option value="task">任务操作</option>
+                                                    <option value="system">系统操作</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 text-right">
+                                                <button class="btn btn-outline-secondary">
+                                                    <i class="fas fa-download"></i> 导出日志
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="log-filters mb-4">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="user-filter">操作用户</label>
+                                                <input type="text" class="form-control" id="user-filter" placeholder="用户名/姓名">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="time-range">时间范围</label>
+                                                <input type="date" class="form-control" id="time-range" value="2024-01-18">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="status-filter">操作状态</label>
+                                                <select class="form-control" id="status-filter">
+                                                    <option value="all">所有状态</option>
+                                                    <option value="success">成功</option>
+                                                    <option value="fail">失败</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="module-filter">操作模块</label>
+                                                <select class="form-control" id="module-filter">
+                                                    <option value="all">所有模块</option>
+                                                    <option value="user">用户管理</option>
+                                                    <option value="task">任务管理</option>
+                                                    <option value="data">数据管理</option>
+                                                    <option value="system">系统设置</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="filter-actions text-right mt-2">
+                                        <button class="btn btn-secondary">重置</button>
+                                        <button class="btn btn-primary">查询</button>
+                                    </div>
+                                </div>
+
+                                <div class="log-list">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>操作时间</th>
+                                                <th>操作用户</th>
+                                                <th>操作类型</th>
+                                                <th>操作模块</th>
+                                                <th>操作内容</th>
+                                                <th>操作IP</th>
+                                                <th>操作状态</th>
+                                                <th>详情</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>2024-01-18 15:30:45</td>
+                                                <td>admin001 (张管理员)</td>
+                                                <td>登录</td>
+                                                <td>系统管理</td>
+                                                <td>用户登录系统</td>
+                                                <td>192.168.1.101</td>
+                                                <td><span class="status-badge success">成功</span></td>
+                                                <td><button class="btn btn-sm btn-primary">查看</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2024-01-18 14:20:18</td>
+                                                <td>auditor001 (王医生)</td>
+                                                <td>审核</td>
+                                                <td>数据审核</td>
+                                                <td>审核通过10条心电图数据</td>
+                                                <td>192.168.1.105</td>
+                                                <td><span class="status-badge success">成功</span></td>
+                                                <td><button class="btn btn-sm btn-primary">查看</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2024-01-18 13:50:32</td>
+                                                <td>manager001 (陈项目)</td>
+                                                <td>分配</td>
+                                                <td>任务管理</td>
+                                                <td>分配20条清洗任务给cleaner001</td>
+                                                <td>192.168.1.108</td>
+                                                <td><span class="status-badge success">成功</span></td>
+                                                <td><button class="btn btn-sm btn-primary">查看</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2024-01-18 12:15:48</td>
+                                                <td>cleaner001 (赵数据)</td>
+                                                <td>修改</td>
+                                                <td>数据清洗</td>
+                                                <td>清洗完成5条心电图数据</td>
+                                                <td>192.168.1.112</td>
+                                                <td><span class="status-badge success">成功</span></td>
+                                                <td><button class="btn btn-sm btn-primary">查看</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2024-01-18 10:45:12</td>
+                                                <td>admin002 (李管理员)</td>
+                                                <td>配置</td>
+                                                <td>系统设置</td>
+                                                <td>修改AI模型参数</td>
+                                                <td>192.168.1.102</td>
+                                                <td><span class="status-badge success">成功</span></td>
+                                                <td><button class="btn btn-sm btn-primary">查看</button></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="log-stats">
+                                            <span class="stat-item">今日操作：235 次</span>
+                                            <span class="stat-item">成功：228 次</span>
+                                            <span class="stat-item">失败：7 次</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <div class="pagination">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <li class="page-item disabled">
+                                                        <a class="page-link" href="#" aria-label="Previous">
+                                                            <span aria-hidden="true">&laquo;</span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="#" aria-label="Next">
+                                                            <span aria-hidden="true">&raquo;</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建角色模态框 -->
+    <div class="modal fade" id="add-role-modal" tabindex="-1" role="dialog" aria-labelledby="add-role-modal-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-role-modal-label">新建角色</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="role-name-input">角色名称</label>
+                        <input type="text" class="form-control" id="role-name-input" placeholder="请输入角色名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="role-desc-input">角色描述</label>
+                        <textarea class="form-control" id="role-desc-input" rows="3" placeholder="请输入角色描述..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>角色权限</label>
+                        <div class="permission-selection">
+                            <div class="permission-group">
+                                <div class="permission-group-header">
+                                    <input type="checkbox" class="permission-group-checkbox">
+                                    <label>系统管理</label>
+                                </div>
+                                <div class="permission-group-body">
+                                    <div class="permission-item">
+                                        <input type="checkbox" class="permission-checkbox">
+                                        <label>用户管理</label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <input type="checkbox" class="permission-checkbox">
+                                        <label>角色管理</label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <input type="checkbox" class="permission-checkbox">
+                                        <label>权限配置</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="permission-group">
+                                <div class="permission-group-header">
+                                    <input type="checkbox" class="permission-group-checkbox">
+                                    <label>数据管理</label>
+                                </div>
+                                <div class="permission-group-body">
+                                    <div class="permission-item">
+                                        <input type="checkbox" class="permission-checkbox">
+                                        <label>数据上传</label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <input type="checkbox" class="permission-checkbox">
+                                        <label>数据查看</label>
+                                    </div>
+                                    <div class="permission-item">
+                                        <input type="checkbox" class="permission-checkbox">
+                                        <label>数据导出</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">保存角色</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建用户模态框 -->
+    <div class="modal fade" id="add-user-modal" tabindex="-1" role="dialog" aria-labelledby="add-user-modal-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-user-modal-label">新建用户</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="username-input">用户名</label>
+                        <input type="text" class="form-control" id="username-input" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="realname-input">姓名</label>
+                        <input type="text" class="form-control" id="realname-input" placeholder="请输入真实姓名">
+                    </div>
+                    <div class="form-group">
+                        <label for="password-input">密码</label>
+                        <input type="password" class="form-control" id="password-input" placeholder="请输入密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password-input">确认密码</label>
+                        <input type="password" class="form-control" id="confirm-password-input" placeholder="请再次输入密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="email-input">邮箱</label>
+                        <input type="email" class="form-control" id="email-input" placeholder="请输入邮箱地址">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone-input">电话</label>
+                        <input type="tel" class="form-control" id="phone-input" placeholder="请输入电话号码">
+                    </div>
+                    <div class="form-group">
+                        <label for="department-input">所属部门</label>
+                        <input type="text" class="form-control" id="department-input" placeholder="请输入所属部门">
+                    </div>
+                    <div class="form-group">
+                        <label for="role-select">角色</label>
+                        <select class="form-control" id="role-select">
+                            <option value="">请选择角色</option>
+                            <option value="admin">管理员</option>
+                            <option value="auditor">审核员</option>
+                            <option value="cleaner">清洗人员</option>
+                            <option value="manager">项目负责人</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-select">状态</label>
+                        <select class="form-control" id="status-select">
+                            <option value="active">活跃</option>
+                            <option value="inactive">禁用</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">创建用户</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/user_management.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 点击新建角色按钮打开模态框
+            document.getElementById('add-role-btn').addEventListener('click', function() {
+                const addRoleModal = new bootstrap.Modal(document.getElementById('add-role-modal'));
+                addRoleModal.show();
+            });
+
+            // 权限组复选框联动
+            const permissionGroupCheckboxes = document.querySelectorAll('.permission-group-checkbox');
+            permissionGroupCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const groupBody = this.closest('.permission-group').querySelector('.permission-group-body');
+                    const permissionCheckboxes = groupBody.querySelectorAll('.permission-checkbox');
+                    permissionCheckboxes.forEach(permCheckbox => {
+                        permCheckbox.checked = this.checked;
+                    });
+                });
+            });
+
+            // 全选/取消全选用户
+            document.getElementById('select-all-users').addEventListener('change', function() {
+                const userCheckboxes = document.querySelectorAll('.user-select');
+                userCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateSelectedCount();
+            });
+
+            // 单个用户选择
+            const userCheckboxes = document.querySelectorAll('.user-select');
+            userCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+
+            // 更新已选择用户数量
+            function updateSelectedCount() {
+                const selectedCount = document.querySelectorAll('.user-select:checked').length;
+                document.querySelector('.selected-count').textContent = `已选择 ${selectedCount} 项`;
+                
+                // 启用/禁用批量操作按钮
+                const batchButtons = document.querySelectorAll('.operation-buttons button');
+                batchButtons.forEach(button => {
+                    button.disabled = selectedCount === 0;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

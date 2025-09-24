@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据预填充 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle active" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item active" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">3</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有3个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">新的任务已发布</a></li>
+                        <li><a class="dropdown-item" href="#">系统将于明天进行维护</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="data-prepopulate">
+                <div class="task-header mb-4">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h1>数据预填充</h1>
+                            <div class="task-info">
+                                <span class="task-name">当前任务：心电图数据扩展</span>
+                                <span class="task-id">DS-2024-006</span>
+                                <span class="task-status">
+                                    <span class="badge bg-info">进行中</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <div class="model-info">
+                                <span>使用模型：医学大模型 v2.0</span>
+                                <button class="btn btn-sm btn-outline-secondary ml-2">切换模型</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务进度条 -->
+                <div class="task-progress mb-4">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="progress-step completed">
+                                <div class="step-circle">1</div>
+                                <div class="step-name">维度定义</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step active">
+                                <div class="step-circle">2</div>
+                                <div class="step-name">数据预填充</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step">
+                                <div class="step-circle">3</div>
+                                <div class="step-name">数据清洗</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step">
+                                <div class="step-circle">4</div>
+                                <div class="step-name">工单发布</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-step">
+                                <div class="step-circle">5</div>
+                                <div class="step-name">结果提交</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="progress-time">
+                                <span>剩余时间：25天</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 质量评估 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">预填充质量评估</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="quality-metric">
+                                    <div class="metric-value">92%</div>
+                                    <div class="metric-label">平均置信度</div>
+                                    <div class="metric-trend">
+                                        <i class="fas fa-arrow-up text-success"></i> 3% 较上一批次
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="quality-metric">
+                                    <div class="metric-value">95%</div>
+                                    <div class="metric-label">填充完成率</div>
+                                    <div class="metric-trend">
+                                        <i class="fas fa-arrow-up text-success"></i> 2% 较上一批次
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="quality-metric">
+                                    <div class="metric-value">5%</div>
+                                    <div class="metric-label">数据缺失率</div>
+                                    <div class="metric-trend">
+                                        <i class="fas fa-arrow-down text-success"></i> 1% 较上一批次
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="quality-metric">
+                                    <div class="metric-value">88%</div>
+                                    <div class="metric-label">字段准确率</div>
+                                    <div class="metric-trend">
+                                        <i class="fas fa-arrow-up text-success"></i> 4% 较上一批次
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">置信度分布</h5>
+                                    <canvas id="confidenceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 class="chart-title">字段填充率</h5>
+                                    <canvas id="fillRateChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 批量操作和筛选 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title mb-0">数据列表</h4>
+                                <div class="total-count">共 5,000 条数据，当前显示第 1-50 条</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <select class="form-control">
+                                            <option value="all">全部数据</option>
+                                            <option value="low-confidence">低置信度(&lt;70%)</option>
+                                            <option value="medium-confidence">中等置信度(70-90%)</option>
+                                            <option value="high-confidence">高置信度(&gt;90%)</option>
+                                            <option value="missing-data">含缺失数据</option>
+                                            <option value="no-missing-data">无缺失数据</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-control">
+                                            <option value="50">50条/页</option>
+                                            <option value="100">100条/页</option>
+                                            <option value="200">200条/页</option>
+                                            <option value="500">500条/页</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <button class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-redo-alt"></i> 重新预填充
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 批量操作工具栏 -->
+                        <div class="batch-operations mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="select-all">
+                                <label class="form-check-label" for="select-all">全选</label>
+                            </div>
+                            <span class="selected-count">已选择 0 项</span>
+                            <div class="operation-buttons ml-3">
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-check-circle"></i> 批量确认
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-ticket-alt"></i> 批量发工单
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-undo"></i> 批量重置
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 数据对比表格 -->
+                        <div class="data-comparison">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"></th>
+                                        <th>ID</th>
+                                        <th>病人ID</th>
+                                        <th>检测日期</th>
+                                        <th>原始数据</th>
+                                        <th>AI预填充结果</th>
+                                        <th>置信度</th>
+                                        <th>缺失字段</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" class="data-select"></td>
+                                        <td>1</td>
+                                        <td>PT-2024-00123</td>
+                                        <td>2024-01-15</td>
+                                        <td class="raw-data">
+                                            <div class="waveform-mini">
+                                                <!-- 波形图预览 -->
+                                                <svg width="80" height="30" viewBox="0 0 80 30">
+                                                    <path d="M0,15 Q5,10 10,15 Q15,20 20,15 Q25,10 30,15 Q35,20 40,15 Q45,10 50,15 Q55,20 60,15 Q65,10 70,15 Q75,20 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td class="ai-result">
+                                            <div class="field-group mini">
+                                                <div class="field-label">心率：</div>
+                                                <div>72次/分</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">节律：</div>
+                                                <div>窦性心律</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">结论：</div>
+                                                <div>大致正常心电图</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="confidence-badge high">96%</div>
+                                        </td>
+                                        <td>0</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">确认</button>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-warning">发工单</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="data-select"></td>
+                                        <td>2</td>
+                                        <td>PT-2024-00124</td>
+                                        <td>2024-01-15</td>
+                                        <td class="raw-data">
+                                            <div class="waveform-mini">
+                                                <!-- 波形图预览 -->
+                                                <svg width="80" height="30" viewBox="0 0 80 30">
+                                                    <path d="M0,15 Q5,12 10,15 Q15,18 20,15 Q25,10 30,15 Q35,18 40,15 Q45,12 50,15 Q55,18 60,15 Q65,10 70,15 Q75,18 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td class="ai-result">
+                                            <div class="field-group mini">
+                                                <div class="field-label">心率：</div>
+                                                <div>68次/分</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">节律：</div>
+                                                <div>窦性心律</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">结论：</div>
+                                                <div>正常心电图</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="confidence-badge high">98%</div>
+                                        </td>
+                                        <td>0</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">确认</button>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-warning">发工单</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="data-select"></td>
+                                        <td>3</td>
+                                        <td>PT-2024-00125</td>
+                                        <td>2024-01-16</td>
+                                        <td class="raw-data">
+                                            <div class="waveform-mini">
+                                                <!-- 波形图预览 -->
+                                                <svg width="80" height="30" viewBox="0 0 80 30">
+                                                    <path d="M0,15 Q5,5 10,15 Q15,25 20,15 Q25,5 30,15 Q35,25 40,15 Q45,5 50,15 Q55,25 60,15 Q65,5 70,15 Q75,25 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td class="ai-result">
+                                            <div class="field-group mini">
+                                                <div class="field-label">心率：</div>
+                                                <div>95次/分</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">节律：</div>
+                                                <div>窦性心动过速</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">结论：</div>
+                                                <div>异常心电图</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="confidence-badge medium">85%</div>
+                                        </td>
+                                        <td>1</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">确认</button>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-warning">发工单</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="data-select"></td>
+                                        <td>4</td>
+                                        <td>PT-2024-00126</td>
+                                        <td>2024-01-16</td>
+                                        <td class="raw-data">
+                                            <div class="waveform-mini">
+                                                <!-- 波形图预览 -->
+                                                <svg width="80" height="30" viewBox="0 0 80 30">
+                                                    <path d="M0,15 Q7,10 14,15 Q21,20 28,15 Q35,10 42,15 Q49,20 56,15 Q63,10 70,15 Q77,20 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td class="ai-result">
+                                            <div class="field-group mini">
+                                                <div class="field-label">心率：</div>
+                                                <div>58次/分</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">节律：</div>
+                                                <div>窦性心动过缓</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">结论：</div>
+                                                <div class="missing-field">[缺失]</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="confidence-badge low">65%</div>
+                                        </td>
+                                        <td>2</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">确认</button>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-warning">发工单</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="data-select"></td>
+                                        <td>5</td>
+                                        <td>PT-2024-00127</td>
+                                        <td>2024-01-17</td>
+                                        <td class="raw-data">
+                                            <div class="waveform-mini">
+                                                <!-- 波形图预览 -->
+                                                <svg width="80" height="30" viewBox="0 0 80 30">
+                                                    <path d="M0,15 Q5,12 10,15 Q15,20 20,15 Q25,15 30,15 Q35,18 40,15 Q45,12 50,15 Q55,20 60,15 Q65,15 70,15 Q75,18 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
+                                                </svg>
+                                            </div>
+                                        </td>
+                                        <td class="ai-result">
+                                            <div class="field-group mini">
+                                                <div class="field-label">心率：</div>
+                                                <div>75次/分</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">节律：</div>
+                                                <div>窦性心律</div>
+                                            </div>
+                                            <div class="field-group mini">
+                                                <div class="field-label">结论：</div>
+                                                <div>ST段轻度改变，建议结合临床</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="confidence-badge high">92%</div>
+                                        </td>
+                                        <td>0</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">确认</button>
+                                            <button class="btn btn-sm btn-primary">详情</button>
+                                            <button class="btn btn-sm btn-warning">发工单</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 分页 -->
+                        <div class="pagination justify-content-center mt-4">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">5</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="processing-stats">
+                                    <span class="stat-item">已确认：1,250 条</span>
+                                    <span class="stat-item">待处理：3,750 条</span>
+                                    <span class="stat-item">已发工单：128 条</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button class="btn btn-secondary">上一步</button>
+                                <button class="btn btn-primary">下一步</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据详情模态框 -->
+    <div class="modal fade" id="data-detail-modal" tabindex="-1" role="dialog" aria-labelledby="data-detail-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="data-detail-modal-label">数据详情 - 对比视图</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- 左侧原始数据 -->
+                        <div class="col-md-6">
+                            <div class="data-section">
+                                <div class="section-header">
+                                    <h6>原始数据</h6>
+                                    <div class="data-id">ID: PT-2024-00123</div>
+                                </div>
+                                <div class="section-content">
+                                    <div class="field-group">
+                                        <div class="field-label">病人ID：</div>
+                                        <div class="field-value">PT-2024-00123</div>
+                                    </div>
+                                    <div class="field-group">
+                                        <div class="field-label">检测日期：</div>
+                                        <div class="field-value">2024-01-15</div>
+                                    </div>
+                                    <div class="field-group">
+                                        <div class="field-label">心电图波形：</div>
+                                        <div class="waveform-preview">
+                                            <!-- 波形图预览 -->
+                                            <svg width="100%" height="100" viewBox="0 0 500 100">
+                                                <path d="M0,50 Q12.5,40 25,50 Q37.5,60 50,50 Q62.5,40 75,50 Q87.5,60 100,50 Q112.5,40 125,50 Q137.5,60 150,50 Q162.5,40 175,50 Q187.5,60 200,50 Q212.5,40 225,50 Q237.5,60 250,50 Q262.5,40 275,50 Q287.5,60 300,50 Q312.5,40 325,50 Q337.5,60 350,50 Q362.5,40 375,50 Q387.5,60 400,50 Q412.5,40 425,50 Q437.5,60 450,50 Q462.5,40 475,50 Q487.5,60 500,50" fill="none" stroke="#6c757d" stroke-width="2"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="field-group">
+                                        <div class="field-label">临床记录：</div>
+                                        <div class="field-value">45岁男性患者，因常规体检行心电图检查。既往体健，无高血压、糖尿病病史，无家族性心脏病史。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右侧AI预填充结果 -->
+                        <div class="col-md-6">
+                            <div class="data-section">
+                                <div class="section-header">
+                                    <h6>AI预填充结果</h6>
+                                    <div class="confidence-score">置信度：96%</div>
+                                </div>
+                                <div class="section-content">
+                                    <div class="dimension-group">
+                                        <div class="dimension-title">基本信息</div>
+                                        <div class="field-group">
+                                            <div class="field-label">病人ID：</div>
+                                            <div class="field-value">PT-2024-00123</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">检测日期：</div>
+                                            <div class="field-value">2024-01-15</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">年龄：</div>
+                                            <div class="field-value">45</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">性别：</div>
+                                            <div class="field-value">男</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dimension-group">
+                                        <div class="dimension-title">心电图波形分析</div>
+                                        <div class="field-group">
+                                            <div class="field-label">心率：</div>
+                                            <div class="field-value">72次/分</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">节律：</div>
+                                            <div class="field-value">窦性心律，节律整齐</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">P波分析：</div>
+                                            <div class="field-value">形态正常，时限0.10秒，振幅0.25mV</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">QRS波分析：</div>
+                                            <div class="field-value">形态正常，时限0.08秒</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">ST段分析：</div>
+                                            <div class="field-value">无明显偏移</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">T波分析：</div>
+                                            <div class="field-value">形态正常，振幅0.3mV</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dimension-group">
+                                        <div class="dimension-title">异常识别</div>
+                                        <div class="field-group">
+                                            <div class="field-label">异常类型：</div>
+                                            <div class="field-value">未发现明显异常</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dimension-group">
+                                        <div class="dimension-title">初步诊断</div>
+                                        <div class="field-group">
+                                            <div class="field-label">诊断结论：</div>
+                                            <div class="field-value">大致正常心电图</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">诊断依据：</div>
+                                            <div class="field-value">心率在正常范围内，各波形参数均符合正常标准，无明显ST-T改变</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dimension-group">
+                                        <div class="dimension-title">临床建议</div>
+                                        <div class="field-group">
+                                            <div class="field-label">进一步检查建议：</div>
+                                            <div class="field-value">定期体检，必要时复查心电图</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">随访建议：</div>
+                                            <div class="field-value">每年进行一次心电图检查</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI分析和修改建议 -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="ai-analysis">
+                                <div class="analysis-header">
+                                    <i class="fas fa-robot text-primary"></i>
+                                    <span>AI分析说明</span>
+                                </div>
+                                <div class="analysis-content">
+                                    <p>本次分析基于医学大模型v2.0，对心电图波形进行了多维度分析。分析结果显示，该心电图波形规则，各参数均在正常范围内，未发现明显异常。AI对心率、节律、P波、QRS波、ST段和T波的分析结果置信度较高。</p>
+                                    <p class="highlight">建议：该条数据AI分析结果质量良好，可以直接确认通过。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary">修改</button>
+                    <button type="button" class="btn btn-warning">发工单</button>
+                    <button type="button" class="btn btn-success">确认结果</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量操作确认模态框 -->
+    <div class="modal fade" id="batch-operation-modal" tabindex="-1" role="dialog" aria-labelledby="batch-operation-modal-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batch-operation-modal-label">批量操作确认</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="operation-info">
+                        <div class="info-item">
+                            <span class="info-label">操作类型：</span>
+                            <span class="info-value">批量确认</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">选择项数：</span>
+                            <span class="info-value">15 条</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">平均置信度：</span>
+                            <span class="info-value">92%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">缺失字段数：</span>
+                            <span class="info-value">0</span>
+                        </div>
+                    </div>
+                    <div class="operation-warning">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        <span>批量确认后，这些数据将直接进入结果提交阶段，无法撤销。请确认您已检查这些数据的质量。</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success">确认操作</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/data_prepopulate.js"></script>
+    <script>
+        // 初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 置信度分布图
+            const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+            const confidenceChart = new Chart(confidenceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-50%', '51-70%', '71-80%', '81-90%', '91-100%'],
+                    datasets: [{
+                        label: '数据量',
+                        data: [50, 150, 500, 1800, 2500],
+                        backgroundColor: [
+                            'rgba(220, 53, 69, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(108, 117, 125, 0.7)',
+                            'rgba(0, 123, 255, 0.7)',
+                            'rgba(40, 167, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(220, 53, 69, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(108, 117, 125, 1)',
+                            'rgba(0, 123, 255, 1)',
+                            'rgba(40, 167, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '数据量'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '置信度范围'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 字段填充率图
+            const fillRateCtx = document.getElementById('fillRateChart').getContext('2d');
+            const fillRateChart = new Chart(fillRateCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['基本信息', '波形分析', '异常识别', '初步诊断', '临床建议'],
+                    datasets: [{
+                        label: '填充率',
+                        data: [98, 95, 90, 88, 85],
+                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

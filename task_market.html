@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务市场 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="index.html">
+                <i class="fas fa-home mr-2"></i>首页
+            </a>
+            <a class="nav-link" href="dashboard.html">
+                <i class="fas fa-chart-bar mr-2"></i>仪表盘
+            </a>
+            <a class="nav-link active" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="taskFlowDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
+                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+                    <li><a class="dropdown-item" href="data_prepopulate.html">数据预填充</a></li>
+                    <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
+                    <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
+                    <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
+                </ul>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cogs mr-2"></i>支撑模块
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
+                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
+                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
+                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">3</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有3个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">新的任务已发布</a></li>
+                        <li><a class="dropdown-item" href="#">系统将于明天进行维护</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="task-market">
+                <h1 class="mb-4">任务市场</h1>
+
+                <!-- 任务搜索和筛选 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">任务搜索与筛选</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <input type="text" class="form-control" placeholder="搜索任务名称或关键词">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control">
+                                    <option value="all">全部类型</option>
+                                    <option value="text">文本数据</option>
+                                    <option value="image">图像数据</option>
+                                    <option value="medical">医疗数据</option>
+                                    <option value="structured">结构化数据</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control">
+                                    <option value="all">全部难度</option>
+                                    <option value="easy">简单</option>
+                                    <option value="medium">中等</option>
+                                    <option value="hard">困难</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control">
+                                    <option value="all">全部报酬</option>
+                                    <option value="low">低 (1-100)</option>
+                                    <option value="medium">中 (101-500)</option>
+                                    <option value="high">高 (501+)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <button class="btn btn-primary w-100">搜索</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="filter-tags">
+                                    <span class="badge bg-primary mr-2">医疗数据</span>
+                                    <span class="badge bg-secondary mr-2">高优先级</span>
+                                    <span class="badge bg-success mr-2">简单任务</span>
+                                    <span class="badge bg-danger mr-2">即将截止</span>
+                                    <button class="btn btn-sm btn-outline-secondary">清除筛选</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 推荐任务 -->
+                <div class="mb-4">
+                    <h2 class="h4 mb-3">为您推荐</h2>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card recommendation-card">
+                                <div class="card-header bg-primary text-white">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <h5 class="card-title">心电图数据扩展</h5>
+                                            <p class="card-subtitle text-sm">DS-2024-006</p>
+                                        </div>
+                                        <div class="col-4 text-right">
+                                            <span class="badge bg-danger">高优先级</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">基于5000+心电图数据扩展生成病人诊断病历</p>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">数据量</div>
+                                                <div class="stat-value">5,000+</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">难度</div>
+                                                <div class="stat-value">中等</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">截止日期</div>
+                                                <div class="stat-value">30天</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary w-100 mt-3">查看详情</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card recommendation-card">
+                                <div class="card-header bg-secondary text-white">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <h5 class="card-title">产品评论情感分析</h5>
+                                            <p class="card-subtitle text-sm">DS-2024-007</p>
+                                        </div>
+                                        <div class="col-4 text-right">
+                                            <span class="badge bg-warning">中优先级</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">对10000+条产品评论进行情感分析和标签提取</p>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">数据量</div>
+                                                <div class="stat-value">10,000+</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">难度</div>
+                                                <div class="stat-value">简单</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">截止日期</div>
+                                                <div class="stat-value">45天</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary w-100 mt-3">查看详情</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card recommendation-card">
+                                <div class="card-header bg-info text-white">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <h5 class="card-title">用户画像构建</h5>
+                                            <p class="card-subtitle text-sm">DS-2024-008</p>
+                                        </div>
+                                        <div class="col-4 text-right">
+                                            <span class="badge bg-info">低优先级</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">基于用户行为数据构建多维度用户画像</p>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">数据量</div>
+                                                <div class="stat-value">20,000+</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">难度</div>
+                                                <div class="stat-value">困难</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-item">
+                                                <div class="stat-label">截止日期</div>
+                                                <div class="stat-value">60天</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary w-100 mt-3">查看详情</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-8">
+                                <h4 class="card-title mb-0">可用任务列表</h4>
+                            </div>
+                            <div class="col-4 text-right">
+                                <select class="form-control form-control-sm">
+                                    <option value="newest">最新发布</option>
+                                    <option value="highest">优先级高</option>
+                                    <option value="deadline">截止日期近</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>任务ID</th>
+                                        <th>任务名称</th>
+                                        <th>需求描述</th>
+                                        <th>原始数据类型</th>
+                                        <th>数据量</th>
+                                        <th>优先级</th>
+                                        <th>难度</th>
+                                        <th>截止日期</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>DS-2024-006</td>
+                                        <td>心电图数据扩展</td>
+                                        <td>基于5000+心电图数据扩展生成病人诊断病历</td>
+                                        <td>医疗波形</td>
+                                        <td>5,000+</td>
+                                        <td><span class="badge bg-danger">高</span></td>
+                                        <td><span class="badge bg-warning">中等</span></td>
+                                        <td>2024-06-30</td>
+                                        <td><button class="btn btn-sm btn-primary">详情</button> <button
+                                                class="btn btn-sm btn-success">认领</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>DS-2024-007</td>
+                                        <td>产品评论情感分析</td>
+                                        <td>对10000+条产品评论进行情感分析和标签提取</td>
+                                        <td>文本数据</td>
+                                        <td>10,000+</td>
+                                        <td><span class="badge bg-warning">中</span></td>
+                                        <td><span class="badge bg-success">简单</span></td>
+                                        <td>2024-07-15</td>
+                                        <td><button class="btn btn-sm btn-primary">详情</button> <button
+                                                class="btn btn-sm btn-success">认领</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>DS-2024-008</td>
+                                        <td>用户画像构建</td>
+                                        <td>基于用户行为数据构建多维度用户画像</td>
+                                        <td>结构化数据</td>
+                                        <td>20,000+</td>
+                                        <td><span class="badge bg-info">低</span></td>
+                                        <td><span class="badge bg-danger">困难</span></td>
+                                        <td>2024-07-30</td>
+                                        <td><button class="btn btn-sm btn-primary">详情</button> <button
+                                                class="btn btn-sm btn-success">认领</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>DS-2024-009</td>
+                                        <td>图像分类数据集扩展</td>
+                                        <td>扩展10000+张图像的分类标签和描述信息</td>
+                                        <td>图像数据</td>
+                                        <td>10,000+</td>
+                                        <td><span class="badge bg-warning">中</span></td>
+                                        <td><span class="badge bg-warning">中等</span></td>
+                                        <td>2024-08-01</td>
+                                        <td><button class="btn btn-sm btn-primary">详情</button> <button
+                                                class="btn btn-sm btn-success">认领</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>DS-2024-010</td>
+                                        <td>金融报表数据结构化</td>
+                                        <td>将5000+份PDF金融报表转换为结构化数据</td>
+                                        <td>文档数据</td>
+                                        <td>5,000+</td>
+                                        <td><span class="badge bg-danger">高</span></td>
+                                        <td><span class="badge bg-danger">困难</span></td>
+                                        <td>2024-07-20</td>
+                                        <td><button class="btn btn-sm btn-primary">详情</button> <button
+                                                class="btn btn-sm btn-success">认领</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- 分页 -->
+                        <div class="pagination justify-content-center mt-4">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务详情模态框 -->
+    <div class="modal fade" id="task-detail-modal" tabindex="-1" role="dialog" aria-labelledby="task-detail-modal-label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="task-detail-modal-label">任务详情</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>基本信息</h4>
+                            <div class="info-group">
+                                <div class="info-label">任务ID：</div>
+                                <div class="info-value">DS-2024-006</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">任务名称：</div>
+                                <div class="info-value">心电图数据扩展</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">需求描述：</div>
+                                <div class="info-value">基于5000+心电图数据扩展生成病人诊断病历，包括心电图波形分析、异常识别和初步诊断建议。</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">数据源：</div>
+                                <div class="info-value">医院心电图数据库</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">数据量：</div>
+                                <div class="info-value">5,000+ 条心电图记录</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">截止日期：</div>
+                                <div class="info-value">2024-06-30</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">优先级：</div>
+                                <div class="info-value"><span class="badge bg-danger">高</span></div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">难度：</div>
+                                <div class="info-value"><span class="badge bg-warning">中等</span></div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">报酬：</div>
+                                <div class="info-value">¥3,000</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>流程说明</h4>
+                            <div class="process-steps">
+                                <div class="step-item">
+                                    <div class="step-number">1</div>
+                                    <div class="step-name">任务认领</div>
+                                    <div class="step-description">在任务市场认领此任务</div>
+                                </div>
+                                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                                <div class="step-item">
+                                    <div class="step-number">2</div>
+                                    <div class="step-name">维度定义</div>
+                                    <div class="step-description">定义数据扩展的维度结构</div>
+                                </div>
+                                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                                <div class="step-item">
+                                    <div class="step-number">3</div>
+                                    <div class="step-name">数据预填充</div>
+                                    <div class="step-description">AI自动预填充数据</div>
+                                </div>
+                                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                                <div class="step-item">
+                                    <div class="step-number">4</div>
+                                    <div class="step-name">数据清洗</div>
+                                    <div class="step-description">人工审核和修正AI生成结果</div>
+                                </div>
+                                <div class="step-arrow"><i class="fas fa-arrow-down"></i></div>
+                                <div class="step-item">
+                                    <div class="step-number">5</div>
+                                    <div class="step-name">结果提交</div>
+                                    <div class="step-description">提交最终数据成果</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h4>输入/输出样例</h4>
+                            <div class="example-group">
+                                <div class="example-header">
+                                    <span class="example-title">输入样例</span>
+                                </div>
+                                <div class="example-content">
+                                    <div class="input-example">
+                                        <div class="field-group">
+                                            <div class="field-label">病人ID：</div>
+                                            <div>PT-2024-00123</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">检测日期：</div>
+                                            <div>2024-01-15</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">心电图波形数据：</div>
+                                            <div class="waveform-preview">
+                                                <!-- 波形图预览 -->
+                                                <svg width="100%" height="80" viewBox="0 0 400 80">
+                                                    <path
+                                                        d="M0,40 Q10,30 20,40 Q30,50 40,40 Q50,30 60,40 Q70,50 80,40 Q90,30 100,40 Q110,50 120,40 Q130,30 140,40 Q150,50 160,40 Q170,30 180,40 Q190,50 200,40 Q210,30 220,40 Q230,50 240,40 Q250,30 260,40 Q270,50 280,40 Q290,30 300,40 Q310,50 320,40 Q330,30 340,40 Q350,50 360,40 Q370,30 380,40 Q390,50 400,40"
+                                                        fill="none" stroke="#007bff" stroke-width="2" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="example-group mt-3">
+                                <div class="example-header">
+                                    <span class="example-title">输出样例</span>
+                                </div>
+                                <div class="example-content">
+                                    <div class="output-example">
+                                        <div class="field-group">
+                                            <div class="field-label">心电图分析：</div>
+                                            <div>心率72次/分，节律整齐，P波形态正常，QRS波群时限正常，ST段无明显偏移，T波形态正常。</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">异常识别：</div>
+                                            <div>未发现明显异常。</div>
+                                        </div>
+                                        <div class="field-group">
+                                            <div class="field-label">初步诊断：</div>
+                                            <div>窦性心律，大致正常心电图。</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>AI 推荐维度</h4>
+                            <div class="ai-recommendation">
+                                <div class="dimension-tree">
+                                    <div class="dimension-item">
+                                        <div class="dimension-name">基本信息</div>
+                                        <div class="dimension-description">病人基本信息和检测元数据</div>
+                                    </div>
+                                    <div class="dimension-item">
+                                        <div class="dimension-name">心电图波形分析</div>
+                                        <div class="dimension-description">心率、节律、各波形特征分析</div>
+                                    </div>
+                                    <div class="dimension-item">
+                                        <div class="dimension-name">异常识别</div>
+                                        <div class="dimension-description">识别心电图中的异常表现</div>
+                                    </div>
+                                    <div class="dimension-item">
+                                        <div class="dimension-name">初步诊断</div>
+                                        <div class="dimension-description">基于心电图的初步诊断结论</div>
+                                    </div>
+                                    <div class="dimension-item">
+                                        <div class="dimension-name">临床建议</div>
+                                        <div class="dimension-description">基于检测结果的临床建议</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="mt-4">风险提示</h4>
+                            <div class="risk-tips">
+                                <div class="risk-item">
+                                    <div class="risk-icon bg-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="risk-content">
+                                        <div class="risk-title">数据缺失</div>
+                                        <div class="risk-description">约15%的心电图数据缺少完整的临床信息，需要人工补充。</div>
+                                    </div>
+                                </div>
+                                <div class="risk-item">
+                                    <div class="risk-icon bg-danger">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </div>
+                                    <div class="risk-content">
+                                        <div class="risk-title">专业要求高</div>
+                                        <div class="risk-description">心电图分析需要一定的医学专业知识，建议由有经验的人员处理。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-success">认领任务</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/task_market.js"></script>
+</body>
+
+</html>
