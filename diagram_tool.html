@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 图示功能工具</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 自定义样式 -->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+        }
+
+        .main-content {
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .tool-tabs {
+            border-bottom: 1px solid #dee2e6;
+            background-color: #fff;
+        }
+
+        .tool-tabs .nav-link {
+            color: #6c757d;
+            border-radius: 0;
+        }
+
+        .tool-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 3px solid #0d6efd;
+            background-color: #fff;
+        }
+
+        .diagram-panel {
+            background-color: #fff;
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            height: calc(100% - 60px);
+        }
+
+        .tree-node {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .tree-node:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.1rem rgba(13, 110, 253, 0.25);
+        }
+
+        .tree-node .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tree-node .node-children {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            background-color: #f8f9fa;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-row.highlight {
+            border-color: #0d6efd !important;
+            background-color: #f0f7ff !important;
+        }
+
+        .field-name {
+            flex: 1;
+            min-width: 120px;
+            margin-right: 8px;
+        }
+
+        .field-type {
+            flex: 1;
+            min-width: 100px;
+            margin-right: 8px;
+        }
+
+        .field-cn-name {
+            flex: 1;
+            min-width: 120px;
+            margin-right: 8px;
+        }
+
+        .field-description {
+            flex: 2;
+            min-width: 150px;
+            margin-right: 8px;
+        }
+
+        .field-mock {
+            flex: 1;
+            min-width: 100px;
+            margin-right: 8px;
+        }
+
+        .field-required {
+            min-width: 80px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-actions {
+            flex: 0.5;
+            text-align: right;
+            min-width: 70px;
+        }
+
+        .field-actions button {
+            margin-left: 0.5rem;
+        }
+
+        .btn-circle {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropdown-menu {
+            min-width: 150px;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .mock-value {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .badge {
+            font-weight: normal;
+            font-size: 0.75rem;
+        }
+
+        .badge-required {
+            background-color: #dc3545;
+        }
+
+        @media (max-width: 1200px) {
+            .field-description {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .field-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .field-name,
+            .field-type,
+            .field-cn-name,
+            .field-description,
+            .field-mock {
+                min-width: auto;
+            }
+
+            .field-required {
+                align-self: flex-start;
+            }
+
+            .field-actions {
+                justify-content: flex-start;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* AI会话框样式 */
+        .ai-chat-panel {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .ai-chat-panel.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+
+        .ai-header {
+            background-color: #f8f9fa;
+        }
+
+        .ai-conversation {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .message-user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .message-user .message-avatar {
+            margin-right: 0;
+            margin-left: 0.5rem;
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #e9ecef;
+        }
+
+        .message-user .message-content {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .ai-input-area {
+            background-color: #f8f9fa;
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .quick-question {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .btn-floating {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            padding: 0;
+        }
+
+        .ai-chat-panel.expanded-mobile {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        body.ai-panel-active {
+            overflow: hidden;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .ai-chat-panel {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+
+            .ai-chat-panel.active {
+                transform: translateX(0);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+        }
+
+        .main-content {
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        .tool-tabs {
+            border-bottom: 1px solid #dee2e6;
+            background-color: #fff;
+        }
+
+        .tool-tabs .nav-link {
+            color: #6c757d;
+            border-radius: 0;
+        }
+
+        .tool-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 3px solid #0d6efd;
+            background-color: #fff;
+        }
+
+        .diagram-panel {
+            background-color: #fff;
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            height: calc(100% - 60px);
+        }
+
+        .tree-node {
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .tree-node:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.1rem rgba(13, 110, 253, 0.25);
+        }
+
+        .tree-node .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tree-node .node-children {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            background-color: #f8f9fa;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-row.highlight {
+            border-color: #0d6efd !important;
+            background-color: #f0f7ff !important;
+        }
+
+        .field-name {
+            flex: 1;
+            min-width: 120px;
+            margin-right: 8px;
+        }
+
+        .field-type {
+            flex: 1;
+            min-width: 100px;
+            margin-right: 8px;
+        }
+
+        .field-cn-name {
+            flex: 1;
+            min-width: 120px;
+            margin-right: 8px;
+        }
+
+        .field-description {
+            flex: 2;
+            min-width: 150px;
+            margin-right: 8px;
+        }
+
+        .field-mock {
+            flex: 1;
+            min-width: 100px;
+            margin-right: 8px;
+        }
+
+        .field-required {
+            min-width: 80px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-actions {
+            flex: 0.5;
+            text-align: right;
+            min-width: 70px;
+        }
+
+        .field-actions button {
+            margin-left: 0.5rem;
+        }
+
+        .btn-circle {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropdown-menu {
+            min-width: 150px;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .mock-value {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .badge {
+            font-weight: normal;
+            font-size: 0.75rem;
+        }
+
+        .badge-required {
+            background-color: #dc3545;
+        }
+
+        @media (max-width: 1200px) {
+            .field-description {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .field-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .field-name,
+            .field-type,
+            .field-cn-name,
+            .field-description,
+            .field-mock {
+                min-width: auto;
+            }
+
+            .field-required {
+                align-self: flex-start;
+            }
+
+            .field-actions {
+                justify-content: flex-start;
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid d-flex flex-column">
+        <!-- 顶部导航 -->
+        <header class="header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <h1 class="h4 mb-0">数据结构设计工具</h1>
+            </div>
+            <div class="d-flex align-items-center space-x-3">
+                <button class="btn btn-secondary btn-sm" id="generateFromJson">
+                    <i class="fas fa-code mr-1"></i> 通过JSON生成
+                </button>
+                <button class="btn btn-secondary btn-sm">
+                    <i class="fas fa-save mr-1"></i> 保存
+                </button>
+                <button class="btn btn-primary btn-sm">
+                    <i class="fas fa-code mr-1"></i> 生成代码
+                </button>
+                <button class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-cog mr-1"></i> 设置
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="main-content d-flex">
+            <!-- 左侧内容区 -->
+            <div class="flex-grow-1 d-flex flex-column">
+                <!-- 工具选项卡 -->
+                <ul class="nav tool-tabs" id="toolTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="dataStructure-tab" data-bs-toggle="tab"
+                            data-bs-target="#dataStructure" type="button" role="tab" aria-controls="dataStructure"
+                            aria-selected="true">数据结构</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview"
+                            type="button" role="tab" aria-controls="preview" aria-selected="false">预览</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema"
+                            type="button" role="tab" aria-controls="schema" aria-selected="false">JSON Schema</button>
+                    </li>
+                </ul>
+
+                <!-- 选项卡内容 -->
+                <div class="tab-content p-4" id="toolTabsContent" style="height: calc(100% - 49px); flex-grow: 1;">
+                    <!-- 数据结构选项卡 -->
+                    <div class="tab-pane fade show active" id="dataStructure" role="tabpanel"
+                        aria-labelledby="dataStructure-tab">
+                        <div class="h-100">
+                            <div class="diagram-panel h-100">
+                                <div class="diagram-panel h-100">
+                                    <div class="panel-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h2 class="h5 mb-0">数据结构</h2>
+                                            <button id="addRootNode" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-plus mr-1"></i> 添加根节点
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <!-- 数据结构树形图 -->
+                                        <div id="dataStructureTree">
+                                            <!-- 示例根节点 -->
+                                            <div class="tree-node root-node mb-4">
+                                                <div class="node-header">
+                                                    <div class="field-row">
+                                                        <div class="field-name">
+                                                            <i class="fas fa-folder-open text-primary mr-2"></i>
+                                                            <span class="font-weight-medium">根节点</span>
+                                                        </div>
+                                                        <div class="field-type">
+                                                            <span class="badge bg-primary">object</span>
+                                                        </div>
+                                                        <div class="field-cn-name">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-cn-name-input"
+                                                                placeholder="中文名">
+                                                        </div>
+                                                        <div class="field-description">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-description-input"
+                                                                placeholder="说明">
+                                                        </div>
+                                                        <div class="field-mock">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-mock-input"
+                                                                placeholder="Mock">
+                                                        </div>
+                                                        <div class="field-required">
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input field-required-checkbox"
+                                                                    type="checkbox">
+                                                                <label class="form-check-label">必需</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="field-actions">
+                                                            <button
+                                                                class="btn btn-outline-secondary btn-circle btn-sm edit-node">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-outline-secondary btn-circle btn-sm add-child">
+                                                                <i class="fas fa-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- 子字段 -->
+                                                <div class="node-children">
+                                                    <div class="field-row">
+                                                        <div class="field-name">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-input"
+                                                                value="字段1" placeholder="字段名称">
+                                                        </div>
+                                                        <div class="field-type">
+                                                            <div class="dropdown">
+                                                                <button
+                                                                    class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left"
+                                                                    type="button" id="fieldType1"
+                                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    string
+                                                                    <span class="badge badge-required ml-2">*</span>
+                                                                </button>
+                                                                <ul class="dropdown-menu" aria-labelledby="fieldType1">
+                                                                    <li><a class="dropdown-item" href="#">string</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">integer</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">number</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">boolean</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">array</a></li>
+                                                                    <li><a class="dropdown-item" href="#">object</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">null</a></li>
+                                                                    <li><a class="dropdown-item" href="#">any</a></li>
+                                                                    <li>
+                                                                        <hr class="dropdown-divider">
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">组合模式</a></li>
+                                                                    <li><a class="dropdown-item" href="#">自定义</a></li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="field-cn-name">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-cn-name-input"
+                                                                placeholder="中文名">
+                                                        </div>
+                                                        <div class="field-description">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-description-input"
+                                                                placeholder="说明">
+                                                        </div>
+                                                        <div class="field-mock">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-mock-input"
+                                                                placeholder="Mock">
+                                                        </div>
+                                                        <div class="field-required">
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input field-required-checkbox"
+                                                                    type="checkbox" checked>
+                                                                <label class="form-check-label">必需</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="field-actions">
+                                                            <button class="btn btn-outline-success btn-circle btn-sm">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger btn-circle btn-sm">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="field-row">
+                                                        <div class="field-name">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-input"
+                                                                value="字段2" placeholder="字段名称">
+                                                        </div>
+                                                        <div class="field-type">
+                                                            <div class="dropdown">
+                                                                <button
+                                                                    class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left"
+                                                                    type="button" id="fieldType2"
+                                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    string
+                                                                    <span class="badge badge-required ml-2">*</span>
+                                                                </button>
+                                                                <ul class="dropdown-menu" aria-labelledby="fieldType2">
+                                                                    <li><a class="dropdown-item" href="#">string</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">integer</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">number</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">boolean</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">array</a></li>
+                                                                    <li><a class="dropdown-item" href="#">object</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">null</a></li>
+                                                                    <li><a class="dropdown-item" href="#">any</a></li>
+                                                                    <li>
+                                                                        <hr class="dropdown-divider">
+                                                                    </li>
+                                                                    <li><a class="dropdown-item" href="#">组合模式</a></li>
+                                                                    <li><a class="dropdown-item" href="#">自定义</a></li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="field-cn-name">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-cn-name-input"
+                                                                placeholder="中文名">
+                                                        </div>
+                                                        <div class="field-description">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-description-input"
+                                                                placeholder="说明">
+                                                        </div>
+                                                        <div class="field-mock">
+                                                            <input type="text"
+                                                                class="form-control form-control-sm field-mock-input"
+                                                                placeholder="Mock">
+                                                        </div>
+                                                        <div class="field-required">
+                                                            <div class="form-check form-check-inline">
+                                                                <input class="form-check-input field-required-checkbox"
+                                                                    type="checkbox" checked>
+                                                                <label class="form-check-label">必需</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="field-actions">
+                                                            <button class="btn btn-outline-success btn-circle btn-sm">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger btn-circle btn-sm">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <!-- 对象类型字段 -->
+                                                    <div class="tree-node">
+                                                        <div class="node-header">
+                                                            <div class="field-row">
+                                                                <div class="field-name">
+                                                                    <i class="fas fa-folder text-secondary mr-2"></i>
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-input w-40"
+                                                                        value="嵌套对象" placeholder="字段名称">
+                                                                </div>
+                                                                <div class="field-type">
+                                                                    <span class="badge bg-secondary">object</span>
+                                                                </div>
+                                                                <div class="field-cn-name">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-cn-name-input"
+                                                                        placeholder="中文名">
+                                                                </div>
+                                                                <div class="field-description">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-description-input"
+                                                                        placeholder="说明">
+                                                                </div>
+                                                                <div class="field-mock">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-mock-input"
+                                                                        placeholder="Mock">
+                                                                </div>
+                                                                <div class="field-required">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input
+                                                                            class="form-check-input field-required-checkbox"
+                                                                            type="checkbox">
+                                                                        <label class="form-check-label">必需</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="field-actions">
+                                                                    <button
+                                                                        class="btn btn-outline-secondary btn-circle btn-sm edit-node">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        class="btn btn-outline-secondary btn-circle btn-sm add-child">
+                                                                        <i class="fas fa-plus"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        class="btn btn-outline-danger btn-circle btn-sm">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="node-children">
+                                                            <div class="field-row">
+                                                                <div class="field-name">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-input"
+                                                                        value="子字段1" placeholder="字段名称">
+                                                                </div>
+                                                                <div class="field-type">
+                                                                    <div class="dropdown">
+                                                                        <button
+                                                                            class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left"
+                                                                            type="button" id="fieldType3"
+                                                                            data-bs-toggle="dropdown"
+                                                                            aria-expanded="false">
+                                                                            string
+                                                                        </button>
+                                                                        <ul class="dropdown-menu"
+                                                                            aria-labelledby="fieldType3">
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">string</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">integer</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">number</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">boolean</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">array</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">object</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">null</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">any</a></li>
+                                                                            <li>
+                                                                                <hr class="dropdown-divider">
+                                                                            </li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">组合模式</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">自定义</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="field-cn-name">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-cn-name-input"
+                                                                        placeholder="中文名">
+                                                                </div>
+                                                                <div class="field-description">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-description-input"
+                                                                        placeholder="说明">
+                                                                </div>
+                                                                <div class="field-mock">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-mock-input"
+                                                                        placeholder="Mock">
+                                                                </div>
+                                                                <div class="field-required">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input
+                                                                            class="form-check-input field-required-checkbox"
+                                                                            type="checkbox">
+                                                                        <label class="form-check-label">必需</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="field-actions">
+                                                                    <button
+                                                                        class="btn btn-outline-success btn-circle btn-sm">
+                                                                        <i class="fas fa-check"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        class="btn btn-outline-danger btn-circle btn-sm">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="field-row">
+                                                                <div class="field-name">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-input"
+                                                                        value="子字段2" placeholder="字段名称">
+                                                                </div>
+                                                                <div class="field-type">
+                                                                    <div class="dropdown">
+                                                                        <button
+                                                                            class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left"
+                                                                            type="button" id="fieldType4"
+                                                                            data-bs-toggle="dropdown"
+                                                                            aria-expanded="false">
+                                                                            integer
+                                                                        </button>
+                                                                        <ul class="dropdown-menu"
+                                                                            aria-labelledby="fieldType4">
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">string</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">integer</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">number</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">boolean</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">array</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">object</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">null</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">any</a></li>
+                                                                            <li>
+                                                                                <hr class="dropdown-divider">
+                                                                            </li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">组合模式</a></li>
+                                                                            <li><a class="dropdown-item"
+                                                                                    href="#">自定义</a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="field-cn-name">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-cn-name-input"
+                                                                        placeholder="中文名">
+                                                                </div>
+                                                                <div class="field-description">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-description-input"
+                                                                        placeholder="说明">
+                                                                </div>
+                                                                <div class="field-mock">
+                                                                    <input type="text"
+                                                                        class="form-control form-control-sm field-mock-input"
+                                                                        placeholder="Mock">
+                                                                </div>
+                                                                <div class="field-required">
+                                                                    <div class="form-check form-check-inline">
+                                                                        <input
+                                                                            class="form-check-input field-required-checkbox"
+                                                                            type="checkbox">
+                                                                        <label class="form-check-label">必需</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="field-actions">
+                                                                    <button
+                                                                        class="btn btn-outline-success btn-circle btn-sm">
+                                                                        <i class="fas fa-check"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        class="btn btn-outline-danger btn-circle btn-sm">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 预览选项卡 -->
+                            <div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+                                <div class="diagram-panel h-100">
+                                    <div class="panel-header">
+                                        <h2 class="h5 mb-0">数据预览</h2>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="mb-3">
+                                            <button class="btn btn-primary btn-sm">
+                                                <i class="fas fa-sync-alt mr-1"></i> 生成Mock数据
+                                            </button>
+                                        </div>
+                                        <pre class="bg-light p-4 rounded border text-sm overflow-auto"
+                                            style="max-height: calc(100% - 40px);">
+{
+  "字段1": "Mock值",
+  "字段2": "Mock值",
+  "嵌套对象": {
+    "子字段1": "Mock值",
+    "子字段2": 123
+  }
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- JSON Schema选项卡 -->
+                            <div class="tab-pane fade" id="schema" role="tabpanel" aria-labelledby="schema-tab">
+                                <div class="diagram-panel h-100">
+                                    <div class="panel-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h2 class="h5 mb-0">JSON Schema</h2>
+                                            <button class="btn btn-primary btn-sm">
+                                                <i class="fas fa-copy mr-1"></i> 复制
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <pre class="bg-light p-4 rounded border text-sm overflow-auto"
+                                            style="max-height: 100%;">
+{
+  "type": "object",
+  "properties": {
+    "字段1": {
+      "type": "string"
+    },
+    "字段2": {
+      "type": "string"
+    },
+    "嵌套对象": {
+      "type": "object",
+      "properties": {
+        "子字段1": {
+          "type": "string"
+        },
+        "子字段2": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "required": ["字段1", "字段2"]
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加根节点模态框 -->
+            <div class="modal fade" id="addRootNodeModal" tabindex="-1" aria-labelledby="addRootNodeModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addRootNodeModalLabel">添加根节点</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="rootNodeName" class="form-label">节点名称</label>
+                                <input type="text" class="form-control" id="rootNodeName" placeholder="请输入根节点名称">
+                            </div>
+                            <div class="mb-3">
+                                <label for="rootNodeType" class="form-label">数据类型</label>
+                                <select class="form-control" id="rootNodeType">
+                                    <option value="object" selected>object</option>
+                                    <option value="array">array</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="confirmAddRootNode">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通过JSON生成结构模态框 -->
+            <div class="modal fade" id="generateFromJsonModal" tabindex="-1"
+                aria-labelledby="generateFromJsonModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="generateFromJsonModalLabel">通过JSON生成结构</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="jsonInput" class="form-label">JSON内容</label>
+                                <textarea class="form-control" id="jsonInput" rows="10"
+                                    placeholder="请输入或粘贴JSON内容...">{"name":"张三","age":30,"isActive":true,"address":{"city":"北京","street":"朝阳区"},"hobbies":["读书","运动"]}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="rootNodeNameFromJson" class="form-label">根节点名称</label>
+                                <input type="text" class="form-control" id="rootNodeNameFromJson" placeholder="请输入根节点名称"
+                                    value="example">
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                系统将自动解析JSON并生成相应的数据结构。您可以在生成后进行进一步编辑。
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="confirmGenerateFromJson">生成结构</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI会话框 -->
+            <div class="ai-chat-panel w-80 border-l border-gray-200 bg-white md:block">
+                <!-- AI助手头部 -->
+                <div class="ai-header p-3 border-b border-gray-200 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-robot text-primary mr-2"></i>
+                        <span class="font-medium">AI助手</span>
+                    </div>
+                    <button class="btn btn-link text-gray-500 p-1" id="toggleAiPanel">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <!-- 对话区域 -->
+                <div class="ai-conversation p-3 flex-grow-1 overflow-y-auto" id="aiConversation">
+                    <!-- 欢迎消息 -->
+                    <div class="message message-ai">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot text-primary"></i>
+                        </div>
+                        <div class="message-content">
+                            你好！我是你的AI助手，我可以帮你分析和优化数据结构设计。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="ai-input-area p-3 border-t border-gray-200">
+                    <div class="mb-2">
+                        <input type="text" class="form-control" id="aiMessageInput" placeholder="请输入你的问题，例如：如何优化这个数据结构？">
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="quick-questions">
+                            <button class="btn btn-sm btn-outline-secondary mr-2 mb-1 quick-question" data-question="如何优化这个数据结构？">
+                                优化结构
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary mr-2 mb-1 quick-question" data-question="生成示例数据">
+                                示例数据
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary mb-1 quick-question" data-question="检查数据结构是否合理">
+                                检查结构
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary mb-1 quick-question" data-question="生成AI模型prompt">
+                                生成Prompt
+                            </button>
+                        </div>
+                        <button class="btn btn-primary" id="sendAiMessage">
+                            <i class="fas fa-paper-plane mr-1"></i> 发送
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 移动端AI面板切换按钮 -->
+            <button class="btn btn-primary fixed bottom-4 right-4 p-3 rounded-full shadow-lg md:hidden" id="mobileToggleAiPanel">
+                <i class="fas fa-robot"></i>
+            </button>
+
+            <!-- Bootstrap JS -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- 自定义脚本 -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // 初始化Bootstrap组件
+                    const addRootNodeModal = new bootstrap.Modal(document.getElementById('addRootNodeModal'));
+                    const generateFromJsonModal = new bootstrap.Modal(document.getElementById('generateFromJsonModal'));
+                    const toolTabs = new bootstrap.Tab(document.getElementById('toolTabs'));
+
+                    // AI会话框相关元素
+                    const aiChatPanel = document.querySelector('.ai-chat-panel');
+                    const toggleAiPanelBtn = document.getElementById('toggleAiPanel');
+                    const mobileToggleAiPanelBtn = document.getElementById('mobileToggleAiPanel');
+                    const aiMessageInput = document.getElementById('aiMessageInput');
+                    const sendAiMessageBtn = document.getElementById('sendAiMessage');
+                    const aiConversation = document.getElementById('aiConversation');
+                    const quickQuestions = document.querySelectorAll('.quick-question');
+
+                    // 切换AI面板显示/隐藏
+                    toggleAiPanelBtn.addEventListener('click', function () {
+                        aiChatPanel.classList.toggle('collapsed');
+                        const icon = toggleAiPanelBtn.querySelector('i');
+                        if (aiChatPanel.classList.contains('collapsed')) {
+                            icon.classList.remove('fa-chevron-left');
+                            icon.classList.add('fa-chevron-right');
+                        } else {
+                            icon.classList.remove('fa-chevron-right');
+                            icon.classList.add('fa-chevron-left');
+                        }
+                    });
+
+                    // 移动端切换AI面板
+                    mobileToggleAiPanelBtn.addEventListener('click', function () {
+                        aiChatPanel.classList.toggle('active');
+                        document.body.classList.toggle('ai-panel-active');
+                    });
+
+                    // 快速提问按钮
+                    quickQuestions.forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const question = this.getAttribute('data-question');
+                            aiMessageInput.value = question;
+                            sendAiMessage();
+                        });
+                    });
+
+                    // 发送AI消息
+                    sendAiMessageBtn.addEventListener('click', sendAiMessage);
+                    aiMessageInput.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter' && e.ctrlKey) {
+                            sendAiMessage();
+                        }
+                    });
+
+                    // 发送消息函数
+                    function sendAiMessage() {
+                        const message = aiMessageInput.value.trim();
+                        if (!message) return;
+
+                        // 添加用户消息到对话
+                        addUserMessage(message);
+
+                        // 清空输入框
+                        aiMessageInput.value = '';
+
+                        // 获取当前数据结构信息（实际项目中可能需要更复杂的逻辑）
+                        const dataStructureInfo = getCurrentDataStructureInfo();
+
+                        // 模拟AI处理中
+                        addAiTypingIndicator();
+
+                        // 模拟AI响应延迟
+                        setTimeout(() => {
+                            // 移除输入指示器
+                            removeAiTypingIndicator();
+
+                            // 根据不同类型的问题生成不同的响应
+                            const aiResponse = generateAiResponse(message, dataStructureInfo);
+
+                            // 添加AI响应到对话
+                            addAiMessage(aiResponse);
+                        }, 1500 + Math.random() * 1000);
+                    }
+
+                    // 添加用户消息
+                    function addUserMessage(message) {
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'message message-user mb-4';
+                        messageElement.innerHTML = `
+                    <div class="message-content">
+                        <p>${escapeHtml(message)}</p>
+                    </div>
+                    <div class="message-avatar">
+                        <i class="fas fa-user text-gray-500"></i>
+                    </div>
+                `;
+                        aiConversation.appendChild(messageElement);
+                        scrollToBottom();
+                    }
+
+                    // 添加AI消息
+                    function addAiMessage(message) {
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'message message-ai mb-4';
+                        messageElement.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot text-blue-500"></i>
+                    </div>
+                    <div class="message-content">
+                        ${formatAiResponse(message)}
+                    </div>
+                `;
+                        aiConversation.appendChild(messageElement);
+                        scrollToBottom();
+                    }
+
+                    // 添加AI输入指示器
+                    function addAiTypingIndicator() {
+                        const typingIndicator = document.createElement('div');
+                        typingIndicator.id = 'aiTypingIndicator';
+                        typingIndicator.className = 'message message-ai mb-4';
+                        typingIndicator.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot text-blue-500"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+                        aiConversation.appendChild(typingIndicator);
+                        scrollToBottom();
+                    }
+
+                    // 移除AI输入指示器
+                    function removeAiTypingIndicator() {
+                        const typingIndicator = document.getElementById('aiTypingIndicator');
+                        if (typingIndicator) {
+                            typingIndicator.remove();
+                        }
+                    }
+
+                    // 滚动到底部
+                    function scrollToBottom() {
+                        aiConversation.scrollTop = aiConversation.scrollHeight;
+                    }
+
+                    // 获取当前数据结构信息
+                    function getCurrentDataStructureInfo() {
+                        const dataStructure = {
+                            fields: [],
+                            rootNodeName: '根节点'
+                        };
+
+                        // 获取根节点名称
+                        const rootNodeNameElement = document.querySelector('.root-node .font-weight-medium');
+                        if (rootNodeNameElement) {
+                            dataStructure.rootNodeName = rootNodeNameElement.textContent;
+                        }
+
+                        // 获取所有字段信息
+                        document.querySelectorAll('.field-row').forEach(row => {
+                            const fieldNameElement = row.querySelector('.field-input') || row.querySelector('.font-weight-medium');
+                            if (fieldNameElement) {
+                                const fieldName = fieldNameElement.value || fieldNameElement.textContent;
+                                const fieldTypeElement = row.querySelector('.dropdown-toggle') || row.querySelector('.badge');
+                                const fieldType = fieldTypeElement ? fieldTypeElement.textContent.trim() : '';
+
+                                dataStructure.fields.push({
+                                    name: fieldName,
+                                    type: fieldType.replace(/\*/g, '').trim()
+                                });
+                            }
+                        });
+
+                        return dataStructure;
+                    }
+
+                    // 生成AI响应（模拟）
+                    function generateAiResponse(question, dataStructureInfo) {
+                        // 根据不同的问题类型返回不同的响应
+                        if (question.includes('优化') || question.includes('建议')) {
+                            return `根据您当前的数据结构，我有以下优化建议：
+
+1. **字段类型优化**：检查所有字段的类型是否与实际数据匹配。
+2. **必需字段设置**：确保重要字段都标记为必需。
+3. **嵌套结构**：对于复杂对象，可以考虑进一步拆分以提高可维护性。
+4. **Mock数据**：为每个字段添加合理的Mock数据，便于测试。
+
+您可以告诉我更具体的需求，我可以给出更有针对性的建议。`;
+                        } else if (question.includes('适用场景')) {
+                            return `您当前的数据结构包含 ${dataStructureInfo.fields.length} 个字段，主要是对象类型。
+
+这个数据结构适合：
+
+1. 存储用户信息、产品详情等结构化数据
+2. 作为API请求/响应的数据模型
+3. 用于前端表单验证和数据处理
+
+如果您有特定的业务场景，可以提供更多信息，我可以帮助您调整数据结构。`;
+                        } else if (question.includes('TypeScript') || question.includes('TS')) {
+                            let tsInterface = `// ${dataStructureInfo.rootNodeName} TypeScript接口\nexport interface ${toPascalCase(dataStructureInfo.rootNodeName)} {\n`;
+
+                            dataStructureInfo.fields.forEach(field => {
+                                // 简单的类型映射
+                                let tsType = 'any';
+                                if (field.type.includes('string')) tsType = 'string';
+                                if (field.type.includes('number') || field.type.includes('integer')) tsType = 'number';
+                                if (field.type.includes('boolean')) tsType = 'boolean';
+                                if (field.type.includes('array')) tsType = 'any[]';
+                                if (field.type.includes('object')) tsType = 'object';
+                                if (field.type.includes('null')) tsType = 'null';
+
+                                tsInterface += `  ${toCamelCase(field.name)}: ${tsType};\n`;
+                            });
+
+                            tsInterface += `}`;
+
+                            return `根据您的数据结构，生成以下TypeScript接口：\n\n\`\`\`typescript\n${tsInterface}\n\`\`\``;
+                        } else {
+                            return `感谢您的提问！我是数据结构设计助手，我可以帮助您分析和优化数据结构、提供建模建议、生成代码等。\n\n您可以尝试以下问题：\n- 如何优化我的数据结构？\n- 这个数据结构适合存储什么类型的数据？\n- 如何为这个数据结构生成TypeScript接口？`;
+                        }
+                    }
+
+                    // 格式化AI响应（处理代码块等）
+                    function formatAiResponse(response) {
+                        // 处理代码块
+                        response = response.replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-800 text-white p-2 rounded text-xs my-2 overflow-x-auto">$1</pre>');
+                        // 处理换行
+                        response = response.replace(/\n/g, '<br>');
+                        return response;
+                    }
+
+                    // 工具函数：转义HTML
+                    function escapeHtml(text) {
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    }
+
+                    // 工具函数：转驼峰命名
+                    function toCamelCase(str) {
+                        return str.replace(/[-_\s]([a-z])/g, g => g[1].toUpperCase());
+                    }
+
+                    // 工具函数：转帕斯卡命名
+                    function toPascalCase(str) {
+                        const camelCase = toCamelCase(str);
+                        return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+                    }
+
+                    // 添加AI输入指示器的CSS
+                    const style = document.createElement('style');
+                    style.textContent = `
+                .typing-indicator {
+                    display: flex;
+                    align-items: center;
+                }
+                .typing-indicator span {
+                    width: 6px;
+                    height: 6px;
+                    background-color: #666;
+                    border-radius: 50%;
+                    margin: 0 1px;
+                    animation: typing 1.4s infinite ease-in-out both;
+                }
+                .typing-indicator span:nth-child(1) {
+                    animation-delay: -0.32s;
+                }
+                .typing-indicator span:nth-child(2) {
+                    animation-delay: -0.16s;
+                }
+                @keyframes typing {
+                    0%, 80%, 100% {
+                        transform: scale(0);
+                    }
+                    40% {
+                        transform: scale(1);
+                    }
+                }
+            `;
+                    document.head.appendChild(style);
+
+                    // 添加根节点按钮点击事件
+                    document.getElementById('addRootNode').addEventListener('click', function () {
+                        addRootNodeModal.show();
+                    });
+
+                    // 通过JSON生成结构按钮点击事件
+                    document.getElementById('generateFromJson').addEventListener('click', function () {
+                        generateFromJsonModal.show();
+                    });
+
+                    // 确认通过JSON生成结构
+                    document.getElementById('confirmGenerateFromJson').addEventListener('click', function () {
+                        const jsonInput = document.getElementById('jsonInput').value;
+                        const rootNodeName = document.getElementById('rootNodeNameFromJson').value;
+
+                        if (!jsonInput.trim()) {
+                            alert('请输入JSON内容');
+                            return;
+                        }
+
+                        if (!rootNodeName.trim()) {
+                            alert('请输入根节点名称');
+                            return;
+                        }
+
+                        try {
+                            // 尝试解析JSON（这里只是模拟，不做实际解析）
+                            // 在实际应用中，这里会解析JSON并递归生成数据结构
+                            console.log('尝试解析JSON:', jsonInput);
+
+                            // 显示正在生成的提示
+                            alert('正在根据JSON生成数据结构...');
+
+                            // 模拟生成过程
+                            setTimeout(() => {
+                                // 这里仅作示例，创建一个简单的结构来演示交互过程
+                                const dataStructureTree = document.getElementById('dataStructureTree');
+
+                                // 清空现有内容
+                                dataStructureTree.innerHTML = '';
+
+                                // 创建模拟的根节点（在实际应用中，这里会根据JSON递归生成）
+                                const mockRootNode = document.createElement('div');
+                                mockRootNode.className = 'tree-node root-node mb-4';
+                                mockRootNode.innerHTML = `
+                            <div class="node-header">
+                                <div class="field-row">
+                                    <div class="field-name">
+                                        <i class="fas fa-folder-open text-primary mr-2"></i>
+                                        <span class="font-weight-medium">${rootNodeName}</span>
+                                    </div>
+                                    <div class="field-type">
+                                        <span class="badge bg-primary">object</span>
+                                    </div>
+                                    <div class="field-cn-name">
+                                        <input type="text" class="form-control form-control-sm field-cn-name-input" placeholder="中文名">
+                                    </div>
+                                    <div class="field-description">
+                                        <input type="text" class="form-control form-control-sm field-description-input" placeholder="说明">
+                                    </div>
+                                    <div class="field-mock">
+                                        <input type="text" class="form-control form-control-sm field-mock-input" placeholder="Mock">
+                                    </div>
+                                    <div class="field-required">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input field-required-checkbox" type="checkbox">
+                                            <label class="form-check-label">必需</label>
+                                        </div>
+                                    </div>
+                                    <div class="field-actions">
+                                        <button class="btn btn-outline-secondary btn-circle btn-sm edit-node">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-circle btn-sm add-child">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="node-children">
+                                <!-- 这里在实际应用中会根据JSON自动生成 -->
+                                <div class="field-row">
+                                    <div class="field-name">
+                                        <span>name</span>
+                                    </div>
+                                    <div class="field-type">
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                string
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">string</a></li>
+                                                <li><a class="dropdown-item" href="#">integer</a></li>
+                                                <li><a class="dropdown-item" href="#">number</a></li>
+                                                <li><a class="dropdown-item" href="#">boolean</a></li>
+                                                <li><a class="dropdown-item" href="#">array</a></li>
+                                                <li><a class="dropdown-item" href="#">object</a></li>
+                                                <li><a class="dropdown-item" href="#">null</a></li>
+                                                <li><a class="dropdown-item" href="#">any</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#">组合模式</a></li>
+                                                <li><a class="dropdown-item" href="#">自定义</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="field-cn-name">
+                                        <input type="text" class="form-control form-control-sm field-cn-name-input" placeholder="中文名" value="姓名">
+                                    </div>
+                                    <div class="field-description">
+                                        <input type="text" class="form-control form-control-sm field-description-input" placeholder="说明" value="用户姓名">
+                                    </div>
+                                    <div class="field-mock">
+                                        <input type="text" class="form-control form-control-sm field-mock-input" placeholder="Mock" value="张三">
+                                    </div>
+                                    <div class="field-required">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input field-required-checkbox" type="checkbox" checked>
+                                            <label class="form-check-label">必需</label>
+                                        </div>
+                                    </div>
+                                    <div class="field-actions">
+                                        <button class="btn btn-outline-success btn-circle btn-sm">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-circle btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="field-row">
+                                    <div class="field-name">
+                                        <span>age</span>
+                                    </div>
+                                    <div class="field-type">
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                integer
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">string</a></li>
+                                                <li><a class="dropdown-item" href="#">integer</a></li>
+                                                <li><a class="dropdown-item" href="#">number</a></li>
+                                                <li><a class="dropdown-item" href="#">boolean</a></li>
+                                                <li><a class="dropdown-item" href="#">array</a></li>
+                                                <li><a class="dropdown-item" href="#">object</a></li>
+                                                <li><a class="dropdown-item" href="#">null</a></li>
+                                                <li><a class="dropdown-item" href="#">any</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#">组合模式</a></li>
+                                                <li><a class="dropdown-item" href="#">自定义</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="field-cn-name">
+                                        <input type="text" class="form-control form-control-sm field-cn-name-input" placeholder="中文名" value="年龄">
+                                    </div>
+                                    <div class="field-description">
+                                        <input type="text" class="form-control form-control-sm field-description-input" placeholder="说明" value="用户年龄">
+                                    </div>
+                                    <div class="field-mock">
+                                        <input type="text" class="form-control form-control-sm field-mock-input" placeholder="Mock" value="30">
+                                    </div>
+                                    <div class="field-required">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input field-required-checkbox" type="checkbox">
+                                            <label class="form-check-label">必需</label>
+                                        </div>
+                                    </div>
+                                    <div class="field-actions">
+                                        <button class="btn btn-outline-success btn-circle btn-sm">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-circle btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                                // 添加到数据结构树
+                                dataStructureTree.appendChild(mockRootNode);
+
+                                // 初始化事件
+                                initFieldEvents(mockRootNode);
+
+                                // 关闭模态框
+                                generateFromJsonModal.hide();
+
+                                // 提示生成成功
+                                alert('数据结构生成成功！您可以在左侧面板中进行进一步编辑。');
+                            }, 1000);
+                        } catch (error) {
+                            alert('JSON格式错误：' + error.message);
+                        }
+                    });
+
+                    // 确认添加根节点
+                    document.getElementById('confirmAddRootNode').addEventListener('click', function () {
+                        const nodeName = document.getElementById('rootNodeName').value;
+                        const nodeType = document.getElementById('rootNodeType').value;
+
+                        if (nodeName.trim()) {
+                            // 创建新根节点
+                            const dataStructureTree = document.getElementById('dataStructureTree');
+
+                            const newRootNode = document.createElement('div');
+                            newRootNode.className = 'tree-node root-node mb-4';
+                            newRootNode.innerHTML = `
+                        <div class="node-header">
+                            <div class="field-row">
+                                <div class="field-name">
+                                    <i class="fas fa-folder-open text-primary mr-2"></i>
+                                    <span class="font-weight-medium">${nodeName}</span>
+                                </div>
+                                <div class="field-type">
+                                    <span class="badge bg-primary">${nodeType}</span>
+                                </div>
+                                <div class="field-cn-name">
+                                    <input type="text" class="form-control form-control-sm field-cn-name-input" placeholder="中文名">
+                                </div>
+                                <div class="field-description">
+                                    <input type="text" class="form-control form-control-sm field-description-input" placeholder="说明">
+                                </div>
+                                <div class="field-mock">
+                                    <input type="text" class="form-control form-control-sm field-mock-input" placeholder="Mock">
+                                </div>
+                                <div class="field-required">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input field-required-checkbox" type="checkbox">
+                                        <label class="form-check-label">必需</label>
+                                    </div>
+                                </div>
+                                <div class="field-actions">
+                                    <button class="btn btn-outline-secondary btn-circle btn-sm edit-node">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-circle btn-sm add-child">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="node-children">
+                            <!-- 子字段将在这里动态添加 -->
+                        </div>
+                    `;
+
+                            // 添加到数据结构树
+                            dataStructureTree.appendChild(newRootNode);
+
+                            // 添加事件监听器
+                            initFieldEvents(newRootNode);
+
+                            addRootNodeModal.hide();
+
+                            // 重置表单
+                            document.getElementById('rootNodeName').value = '';
+                        } else {
+                            alert('请输入根节点名称');
+                        }
+                    });
+
+                    // 字段类型下拉菜单选择事件
+                    document.querySelectorAll('.dropdown-menu a').forEach(item => {
+                        item.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const fieldType = this.textContent;
+                            const dropdownBtn = this.closest('.dropdown').querySelector('.dropdown-toggle');
+
+                            // 更新下拉按钮文本
+                            dropdownBtn.innerHTML = fieldType + (dropdownBtn.innerHTML.includes('badge-required') ?
+                                ' <span class="badge badge-required ml-2">*</span>' : '');
+                        });
+                    });
+
+                    // 点击字段行高亮
+                    document.querySelectorAll('.field-row').forEach(row => {
+                        row.addEventListener('click', function () {
+                            // 移除其他行的高亮
+                            document.querySelectorAll('.field-row').forEach(r => r.classList.remove('highlight'));
+                            // 添加当前行的高亮
+                            this.classList.add('highlight');
+                        });
+                    });
+
+                    // 编辑节点按钮点击事件
+                    document.querySelectorAll('.edit-node').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            const node = this.closest('.tree-node');
+                            const nodeName = node.querySelector('.font-weight-medium, .field-input').value || node.querySelector('.font-weight-medium').textContent;
+
+                            console.log('编辑节点:', nodeName);
+                            // 这里可以添加编辑节点的逻辑
+                        });
+                    });
+
+                    // 添加子节点按钮点击事件
+                    document.querySelectorAll('.add-child').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            const node = this.closest('.tree-node');
+                            const childrenContainer = node.querySelector('.node-children') || node.querySelector('.node-header').insertAdjacentElement('afterend', document.createElement('div')).classList.add('node-children');
+
+                            // 创建新的字段行
+                            const newFieldRow = document.createElement('div');
+                            newFieldRow.className = 'field-row highlight';
+                            newFieldRow.innerHTML = `
+                        <div class="field-name">
+                            <input type="text" class="form-control form-control-sm field-input" placeholder="字段名称">
+                        </div>
+                        <div class="field-type">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    string
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">string</a></li>
+                                    <li><a class="dropdown-item" href="#">integer</a></li>
+                                    <li><a class="dropdown-item" href="#">number</a></li>
+                                    <li><a class="dropdown-item" href="#">boolean</a></li>
+                                    <li><a class="dropdown-item" href="#">array</a></li>
+                                    <li><a class="dropdown-item" href="#">object</a></li>
+                                    <li><a class="dropdown-item" href="#">null</a></li>
+                                    <li><a class="dropdown-item" href="#">any</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">组合模式</a></li>
+                                    <li><a class="dropdown-item" href="#">自定义</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="field-cn-name">
+                            <input type="text" class="form-control form-control-sm field-cn-name-input" placeholder="中文名">
+                        </div>
+                        <div class="field-description">
+                            <input type="text" class="form-control form-control-sm field-description-input" placeholder="说明">
+                        </div>
+                        <div class="field-mock">
+                            <input type="text" class="form-control form-control-sm field-mock-input" placeholder="Mock">
+                        </div>
+                        <div class="field-required">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input field-required-checkbox" type="checkbox">
+                                <label class="form-check-label">必需</label>
+                            </div>
+                        </div>
+                        <div class="field-actions">
+                            <button class="btn btn-outline-success btn-circle btn-sm">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-circle btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+
+                            // 添加到子节点容器
+                            node.querySelector('.node-children').appendChild(newFieldRow);
+
+                            // 聚焦到新字段的输入框
+                            newFieldRow.querySelector('.field-input').focus();
+
+                            // 初始化新字段的事件
+                            initFieldEvents(newFieldRow);
+                        });
+                    });
+
+                    // 删除按钮点击事件
+                    document.querySelectorAll('.btn-outline-danger').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            if (confirm('确定要删除吗？')) {
+                                if (this.closest('.field-row')) {
+                                    this.closest('.field-row').remove();
+                                } else if (this.closest('.tree-node')) {
+                                    this.closest('.tree-node').remove();
+                                }
+                            }
+                        });
+                    });
+
+                    // 保存按钮点击事件 - 现在包含所有字段属性
+                    document.querySelectorAll('.btn-outline-success').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            const fieldRow = this.closest('.field-row');
+
+                            // 获取字段信息
+                            const fieldName = fieldRow.querySelector('.field-input') ? fieldRow.querySelector('.field-input').value : fieldRow.querySelector('.font-weight-medium').textContent;
+                            const fieldType = fieldRow.querySelector('.dropdown-toggle') ? fieldRow.querySelector('.dropdown-toggle').textContent.trim() :
+                                fieldRow.querySelector('.badge') ? fieldRow.querySelector('.badge').textContent : '';
+                            const fieldCnName = fieldRow.querySelector('.field-cn-name-input').value;
+                            const fieldDescription = fieldRow.querySelector('.field-description-input').value;
+                            const fieldMock = fieldRow.querySelector('.field-mock-input').value;
+                            const fieldRequired = fieldRow.querySelector('.field-required-checkbox').checked;
+
+                            console.log('保存字段属性:', { fieldName, fieldType, fieldCnName, fieldDescription, fieldMock, fieldRequired });
+
+                            // 更新UI，显示保存状态
+                            fieldRow.classList.remove('highlight');
+                        });
+                    });
+
+                    // 必需项复选框变化事件
+                    document.querySelectorAll('.field-required-checkbox').forEach(checkbox => {
+                        checkbox.addEventListener('change', function () {
+                            const fieldRow = this.closest('.field-row');
+                            const dropdownBtn = fieldRow.querySelector('.dropdown-toggle');
+
+                            if (dropdownBtn) {
+                                if (this.checked) {
+                                    if (!dropdownBtn.innerHTML.includes('badge-required')) {
+                                        dropdownBtn.innerHTML += ' <span class="badge badge-required ml-2">*</span>';
+                                    }
+                                } else {
+                                    dropdownBtn.innerHTML = dropdownBtn.innerHTML.replace(' <span class="badge badge-required ml-2">*</span>', '');
+                                }
+                            }
+                        });
+                    });
+
+                    // 初始化字段事件的辅助函数
+                    function initFieldEvents(element) {
+                        // 为新添加的元素添加事件监听器
+                        element.querySelectorAll('.dropdown-menu a').forEach(item => {
+                            item.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                const fieldType = this.textContent;
+                                const dropdownBtn = this.closest('.dropdown').querySelector('.dropdown-toggle');
+
+                                // 更新下拉按钮文本
+                                dropdownBtn.innerHTML = fieldType + (dropdownBtn.innerHTML.includes('badge-required') ?
+                                    ' <span class="badge badge-required ml-2">*</span>' : '');
+                            });
+                        });
+
+                        // 点击字段行高亮
+                        element.querySelectorAll('.field-row').forEach(row => {
+                            row.addEventListener('click', function () {
+                                // 移除其他行的高亮
+                                document.querySelectorAll('.field-row').forEach(r => r.classList.remove('highlight'));
+                                // 添加当前行的高亮
+                                this.classList.add('highlight');
+                            });
+                        });
+
+                        // 保存按钮点击事件
+                        element.querySelectorAll('.btn-outline-success').forEach(btn => {
+                            btn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                const fieldRow = this.closest('.field-row');
+
+                                // 获取字段信息
+                                const fieldName = fieldRow.querySelector('.field-input') ? fieldRow.querySelector('.field-input').value : fieldRow.querySelector('.font-weight-medium').textContent;
+                                const fieldType = fieldRow.querySelector('.dropdown-toggle') ? fieldRow.querySelector('.dropdown-toggle').textContent.trim() :
+                                    fieldRow.querySelector('.badge') ? fieldRow.querySelector('.badge').textContent : '';
+                                const fieldCnName = fieldRow.querySelector('.field-cn-name-input').value;
+                                const fieldDescription = fieldRow.querySelector('.field-description-input').value;
+                                const fieldMock = fieldRow.querySelector('.field-mock-input').value;
+                                const fieldRequired = fieldRow.querySelector('.field-required-checkbox').checked;
+
+                                console.log('保存字段属性:', { fieldName, fieldType, fieldCnName, fieldDescription, fieldMock, fieldRequired });
+
+                                // 更新UI，显示保存状态
+                                fieldRow.classList.remove('highlight');
+                            });
+                        });
+
+                        // 删除按钮点击事件
+                        element.querySelectorAll('.btn-outline-danger').forEach(btn => {
+                            btn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                if (confirm('确定要删除吗？')) {
+                                    if (this.closest('.field-row')) {
+                                        this.closest('.field-row').remove();
+                                    } else if (this.closest('.tree-node')) {
+                                        this.closest('.tree-node').remove();
+                                    }
+                                }
+                            });
+                        });
+
+                        // 必需项复选框变化事件
+                        element.querySelectorAll('.field-required-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', function () {
+                                const fieldRow = this.closest('.field-row');
+                                const dropdownBtn = fieldRow.querySelector('.dropdown-toggle');
+
+                                if (dropdownBtn) {
+                                    if (this.checked) {
+                                        if (!dropdownBtn.innerHTML.includes('badge-required')) {
+                                            dropdownBtn.innerHTML += ' <span class="badge badge-required ml-2">*</span>';
+                                        }
+                                    } else {
+                                        dropdownBtn.innerHTML = dropdownBtn.innerHTML.replace(' <span class="badge badge-required ml-2">*</span>', '');
+                                    }
+                                }
+                            });
+                        });
+
+                        // 编辑节点按钮点击事件
+                        element.querySelectorAll('.edit-node').forEach(btn => {
+                            btn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                const node = this.closest('.tree-node');
+                                const nodeName = node.querySelector('.font-weight-medium, .field-input').value || node.querySelector('.font-weight-medium').textContent;
+
+                                console.log('编辑节点:', nodeName);
+                                // 这里可以添加编辑节点的逻辑
+                            });
+                        });
+
+                        // 添加子节点按钮点击事件
+                        element.querySelectorAll('.add-child').forEach(btn => {
+                            btn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                const node = this.closest('.tree-node');
+                                const childrenContainer = node.querySelector('.node-children') || node.querySelector('.node-header').insertAdjacentElement('afterend', document.createElement('div')).classList.add('node-children');
+
+                                // 创建新的字段行
+                                const newFieldRow = document.createElement('div');
+                                newFieldRow.className = 'field-row highlight';
+                                newFieldRow.innerHTML = `
+                            <div class="field-name">
+                                <input type="text" class="form-control form-control-sm field-input" placeholder="字段名称">
+                            </div>
+                            <div class="field-type">
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary dropdown-toggle form-control form-control-sm text-left" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        string
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#">string</a></li>
+                                        <li><a class="dropdown-item" href="#">integer</a></li>
+                                        <li><a class="dropdown-item" href="#">number</a></li>
+                                        <li><a class="dropdown-item" href="#">boolean</a></li>
+                                        <li><a class="dropdown-item" href="#">array</a></li>
+                                        <li><a class="dropdown-item" href="#">object</a></li>
+                                        <li><a class="dropdown-item" href="#">null</a></li>
+                                        <li><a class="dropdown-item" href="#">any</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#">组合模式</a></li>
+                                        <li><a class="dropdown-item" href="#">自定义</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="field-cn-name">
+                                <input type="text" class="form-control form-control-sm field-cn-name-input" placeholder="中文名">
+                            </div>
+                            <div class="field-description">
+                                <input type="text" class="form-control form-control-sm field-description-input" placeholder="说明">
+                            </div>
+                            <div class="field-mock">
+                                <input type="text" class="form-control form-control-sm field-mock-input" placeholder="Mock">
+                            </div>
+                            <div class="field-required">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input field-required-checkbox" type="checkbox">
+                                    <label class="form-check-label">必需</label>
+                                </div>
+                            </div>
+                            <div class="field-actions">
+                                <button class="btn btn-outline-success btn-circle btn-sm">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-circle btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+
+                                // 添加到子节点容器
+                                node.querySelector('.node-children').appendChild(newFieldRow);
+
+                                // 聚焦到新字段的输入框
+                                newFieldRow.querySelector('.field-input').focus();
+
+                                // 递归初始化新字段的事件
+                                initFieldEvents(newFieldRow);
+                            });
+                        });
+                    }
+                });
+            </script>
+
+            <!-- AI模型prompt生成功能 -->
+            <script src="ai_prompt_generator.js"></script>
+
+        </div>
+    </div>
+</body>
+
+</html>

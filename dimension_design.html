@@ -7,6 +7,417 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <!-- 维度设计页面特定样式 -->
+    <style>
+        /* 维度来源工具样式 */
+        .dimension-source-tool {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .source-tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .source-tool-content {
+            display: grid;
+            grid-template-columns: 200px 1fr 300px;
+            gap: 1rem;
+        }
+        
+        .source-palette h5,
+        .source-visualization h5,
+        .source-properties h5 {
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .source-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .source-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        
+        .source-item:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .source-item:active {
+            cursor: grabbing;
+        }
+        
+        .source-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .source-visualization {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .visualization-canvas {
+            flex: 1;
+            min-height: 400px;
+            background: white;
+            border: 2px dashed #adb5bd;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .visualization-canvas.drag-over {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+        
+        .canvas-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6c757d;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .source-node {
+            position: absolute;
+            width: 120px;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: move;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .source-node:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .source-node.selected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40,167,69,0.2);
+        }
+        
+        .node-icon {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .node-label {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .node-actions {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .source-node:hover .node-actions {
+            opacity: 1;
+        }
+        
+        .visualization-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            justify-content: center;
+        }
+        
+        .source-properties {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .properties-form {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        
+        .properties-form .form-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .properties-form label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .connection-fields {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        /* AI扩展工具栏样式 */
+        .ai-extension-toolbar {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .toolbar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tool-tip {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .toolbar-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .ai-extension-results {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .results-content {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .result-status {
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .result-status.processing {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .result-status.completed {
+            background: #28a745;
+            color: white;
+        }
+        
+        .confidence-score {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .result-output {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+        
+        .ai-result-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ai-result-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .ai-result-section h6 {
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+        
+        .ai-result-section pre {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            overflow-x: auto;
+        }
+        
+        .ai-result-section table {
+            font-size: 0.8rem;
+        }
+        
+        .ai-result-section table th {
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+        
+        .structure-diagram {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .diagram-node {
+            background: white;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .diagram-subnode {
+            background: white;
+            border: 1px solid #6c757d;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            margin-left: 1rem;
+        }
+        
+        .diagram-connection {
+            width: 2px;
+            height: 20px;
+            background: #6c757d;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        /* 维度树形结构样式增强 */
+        .dimension-tree {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .dimension-node {
+            padding: 0.5rem 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .dimension-node:hover {
+            background: #f8f9fa;
+        }
+        
+        .dimension-node.selected {
+            background: #e3f2fd;
+            border-left: 3px solid #007bff;
+        }
+        
+        .node-toggle {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            margin-right: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .dimension-children {
+            margin-left: 1.5rem;
+        }
+        
+        .dimension-children.hidden {
+            display: none;
+        }
+        
+        .dimension-actions {
+            float: right;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .dimension-node:hover .dimension-actions {
+            opacity: 1;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 1200px) {
+            .source-tool-content {
+                grid-template-columns: 180px 1fr 280px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .source-tool-content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .visualization-canvas {
+                min-height: 300px;
+            }
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
