@@ -522,6 +522,134 @@
             background-color: var(--branch-color);
             color: white;
         }
+        
+        /* 内容标记样式 */
+        .message.content-marked {
+            border-left: 4px solid #ffc107;
+            background-color: rgba(255, 193, 7, 0.05);
+        }
+        
+        .action-btn.mark-content {
+            font-size: 14px;
+        }
+        
+        /* 已标记内容模态框 */
+        .marked-contents-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .marked-contents-container {
+            background-color: white;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .marked-contents-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .marked-contents-header h3 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .marked-contents-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .marked-contents-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .marked-content-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .marked-content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .marked-content-type {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .marked-content-date {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .delete-marked {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .marked-content-body {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+        }
+        
+        /* 提示消息样式 */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 3000;
+        }
+        
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -547,6 +675,7 @@
                 <span id="branchPath">路径: 主分支</span>
             </div>
             <button id="viewFlowGraph" title="查看对话流程图">📊</button>
+            <button id="showMarkedContents" title="查看已标记内容">⭐</button>
         </div>
         <div class="chat-messages" id="chatMessages">
             <!-- 对话消息将通过JavaScript动态生成 -->
@@ -599,6 +728,19 @@
             <button class="create-branch" id="createBranchFromSummary">基于摘要创建分支</button>
         </div>
     </div>
+    
+    <!-- 已标记内容模态框 -->
+    <div class="marked-contents-modal" id="markedContentsModal">
+        <div class="marked-contents-container">
+            <div class="marked-contents-header">
+                <h3>已标记内容</h3>
+                <button class="marked-contents-close" id="closeMarkedContents">×</button>
+            </div>
+            <div class="marked-contents-body">
+                <div id="markedContentsList"></div>
+            </div>
+        </div>
+    </div>
     <div class="merge-panel" id="mergePanel">
         <h3>合并分支</h3>
         <p>选择要合并到当前分支的分支：</p>
@@ -622,6 +764,143 @@
         </div>
     </div>
 
+    <style>
+        /* 模型选择相关样式 */
+        .model-switch-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            min-width: 300px;
+            display: none;
+        }
+        
+        .model-switch-panel h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .model-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .model-option:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .model-option input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        .model-switch-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .model-switch-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .model-switch-buttons .cancel {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .model-switch-buttons .confirm {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .model-name {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+            font-style: italic;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        /* 模型标签样式 */
+        .model-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 8px;
+            background-color: #f0f0f0;
+            color: #666;
+        }
+    </style>
+    
+    <div id="modalOverlay" class="modal-overlay"></div>
+    
+    <!-- 模型切换面板 -->
+    <div id="modelSwitchPanel" class="model-switch-panel">
+        <h3>切换AI模型</h3>
+        <div class="model-options">
+            <label class="model-option">
+                <input type="radio" name="modelType" value="default" checked>
+                <div>
+                    <span>通用助手</span>
+                    <div class="model-name">平衡的通用对话模型</div>
+                </div>
+            </label>
+            <label class="model-option">
+                <input type="radio" name="modelType" value="technical">
+                <div>
+                    <span>技术专家</span>
+                    <div class="model-name">专注于技术问题的模型</div>
+                </div>
+            </label>
+            <label class="model-option">
+                <input type="radio" name="modelType" value="creative">
+                <div>
+                    <span>创意生成器</span>
+                    <div class="model-name">擅长创意内容生成的模型</div>
+                </div>
+            </label>
+            <label class="model-option">
+                <input type="radio" name="modelType" value="simplifier">
+                <div>
+                    <span>简化解释师</span>
+                    <div class="model-name">擅长用简单语言解释复杂概念的模型</div>
+                </div>
+            </label>
+        </div>
+        <div class="model-switch-buttons">
+            <button class="cancel" onclick="hideModelSwitchPanel()">取消</button>
+            <button class="confirm" onclick="switchAIModel()">切换</button>
+        </div>
+    </div>
+    
     <script>
         // 对话数据结构
         let conversationData = {
@@ -631,19 +910,30 @@
                     name: '主分支',
                     messages: [
                         { id: 'm1', role: 'user', content: '你好，我想了解人工智能的基本概念。', timestamp: new Date() },
-                        { id: 'm2', role: 'ai', content: '当然！人工智能是计算机科学的一个分支，旨在创造能够执行通常需要人类智能的任务的机器。', timestamp: new Date() },
+                        { id: 'm2', role: 'ai', content: '当然！人工智能是计算机科学的一个分支，旨在创造能够执行通常需要人类智能的任务的机器。', timestamp: new Date(), model: 'default' },
                         { id: 'm3', role: 'user', content: '那么机器学习是人工智能的一部分吗？', timestamp: new Date() },
-                        { id: 'm4', role: 'ai', content: '是的，机器学习是人工智能的一个重要子领域，它使计算机能够在没有明确编程的情况下学习和改进。', timestamp: new Date() }
+                        { id: 'm4', role: 'ai', content: '是的，机器学习是人工智能的一个重要子领域，它使计算机能够在没有明确编程的情况下学习和改进。', timestamp: new Date(), model: 'default' }
                     ],
                     parent: null,
                     children: []
                 }
             },
-            currentBranch: 'main'
+            currentBranch: 'main',
+            currentModel: 'default'
         };
+        
+        // 定义可用的AI模型
+        const availableModels = [
+            { id: 'default', name: '通用助手', description: '平衡的通用对话模型' },
+            { id: 'technical', name: '技术专家', description: '专注于技术问题的模型' },
+            { id: 'creative', name: '创意生成器', description: '擅长创意内容生成的模型' },
+            { id: 'simplifier', name: '简化解释师', description: '擅长用简单语言解释复杂概念的模型' }
+        ];
         
         // 存储当前选中的消息ID
         let selectedMessages = [];
+        // 存储已标记的消息内容
+        let markedContents = [];
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
@@ -681,6 +971,10 @@
             // 摘要相关事件
             document.getElementById('cancelSummary').addEventListener('click', hideSummary);
             document.getElementById('createBranchFromSummary').addEventListener('click', createBranchFromSummary);
+            
+            // 已标记内容相关事件
+            document.getElementById('showMarkedContents').addEventListener('click', showMarkedContents);
+            document.getElementById('closeMarkedContents').addEventListener('click', hideMarkedContents);
         });
 
         // 渲染分支树
@@ -741,6 +1035,8 @@
                         <button class="action-btn branch-from-here" title="从此处创建分支(包含所有历史)">🌿</button>
                         <button class="action-btn branch-only-this" title="仅以此内容为基础创建分支">✂️</button>
                         <button class="action-btn highlight-keywords" title="标记关键词">🔖</button>
+                        <button class="action-btn mark-content" title="标记内容">⭐</button>
+                        <button class="action-btn switch-model" title="切换AI模型" ${message.role !== 'ai' ? 'style="display:none"' : ''}>🔄</button>
                     </div>
                 `;
                 
@@ -800,8 +1096,22 @@
                     switchBranch(newBranchId);
                 });
                 
-                // 添加仅以此内容为基础创建分支的事件
-                messageElement.querySelector('.branch-only-this').addEventListener('click', (e) => {
+                // 添加标记内容事件
+                    messageElement.querySelector('.mark-content').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleContentMark(message.id, message.content, message.role);
+                    });
+                    
+                    // 添加切换模型事件
+                    if (message.role === 'ai') {
+                        messageElement.querySelector('.switch-model').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            showModelSwitchPanel(message.id);
+                        });
+                    }
+                    
+                    // 添加仅以此内容为基础创建分支的事件
+                    messageElement.querySelector('.branch-only-this').addEventListener('click', (e) => {
                     e.stopPropagation();
                     
                     // 直接创建分支 - 仅包含选中的消息内容
@@ -896,21 +1206,180 @@
         }
 
         // 生成AI回复（模拟）
-        function generateAIResponse(userMessage, messageHistory) {
-            const responses = [
-                "这是一个很好的问题！让我详细解释一下。",
-                "基于我们之前的对话，我认为...",
-                "您提到了一个关键点。关于这一点，我想补充...",
-                "我理解您的疑问。实际上，这个问题可以从多个角度来理解...",
-                "感谢您的提问！这让我想到了相关的概念..."
-            ];
+        function generateAIResponse(userMessage, messageHistory, modelId = 'default') {
+            // 不同模型的响应模式
+            const modelResponses = {
+                default: [
+                    "这是一个很好的问题！让我详细解释一下。",
+                    "基于我们之前的对话，我认为...",
+                    "您提到了一个关键点。关于这一点，我想补充...",
+                    "我理解您的疑问。实际上，这个问题可以从多个角度来理解...",
+                    "感谢您的提问！这让我想到了相关的概念..."
+                ],
+                technical: [
+                    "从技术角度分析，这个问题涉及到以下几个核心概念：",
+                    "根据我的技术理解，这个问题可以通过以下方法解决：",
+                    "这个技术问题的关键点在于...",
+                    "从实现细节来看，我们需要考虑...",
+                    "在技术选型上，我建议..."
+                ],
+                creative: [
+                    "让我从创意的角度来思考这个问题...",
+                    "这里有一些创造性的解决方案...",
+                    "换个角度看，我们可以这样尝试...",
+                    "创意层面上，这个问题可以有多种有趣的解决方式...",
+                    "从创新视角出发，我想到了以下可能性..."
+                ],
+                simplifier: [
+                    "简单来说，这个问题可以这样理解...",
+                    "让我用更简单的语言解释一下...",
+                    "其实这个概念并不复杂，本质上就是...",
+                    "为了更容易理解，我们可以这样比喻...",
+                    "简化一下，核心思想是..."
+                ]
+            };
+            
+            const responses = modelResponses[modelId] || modelResponses.default;
             
             // 简单模拟根据消息历史生成回复
             if (userMessage.includes('?')) {
-                return "这个问题很有深度。简而言之，我认为..." + responses[Math.floor(Math.random() * responses.length)];
+                const modelPrefixes = {
+                    default: "这个问题很有深度。简而言之，我认为...",
+                    technical: "根据技术原理，这个问题的答案是...",
+                    creative: "从创意角度出发，我的看法是...",
+                    simplifier: "简单来说，答案可以这样理解..."
+                };
+                const prefix = modelPrefixes[modelId] || modelPrefixes.default;
+                return prefix + responses[Math.floor(Math.random() * responses.length)];
             }
             
             return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        // 显示模型切换面板
+        function showModelSwitchPanel(messageId) {
+            const panel = document.getElementById('modelSwitchPanel');
+            const overlay = document.getElementById('modalOverlay');
+            
+            // 保存当前要切换的消息ID
+            panel.dataset.messageId = messageId;
+            
+            // 显示面板和遮罩
+            panel.style.display = 'block';
+            overlay.style.display = 'block';
+            
+            // 预选中当前模型
+            const currentMessage = getMessageById(messageId);
+            if (currentMessage && currentMessage.model) {
+                const modelRadio = document.querySelector(`input[name="modelType"][value="${currentMessage.model}"]`);
+                if (modelRadio) {
+                    modelRadio.checked = true;
+                }
+            }
+        }
+        
+        // 隐藏模型切换面板
+        function hideModelSwitchPanel() {
+            document.getElementById('modelSwitchPanel').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+        
+        // 根据消息ID获取消息对象
+        function getMessageById(messageId) {
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            return currentBranch.messages.find(msg => msg.id === messageId);
+        }
+        
+        // 切换AI模型
+        function switchAIModel() {
+            const panel = document.getElementById('modelSwitchPanel');
+            const messageId = panel.dataset.messageId;
+            const selectedModel = document.querySelector('input[name="modelType"]:checked').value;
+            
+            // 获取当前消息和分支
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            const messageIndex = currentBranch.messages.findIndex(msg => msg.id === messageId);
+            const message = currentBranch.messages[messageIndex];
+            
+            // 检查消息是否存在且为AI回复
+            if (messageIndex === -1 || message.role !== 'ai') {
+                hideModelSwitchPanel();
+                return;
+            }
+            
+            // 更新当前模型设置
+            conversationData.currentModel = selectedModel;
+            
+            // 生成消息摘要
+            const summary = generateMessageSummary(message.content);
+            
+            // 创建新分支，使用新模型重新生成回复
+            const newBranchId = 'branch_' + Date.now();
+            
+            // 复制当前分支的所有消息，直到要切换的消息之前
+            const newMessages = [...currentBranch.messages.slice(0, messageIndex)];
+            
+            // 添加用户请求切换模型的系统消息
+            newMessages.push({
+                id: 'm' + Date.now(),
+                role: 'system',
+                content: `[切换到${availableModels.find(m => m.id === selectedModel).name}模型，基于以下内容进行重新回复]\n\n${summary}`,
+                timestamp: new Date()
+            });
+            
+            // 立即显示提示，说明正在生成新回复
+            renderCurrentBranch();
+            
+            // 模拟新模型生成回复（使用setTimeout模拟延迟）
+            setTimeout(() => {
+                const newAIMessageId = 'm' + Date.now();
+                const newAIMessage = {
+                    id: newAIMessageId,
+                    role: 'ai',
+                    content: generateAIResponse(summary, newMessages, selectedModel),
+                    timestamp: new Date(),
+                    model: selectedModel
+                };
+                
+                // 更新新分支消息
+                newMessages.push(newAIMessage);
+                
+                // 创建新分支
+                conversationData.branches[newBranchId] = {
+                    id: newBranchId,
+                    name: `[${availableModels.find(m => m.id === selectedModel).name}] ${currentBranch.name}`,
+                    messages: newMessages,
+                    parent: {
+                        branch: conversationData.currentBranch,
+                        messageId: messageId,
+                        modelSwitch: true,
+                        fromModel: message.model || 'default',
+                        toModel: selectedModel
+                    },
+                    children: []
+                };
+                
+                // 将新分支添加到当前分支的子分支中
+                currentBranch.children.push(newBranchId);
+                
+                // 切换到新分支
+                switchBranch(newBranchId);
+                
+                // 隐藏面板
+                hideModelSwitchPanel();
+            }, 1000);
+        }
+        
+        // 生成消息摘要
+        function generateMessageSummary(messageContent) {
+            // 简单的摘要生成逻辑
+            // 在实际应用中，这里可以使用更复杂的NLP算法
+            if (messageContent.length <= 100) {
+                return messageContent; // 如果消息本身就不长，直接返回
+            }
+            
+            // 简单截取前100个字符并添加省略号
+            return messageContent.substring(0, 100) + '...';
         }
 
         // 显示分支创建面板
@@ -982,6 +1451,60 @@
             renderCurrentBranch();
         }
 
+        // 切换内容标记状态
+        function toggleContentMark(messageId, content, role) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            const markButton = messageElement.querySelector('.mark-content');
+            
+            // 检查是否已标记
+            const isMarked = markedContents.some(item => item.messageId === messageId);
+            
+            if (isMarked) {
+                // 取消标记
+                markedContents = markedContents.filter(item => item.messageId !== messageId);
+                messageElement.classList.remove('content-marked');
+                markButton.title = '标记内容';
+                markButton.textContent = '⭐';
+            } else {
+                // 标记内容并独立存储
+                markedContents.push({
+                    id: 'mc' + Date.now(),
+                    messageId: messageId,
+                    content: content,
+                    role: role,
+                    timestamp: new Date(),
+                    sourceBranch: conversationData.currentBranch
+                });
+                messageElement.classList.add('content-marked');
+                markButton.title = '取消标记';
+                markButton.textContent = '★';
+                
+                // 显示标记成功的提示
+                showToast('内容已标记并独立存储');
+            }
+        }
+        
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // 添加动画
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // 3秒后自动消失
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+        
         // 显示合并分支面板
         function showMergePanel() {
             const panel = document.getElementById('mergePanel');
@@ -1057,6 +1580,56 @@
                    `这是一个包含${userMessages.length}个用户提问和${aiResponses.length}个AI回复的对话。\n\n` +
                    `主要讨论内容围绕：${topKeywords}\n\n` +
                    `用户的主要问题是：${userMessages.length > 0 ? userMessages[0].content.substring(0, 100) + '...' : '无'}`;
+        }
+        
+        // 显示已标记内容面板
+        function showMarkedContents() {
+            const modal = document.getElementById('markedContentsModal');
+            const markedList = document.getElementById('markedContentsList');
+            
+            // 清空列表
+            markedList.innerHTML = '';
+            
+            if (markedContents.length === 0) {
+                markedList.innerHTML = '<div class="empty-state">暂无已标记的内容</div>';
+            } else {
+                // 按时间排序
+                const sortedMarkedContents = [...markedContents].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                // 遍历所有已标记的内容
+                sortedMarkedContents.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'marked-content-item';
+                    
+                    const date = new Date(item.timestamp);
+                    const formattedDate = date.toLocaleString();
+                    
+                    itemElement.innerHTML = `
+                        <div class="marked-content-header">
+                            <span class="marked-content-type">${item.role === 'user' ? '用户' : 'AI'}</span>
+                            <span class="marked-content-date">${formattedDate}</span>
+                            <button class="delete-marked" data-id="${item.messageId}" title="删除标记">🗑️</button>
+                        </div>
+                        <div class="marked-content-body">${item.content}</div>
+                    `;
+                    
+                    // 添加删除事件
+                    itemElement.querySelector('.delete-marked').addEventListener('click', function() {
+                        const messageId = this.getAttribute('data-id');
+                        toggleContentMark(messageId, '', ''); // 取消标记
+                        showMarkedContents(); // 刷新列表
+                    });
+                    
+                    markedList.appendChild(itemElement);
+                });
+            }
+            
+            modal.style.display = 'block';
+        }
+        
+        // 隐藏已标记内容面板
+        function hideMarkedContents() {
+            document.getElementById('markedContentsModal').style.display = 'none';
         }
         
         // 合并分支
