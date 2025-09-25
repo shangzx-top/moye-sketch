@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分支式AI对话界面</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --user-bubble: #e3f2fd;
+            --ai-bubble: #f5f5f5;
+            --branch-color: #8bc34a;
+            --border-color: #ddd;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --selected-bg: rgba(74, 111, 165, 0.1);
+            --selected-border: #4a6fa5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        
+        /* 分支面板样式 */
+        .branch-panel {
+            width: 280px;
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .branch-header {
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .branch-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .branch-node {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+        
+        .branch-node.active {
+            background-color: var(--user-bubble);
+            border-left-color: var(--primary-color);
+        }
+        
+        .branch-node:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .branch-content {
+            font-size: 0.9em;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .branch-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* 对话面板样式 */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message {
+            max-width: 80%;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .message.selected {
+            background-color: var(--selected-bg);
+            border: 2px solid var(--selected-border);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background-color: var(--user-bubble);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .ai-message {
+            background-color: var(--ai-bubble);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-actions {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            display: none;
+            padding: 5px;
+        }
+        
+        .message:hover .message-actions {
+            display: flex;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            margin: 0 2px;
+            color: #666;
+        }
+        
+        .action-btn:hover {
+            background-color: #f0f0f0;
+            color: var(--primary-color);
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: none;
+            height: 60px;
+        }
+        
+        .chat-input button {
+            margin-left: 10px;
+            padding: 0 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .branch-indicator {
+            font-size: 0.8em;
+            color: var(--branch-color);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .branch-indicator::before {
+            content: "•";
+            margin-right: 5px;
+            color: var(--branch-color);
+        }
+        
+        /* 分支创建面板 */
+        .branch-create {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 15px;
+            z-index: 100;
+            width: 300px;
+            display: none;
+        }
+        
+        .branch-create h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .branch-create textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+        
+        .branch-create-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .branch-create-buttons button {
+            margin-left: 10px;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .branch-create-buttons .cancel {
+            background-color: #f5f5f5;
+        }
+        
+        .branch-create-buttons .create {
+            background-color: var(--branch-color);
+            color: white;
+        }
+        
+        /* 合并分支面板 */
+        .merge-panel {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 15px;
+            z-index: 100;
+            width: 350px;
+            display: none;
+        }
+        
+        .merge-branches {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .merge-branch {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        
+        .merge-branch.selected {
+            border-color: var(--branch-color);
+            background-color: rgba(139, 195, 74, 0.1);
+        }
+        
+        /* 合并选项样式 */
+        .merge-options {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .merge-options h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .merge-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .merge-option input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .merge-option span {
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+        }
+        
+        /* 系统消息样式 */
+        .message.system {
+            background-color: #fff9c4;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .branch-start-point {
+            background-color: rgba(139, 195, 74, 0.1);
+            border-left: 3px solid var(--branch-color);
+        }
+        
+        /* 选择计数和操作栏 */
+        .selection-actions {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            padding: 10px 20px;
+            display: none;
+            z-index: 1000;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .selection-count {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .create-from-selection,
+        .clear-selection {
+            padding: 8px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .clear-selection {
+            background-color: #666;
+        }
+        
+        .create-from-selection:hover {
+            background-color: #2980b9;
+        }
+        
+        .clear-selection:hover {
+            background-color: #444;
+        }
+        
+        /* 选中的消息样式 */
+        .message.selected {
+            background-color: rgba(139, 195, 74, 0.2);
+            border-left: 4px solid var(--branch-color);
+        }
+        
+        /* 流程图样式 */
+        .flow-graph-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .flow-graph-container {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .flow-graph-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .flow-graph-header h3 {
+            color: var(--primary-color);
+        }
+        
+        .flow-graph-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .flow-graph-content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .flow-graph-svg {
+            width: 100%;
+            height: 100%;
+            background-color: #f9f9f9;
+        }
+        
+        .graph-node {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .graph-node:hover {
+            transform: scale(1.05);
+        }
+        
+        .graph-node circle {
+            stroke: var(--border-color);
+            stroke-width: 2;
+        }
+        
+        .graph-node text {
+            font-size: 12px;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+        
+        .graph-edge {
+            stroke: var(--border-color);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .graph-node.active circle {
+            stroke: var(--primary-color);
+            stroke-width: 3;
+        }
+        
+        .summary-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 500px;
+            max-width: 90%;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .summary-modal h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .summary-content {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            min-height: 100px;
+            margin-bottom: 15px;
+        }
+        
+        .summary-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .summary-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .summary-actions .cancel {
+            background-color: #f5f5f5;
+        }
+        
+        .summary-actions .create-branch {
+            background-color: var(--branch-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 分支面板 -->
+    <div class="branch-panel">
+        <div class="branch-header">
+            <h3>对话分支</h3>
+        </div>
+        <div class="branch-tree" id="branchTree">
+            <!-- 分支节点将通过JavaScript动态生成 -->
+        </div>
+        <div class="branch-actions">
+            <button id="newMainBranch">新建主分支</button>
+            <button id="mergeBranches">合并分支</button>
+        </div>
+    </div>
+    
+    <!-- 对话面板 -->
+    <div class="chat-panel">
+        <div class="chat-header">
+            <h3 id="currentBranchName">主分支</h3>
+            <div class="branch-info">
+                <span id="branchPath">路径: 主分支</span>
+            </div>
+            <button id="viewFlowGraph" title="查看对话流程图">📊</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- 对话消息将通过JavaScript动态生成 -->
+        </div>
+        <div class="chat-input">
+            <textarea id="messageInput" placeholder="输入您的消息..."></textarea>
+            <button id="sendMessage">发送</button>
+        </div>
+        
+        <!-- 消息选择操作栏 -->
+        <div class="selection-actions" id="selectionActions">
+            <span class="selection-count" id="selectionCount">已选择 0 条消息</span>
+            <button class="create-from-selection" id="createFromSelection">基于选中内容创建分支</button>
+            <button class="create-from-selection" id="generateSummary">生成摘要</button>
+            <button class="clear-selection" id="clearSelection">清除选择</button>
+        </div>
+    </div>
+    
+    <!-- 分支创建面板 -->
+    <div class="branch-create" id="branchCreatePanel">
+        <h3>创建新分支</h3>
+        <p>新分支将从选定的消息开始</p>
+        <div class="branch-create-buttons">
+            <button class="cancel" id="cancelBranch">取消</button>
+            <button class="create" id="createBranch">创建</button>
+        </div>
+    </div>
+    
+
+    
+    <!-- 流程图模态框 -->
+    <div class="flow-graph-modal" id="flowGraphModal">
+        <div class="flow-graph-container">
+            <div class="flow-graph-header">
+                <h3>对话流程图</h3>
+                <button class="flow-graph-close" id="closeFlowGraph">×</button>
+            </div>
+            <div class="flow-graph-content">
+                <svg class="flow-graph-svg" id="flowGraphSvg"></svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 摘要模态框 -->
+    <div class="summary-modal" id="summaryModal">
+        <h3>会话摘要</h3>
+        <div class="summary-content" id="summaryContent"></div>
+        <div class="summary-actions">
+            <button class="cancel" id="cancelSummary">关闭</button>
+            <button class="create-branch" id="createBranchFromSummary">基于摘要创建分支</button>
+        </div>
+    </div>
+    <div class="merge-panel" id="mergePanel">
+        <h3>合并分支</h3>
+        <p>选择要合并到当前分支的分支：</p>
+        <div class="merge-branches" id="mergeBranchesList">
+            <!-- 可合并的分支将通过JavaScript动态生成 -->
+        </div>
+        <div class="merge-options">
+            <h4>合并方式：</h4>
+            <label class="merge-option">
+                <input type="radio" name="mergeType" value="migrate" checked>
+                <span>迁移所有聊天气泡，按时间顺序重排</span>
+            </label>
+            <label class="merge-option">
+                <input type="radio" name="mergeType" value="summary">
+                <span>生成摘要，作为单个气泡添加</span>
+            </label>
+        </div>
+        <div class="branch-create-buttons">
+            <button class="cancel" id="cancelMerge">取消</button>
+            <button class="create" id="confirmMerge">合并</button>
+        </div>
+    </div>
+
+    <script>
+        // 对话数据结构
+        let conversationData = {
+            branches: {
+                'main': {
+                    id: 'main',
+                    name: '主分支',
+                    messages: [
+                        { id: 'm1', role: 'user', content: '你好，我想了解人工智能的基本概念。', timestamp: new Date() },
+                        { id: 'm2', role: 'ai', content: '当然！人工智能是计算机科学的一个分支，旨在创造能够执行通常需要人类智能的任务的机器。', timestamp: new Date() },
+                        { id: 'm3', role: 'user', content: '那么机器学习是人工智能的一部分吗？', timestamp: new Date() },
+                        { id: 'm4', role: 'ai', content: '是的，机器学习是人工智能的一个重要子领域，它使计算机能够在没有明确编程的情况下学习和改进。', timestamp: new Date() }
+                    ],
+                    parent: null,
+                    children: []
+                }
+            },
+            currentBranch: 'main'
+        };
+        
+        // 存储当前选中的消息ID
+        let selectedMessages = [];
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            renderBranchTree();
+            renderCurrentBranch();
+            
+            // 发送消息事件
+            document.getElementById('sendMessage').addEventListener('click', sendMessage);
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // 分支创建事件
+            document.getElementById('newMainBranch').addEventListener('click', showBranchCreatePanel);
+            document.getElementById('cancelBranch').addEventListener('click', hideBranchCreatePanel);
+            document.getElementById('createBranch').addEventListener('click', createNewBranch);
+            
+            // 合并分支事件
+            document.getElementById('mergeBranches').addEventListener('click', showMergePanel);
+            document.getElementById('cancelMerge').addEventListener('click', hideMergePanel);
+            document.getElementById('confirmMerge').addEventListener('click', mergeBranches);
+            
+            // 基于选中内容创建分支事件
+            document.getElementById('createFromSelection').addEventListener('click', createBranchFromSelection);
+            document.getElementById('clearSelection').addEventListener('click', clearMessageSelection);
+            document.getElementById('generateSummary').addEventListener('click', generateSummary);
+            
+            // 流程图相关事件
+            document.getElementById('viewFlowGraph').addEventListener('click', showFlowGraph);
+            document.getElementById('closeFlowGraph').addEventListener('click', hideFlowGraph);
+            
+            // 摘要相关事件
+            document.getElementById('cancelSummary').addEventListener('click', hideSummary);
+            document.getElementById('createBranchFromSummary').addEventListener('click', createBranchFromSummary);
+        });
+
+        // 渲染分支树
+        function renderBranchTree() {
+            const branchTree = document.getElementById('branchTree');
+            branchTree.innerHTML = '';
+            
+            // 递归渲染分支
+            function renderBranch(branchId, level = 0) {
+                const branch = conversationData.branches[branchId];
+                const branchNode = document.createElement('div');
+                branchNode.className = `branch-node ${conversationData.currentBranch === branchId ? 'active' : ''}`;
+                branchNode.style.paddingLeft = `${10 + level * 20}px`;
+                branchNode.dataset.branchId = branchId;
+                
+                branchNode.innerHTML = `
+                    <div class="branch-name">${branch.name}</div>
+                    <div class="branch-content">${branch.messages[branch.messages.length - 1]?.content.substring(0, 30) || '空分支'}...</div>
+                `;
+                
+                branchNode.addEventListener('click', () => switchBranch(branchId));
+                branchTree.appendChild(branchNode);
+                
+                // 渲染子分支
+                branch.children.forEach(childId => {
+                    renderBranch(childId, level + 1);
+                });
+            }
+            
+            // 从根分支开始渲染
+            Object.keys(conversationData.branches).forEach(branchId => {
+                if (!conversationData.branches[branchId].parent) {
+                    renderBranch(branchId);
+                }
+            });
+        }
+
+        // 渲染当前分支的对话
+        function renderCurrentBranch() {
+            const chatMessages = document.getElementById('chatMessages');
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            
+            chatMessages.innerHTML = '';
+            currentBranch.messages.forEach((message, index) => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.role === 'user' ? 'user-message' : message.role === 'ai' ? 'ai-message' : 'system'}`;
+                messageElement.dataset.messageId = message.id;
+                
+                // 标记分支起始点
+                if (currentBranch.parent && index === 0) {
+                    messageElement.classList.add('branch-start-point');
+                }
+                
+                messageElement.innerHTML = `
+                    <div class="message-content">${message.content}</div>
+                    <div class="message-actions">
+                        <button class="action-btn select-message" title="选择/取消选择此消息">✅</button>
+                        <button class="action-btn branch-from-here" title="从此处创建分支(包含所有历史)">🌿</button>
+                        <button class="action-btn branch-only-this" title="仅以此内容为基础创建分支">✂️</button>
+                        <button class="action-btn highlight-keywords" title="标记关键词">🔖</button>
+                    </div>
+                `;
+                
+                // 重新设置data-message-id属性，确保toggleMessageSelection能找到元素
+                messageElement.dataset.messageId = message.id;
+                
+                chatMessages.appendChild(messageElement);
+                
+                // 添加消息选择事件
+                messageElement.addEventListener('click', (e) => {
+                    // 只有当点击的是消息内容区域时才触发选择
+                    const contentElement = messageElement.querySelector('.message-content');
+                    if (e.target === contentElement || contentElement.contains(e.target)) {
+                        toggleMessageSelection(message.id);
+                    }
+                });
+                
+                // 添加多选按钮事件
+                messageElement.querySelector('.select-message').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleMessageSelection(message.id);
+                });
+                
+                // 添加分支创建事件 - 直接创建分支而不显示面板
+                messageElement.querySelector('.branch-from-here').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // 直接创建分支 - 包含所有历史消息
+                    const newBranchId = 'branch_' + Date.now();
+                    const currentBranch = conversationData.branches[conversationData.currentBranch];
+                    
+                    // 确定新分支的起始消息索引
+                    let startingPoint = 0;
+                    if (message.id) {
+                        startingPoint = currentBranch.messages.findIndex(m => m.id === message.id);
+                    }
+                    
+                    // 创建新分支 - 只包含起始点及之前的消息
+                    conversationData.branches[newBranchId] = {
+                        id: newBranchId,
+                        name: `分支 ${Object.keys(conversationData.branches).length}`,
+                        messages: [
+                            // 只包含起始点及之前的消息
+                            ...currentBranch.messages.slice(0, startingPoint + 1)
+                        ],
+                        parent: {
+                            branch: conversationData.currentBranch,
+                            messageId: message.id
+                        },
+                        children: []
+                    };
+                    
+                    // 将新分支添加到当前分支的子分支中
+                    currentBranch.children.push(newBranchId);
+                    
+                    // 切换到新分支
+                    switchBranch(newBranchId);
+                });
+                
+                // 添加仅以此内容为基础创建分支的事件
+                messageElement.querySelector('.branch-only-this').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // 直接创建分支 - 仅包含选中的消息内容
+                    const newBranchId = 'branch_' + Date.now();
+                    const currentBranch = conversationData.branches[conversationData.currentBranch];
+                    
+                    // 创建新分支 - 只包含选中的消息
+                    conversationData.branches[newBranchId] = {
+                        id: newBranchId,
+                        name: `仅选分支 ${Object.keys(conversationData.branches).length}`,
+                        messages: [
+                            // 仅包含选中的消息
+                            {
+                                ...message, // 复制选中的消息内容
+                                id: 'm' + Date.now() // 生成新的ID以避免冲突
+                            }
+                        ],
+                        parent: {
+                            branch: conversationData.currentBranch,
+                            messageId: message.id
+                        },
+                        children: []
+                    };
+                    
+                    // 将新分支添加到当前分支的子分支中
+                    currentBranch.children.push(newBranchId);
+                    
+                    // 切换到新分支
+                    switchBranch(newBranchId);
+                });
+            });
+            
+            // 更新分支信息
+            document.getElementById('currentBranchName').textContent = currentBranch.name;
+            document.getElementById('branchPath').textContent = `路径: ${getBranchPath(currentBranch.id)}`;
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 获取分支路径
+        function getBranchPath(branchId) {
+            let path = [];
+            let currentBranch = conversationData.branches[branchId];
+            
+            while (currentBranch) {
+                path.unshift(currentBranch.name);
+                if (currentBranch.parent) {
+                    currentBranch = conversationData.branches[currentBranch.parent.branch];
+                } else {
+                    currentBranch = null;
+                }
+            }
+            
+            return path.join(' → ');
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const currentBranch = conversationData.branches[conversationData.currentBranch];
+                const messageId = 'm' + Date.now();
+                
+                // 添加用户消息
+                currentBranch.messages.push({
+                    id: messageId,
+                    role: 'user',
+                    content: message,
+                    timestamp: new Date()
+                });
+                
+                // 模拟AI回复
+                setTimeout(() => {
+                    const aiMessageId = 'm' + Date.now();
+                    currentBranch.messages.push({
+                        id: aiMessageId,
+                        role: 'ai',
+                        content: generateAIResponse(message, currentBranch.messages),
+                        timestamp: new Date()
+                    });
+                    
+                    renderCurrentBranch();
+                    renderBranchTree();
+                }, 1000);
+                
+                renderCurrentBranch();
+                input.value = '';
+            }
+        }
+
+        // 生成AI回复（模拟）
+        function generateAIResponse(userMessage, messageHistory) {
+            const responses = [
+                "这是一个很好的问题！让我详细解释一下。",
+                "基于我们之前的对话，我认为...",
+                "您提到了一个关键点。关于这一点，我想补充...",
+                "我理解您的疑问。实际上，这个问题可以从多个角度来理解...",
+                "感谢您的提问！这让我想到了相关的概念..."
+            ];
+            
+            // 简单模拟根据消息历史生成回复
+            if (userMessage.includes('?')) {
+                return "这个问题很有深度。简而言之，我认为..." + responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // 显示分支创建面板
+        function showBranchCreatePanel(fromMessageId = null) {
+            const panel = document.getElementById('branchCreatePanel');
+            panel.style.display = 'block';
+            panel.dataset.fromMessageId = fromMessageId;
+            
+            // 定位面板
+            if (fromMessageId) {
+                const messageElement = document.querySelector(`[data-message-id="${fromMessageId}"]`);
+                const rect = messageElement.getBoundingClientRect();
+                panel.style.top = `${rect.top}px`;
+                panel.style.left = `${rect.right + 10}px`;
+            } else {
+                panel.style.top = '50%';
+                panel.style.left = '50%';
+                panel.style.transform = 'translate(-50%, -50%)';
+            }
+        }
+
+        // 隐藏分支创建面板
+        function hideBranchCreatePanel() {
+            document.getElementById('branchCreatePanel').style.display = 'none';
+        }
+
+        // 创建新分支
+        function createNewBranch() {
+            const fromMessageId = document.getElementById('branchCreatePanel').dataset.fromMessageId;
+            
+            const newBranchId = 'branch_' + Date.now();
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            
+            // 确定新分支的起始消息索引
+            let startingPoint = 0;
+            if (fromMessageId) {
+                startingPoint = currentBranch.messages.findIndex(m => m.id === fromMessageId);
+            }
+            
+            // 创建新分支 - 只包含起始点及之前的消息
+            conversationData.branches[newBranchId] = {
+                id: newBranchId,
+                name: `分支 ${Object.keys(conversationData.branches).length}`,
+                messages: [
+                    // 只包含起始点及之前的消息
+                    ...currentBranch.messages.slice(0, startingPoint + 1)
+                ],
+                parent: {
+                    branch: conversationData.currentBranch,
+                    messageId: fromMessageId
+                },
+                children: []
+            };
+            
+            // 将新分支添加到当前分支的子分支中
+            currentBranch.children.push(newBranchId);
+            
+            // 切换到新分支
+            switchBranch(newBranchId);
+            
+            // 隐藏面板
+            hideBranchCreatePanel();
+        }
+
+        // 切换分支
+        function switchBranch(branchId) {
+            conversationData.currentBranch = branchId;
+            renderBranchTree();
+            renderCurrentBranch();
+        }
+
+        // 显示合并分支面板
+        function showMergePanel() {
+            const panel = document.getElementById('mergePanel');
+            const branchesList = document.getElementById('mergeBranchesList');
+            
+            branchesList.innerHTML = '';
+            
+            // 添加可合并的分支（排除当前分支）
+            Object.keys(conversationData.branches).forEach(branchId => {
+                if (branchId !== conversationData.currentBranch) {
+                    const branch = conversationData.branches[branchId];
+                    const branchElement = document.createElement('div');
+                    branchElement.className = 'merge-branch';
+                    branchElement.dataset.branchId = branchId;
+                    branchElement.textContent = branch.name;
+                    
+                    branchElement.addEventListener('click', function() {
+                        // 切换选中状态
+                        document.querySelectorAll('.merge-branch').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+                    });
+                    
+                    branchesList.appendChild(branchElement);
+                }
+            });
+            
+            panel.style.display = 'block';
+            panel.style.top = '50%';
+            panel.style.left = '50%';
+            panel.style.transform = 'translate(-50%, -50%)';
+        }
+
+        // 隐藏合并分支面板
+        function hideMergePanel() {
+            document.getElementById('mergePanel').style.display = 'none';
+        }
+
+        // 生成会话摘要
+        function generateConversationSummary(messages) {
+            // 简单实现：提取关键信息和主要问题
+            const userMessages = messages.filter(m => m.role === 'user');
+            const aiResponses = messages.filter(m => m.role === 'ai');
+            
+            // 提取关键词
+            let keywords = [];
+            userMessages.forEach(msg => {
+                // 简单的关键词提取逻辑
+                const words = msg.content.toLowerCase().split(/\s+/);
+                const importantWords = words.filter(word => 
+                    word.length > 3 && 
+                    !['the', 'and', 'but', 'or', 'because', 'so', 'is', 'are', 'was', 'were'].includes(word)
+                );
+                keywords = [...keywords, ...importantWords];
+            });
+            
+            // 统计关键词频率
+            const keywordFreq = {};
+            keywords.forEach(keyword => {
+                keywordFreq[keyword] = (keywordFreq[keyword] || 0) + 1;
+            });
+            
+            // 取最频繁的5个关键词
+            const topKeywords = Object.entries(keywordFreq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(entry => entry[0])
+                .join(', ');
+            
+            // 生成摘要
+            return `[分支"${conversationData.branches[conversationData.currentBranch].name}"的对话摘要]\n\n` +
+                   `这是一个包含${userMessages.length}个用户提问和${aiResponses.length}个AI回复的对话。\n\n` +
+                   `主要讨论内容围绕：${topKeywords}\n\n` +
+                   `用户的主要问题是：${userMessages.length > 0 ? userMessages[0].content.substring(0, 100) + '...' : '无'}`;
+        }
+        
+        // 合并分支
+        function mergeBranches() {
+            const selectedBranch = document.querySelector('.merge-branch.selected');
+            
+            if (selectedBranch) {
+                const branchId = selectedBranch.dataset.branchId;
+                const currentBranch = conversationData.branches[conversationData.currentBranch];
+                const branchToMerge = conversationData.branches[branchId];
+                
+                // 获取用户选择的合并方式
+                const mergeType = document.querySelector('input[name="mergeType"]:checked').value;
+                
+                if (mergeType === 'migrate') {
+                    // 方式1：迁移所有聊天气泡，按时间顺序重排
+                    // 复制所有消息并生成新的ID
+                    const migratedMessages = branchToMerge.messages.map(msg => ({
+                        ...msg,
+                        id: 'm' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                        timestamp: new Date(msg.timestamp) // 保持原始时间戳
+                    }));
+                    
+                    // 合并并按时间排序
+                    currentBranch.messages = [...currentBranch.messages, ...migratedMessages]
+                        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    
+                } else if (mergeType === 'summary') {
+                    // 方式2：生成摘要，作为单个气泡添加
+                    const summary = generateConversationSummary(branchToMerge.messages);
+                    
+                    currentBranch.messages.push({
+                        id: 'm' + Date.now(),
+                        role: 'system',
+                        content: `[来自分支"${branchToMerge.name}"的摘要]\n\n${summary}`,
+                        timestamp: new Date()
+                    });
+                }
+                
+                renderCurrentBranch();
+                renderBranchTree();
+                hideMergePanel();
+            }
+        }
+        
+        // 切换消息选择状态
+        function toggleMessageSelection(messageId) {
+            const index = selectedMessages.indexOf(messageId);
+            
+            if (index > -1) {
+                // 取消选择
+                selectedMessages.splice(index, 1);
+                document.querySelector(`[data-message-id="${messageId}"]`).classList.remove('selected');
+            } else {
+                // 选择消息
+                selectedMessages.push(messageId);
+                document.querySelector(`[data-message-id="${messageId}"]`).classList.add('selected');
+            }
+            
+            updateSelectionUI();
+        }
+        
+        // 更新选择UI
+        function updateSelectionUI() {
+            const selectionCount = document.getElementById('selectionCount');
+            const selectionActions = document.getElementById('selectionActions');
+            
+            selectionCount.textContent = `已选择 ${selectedMessages.length} 条消息`;
+            
+            if (selectedMessages.length > 0) {
+                selectionActions.style.display = 'flex';
+            } else {
+                selectionActions.style.display = 'none';
+            }
+        }
+        
+        // 清除消息选择
+        function clearMessageSelection() {
+            selectedMessages.forEach(messageId => {
+                document.querySelector(`[data-message-id="${messageId}"]`).classList.remove('selected');
+            });
+            
+            selectedMessages = [];
+            updateSelectionUI();
+        }
+        
+        // 基于选中内容创建分支
+        function createBranchFromSelection() {
+            if (selectedMessages.length === 0) {
+                return;
+            }
+            
+            const newBranchId = 'branch_' + Date.now();
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            
+            // 获取选中的消息并保持顺序
+            const selectedMessagesData = selectedMessages
+                .map(messageId => {
+                    const message = currentBranch.messages.find(m => m.id === messageId);
+                    return message ? { ...message, id: 'm' + Date.now() + '_' + messageId } : null;
+                })
+                .filter(Boolean);
+            
+            // 创建新分支 - 只包含选中的消息
+            conversationData.branches[newBranchId] = {
+                id: newBranchId,
+                name: `多选分支 ${Object.keys(conversationData.branches).length}`,
+                messages: selectedMessagesData,
+                parent: {
+                    branch: conversationData.currentBranch,
+                    messageIds: [...selectedMessages] // 保存所有选中的消息ID用于引用
+                },
+                children: []
+            };
+            
+            // 将新分支添加到当前分支的子分支中
+            currentBranch.children.push(newBranchId);
+            
+            // 切换到新分支
+            switchBranch(newBranchId);
+            
+            // 清除选择
+            clearMessageSelection();
+        }
+        
+        // 显示流程图
+        function showFlowGraph() {
+            const modal = document.getElementById('flowGraphModal');
+            modal.style.display = 'flex';
+            drawFlowGraph();
+        }
+        
+        // 隐藏流程图
+        function hideFlowGraph() {
+            document.getElementById('flowGraphModal').style.display = 'none';
+        }
+        
+        // 绘制流程图
+        function drawFlowGraph() {
+            const svg = document.getElementById('flowGraphSvg');
+            svg.innerHTML = '';
+            
+            // 获取SVG尺寸
+            const width = svg.clientWidth;
+            const height = svg.clientHeight;
+            
+            // 设置SVG属性
+            svg.setAttribute('width', width);
+            svg.setAttribute('height', height);
+            
+            // 计算节点位置的简单布局算法
+            const nodes = {};
+            const edges = [];
+            const nodeSize = 80;
+            const horizontalSpacing = 200;
+            const verticalSpacing = 100;
+            
+            // 计算层次结构
+            const levels = {};
+            const rootBranches = [];
+            
+            // 找到根分支
+            Object.keys(conversationData.branches).forEach(branchId => {
+                if (!conversationData.branches[branchId].parent) {
+                    rootBranches.push(branchId);
+                }
+            });
+            
+            // 分配节点位置
+            function assignPositions(branchId, level = 0, position = 0) {
+                if (!levels[level]) {
+                    levels[level] = 0;
+                }
+                
+                const actualPosition = levels[level]++;
+                const x = 100 + level * horizontalSpacing;
+                const y = 100 + actualPosition * verticalSpacing;
+                
+                nodes[branchId] = { x, y };
+                
+                // 处理子分支
+                const branch = conversationData.branches[branchId];
+                branch.children.forEach((childId, idx) => {
+                    edges.push({ from: branchId, to: childId });
+                    assignPositions(childId, level + 1, idx);
+                });
+            }
+            
+            // 从根分支开始分配位置
+            rootBranches.forEach((branchId, idx) => {
+                assignPositions(branchId);
+            });
+            
+            // 绘制连接线
+            edges.forEach(edge => {
+                const from = nodes[edge.from];
+                const to = nodes[edge.to];
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                line.classList.add('graph-edge');
+                
+                // 简单的贝塞尔曲线连接
+                const path = `M ${from.x + nodeSize/2} ${from.y + nodeSize/2} C ${(from.x + to.x)/2} ${from.y + nodeSize/2}, ${(from.x + to.x)/2} ${to.y + nodeSize/2}, ${to.x - nodeSize/2} ${to.y + nodeSize/2}`;
+                line.setAttribute('d', path);
+                svg.appendChild(line);
+            });
+            
+            // 绘制节点
+            Object.keys(nodes).forEach(branchId => {
+                const node = nodes[branchId];
+                const branch = conversationData.branches[branchId];
+                const isActive = branchId === conversationData.currentBranch;
+                
+                const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                nodeGroup.classList.add('graph-node');
+                if (isActive) {
+                    nodeGroup.classList.add('active');
+                }
+                
+                // 节点圆
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', node.x + nodeSize/2);
+                circle.setAttribute('cy', node.y + nodeSize/2);
+                circle.setAttribute('r', nodeSize/2);
+                circle.setAttribute('fill', branch.parent ? '#f0f0f0' : 'var(--user-bubble)');
+                
+                // 节点文本
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', node.x + nodeSize/2);
+                text.setAttribute('y', node.y + nodeSize/2);
+                text.setAttribute('dy', '0.3em');
+                
+                // 截断长文本
+                const shortName = branch.name.length > 8 ? branch.name.substring(0, 8) + '...' : branch.name;
+                text.textContent = shortName;
+                
+                // 添加点击事件
+                nodeGroup.addEventListener('click', () => {
+                    hideFlowGraph();
+                    switchBranch(branchId);
+                });
+                
+                nodeGroup.appendChild(circle);
+                nodeGroup.appendChild(text);
+                svg.appendChild(nodeGroup);
+            })
+          
+        }
+        
+        // 生成摘要
+        function generateSummary() {
+            if (selectedMessages.length === 0) {
+                return;
+            }
+            
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            
+            // 获取选中的消息并保持顺序
+            const selectedMessagesData = currentBranch.messages
+                .filter(message => selectedMessages.includes(message.id))
+                .sort((a, b) => currentBranch.messages.indexOf(a) - currentBranch.messages.indexOf(b));
+            
+            // 简单的摘要生成逻辑
+            let summary = "";
+            
+            // 统计用户和AI的发言次数
+            const userMessages = selectedMessagesData.filter(m => m.role === 'user');
+            const aiMessages = selectedMessagesData.filter(m => m.role === 'ai');
+            
+            // 提取关键词（简单实现）
+            const keywords = extractKeywords(selectedMessagesData.map(m => m.content).join(' '));
+            
+            // 生成摘要文本
+            summary += `这段对话包含 ${userMessages.length} 条用户消息和 ${aiMessages.length} 条AI回复。\n\n`;
+            
+            if (keywords.length > 0) {
+                summary += `讨论的主要关键词：${keywords.join(', ')}\n\n`;
+            }
+            
+            // 提取用户的主要问题
+            if (userMessages.length > 0) {
+                summary += "用户的主要问题/关注点：\n";
+                userMessages.forEach((msg, idx) => {
+                    // 只显示不太长的消息
+                    const shortContent = msg.content.length > 80 ? msg.content.substring(0, 80) + '...' : msg.content;
+                    summary += `- ${shortContent}\n`;
+                });
+            }
+            
+            // 更新摘要内容
+            document.getElementById('summaryContent').textContent = summary;
+            
+            // 显示摘要模态框
+            document.getElementById('summaryModal').style.display = 'block';
+        }
+        
+        // 简单的关键词提取函数
+        function extractKeywords(text) {
+            // 移除常见停用词
+            const stopwords = ['的', '了', '在', '是', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这'];
+            
+            // 分词并过滤
+            const words = text
+                .replace(/[.,?!;:"“”‘’()\[\]{}]/g, ' ')
+                .split(/\s+/)
+                .filter(word => word.length > 1 && !stopwords.includes(word))
+                .map(word => word.toLowerCase());
+            
+            // 统计词频
+            const wordCounts = {};
+            words.forEach(word => {
+                wordCounts[word] = (wordCounts[word] || 0) + 1;
+            });
+            
+            // 排序并返回前5个关键词
+            return Object.keys(wordCounts)
+                .sort((a, b) => wordCounts[b] - wordCounts[a])
+                .slice(0, 5);
+        }
+        
+        // 隐藏摘要
+        function hideSummary() {
+            document.getElementById('summaryModal').style.display = 'none';
+        }
+        
+        // 基于摘要创建分支
+        function createBranchFromSummary() {
+            const summary = document.getElementById('summaryContent').textContent;
+            
+            const newBranchId = 'branch_' + Date.now();
+            const currentBranch = conversationData.branches[conversationData.currentBranch];
+            
+            // 创建新分支 - 只包含摘要消息
+            conversationData.branches[newBranchId] = {
+                id: newBranchId,
+                name: `摘要分支 ${Object.keys(conversationData.branches).length}`,
+                messages: [
+                    {
+                        id: 'm' + Date.now(),
+                        role: 'user',
+                        content: '基于以下摘要继续讨论：\n' + summary,
+                        timestamp: new Date()
+                    }
+                ],
+                parent: {
+                    branch: conversationData.currentBranch,
+                    summaryBased: true,
+                    messageIds: [...selectedMessages] // 保存所有选中的消息ID用于引用
+                },
+                children: []
+            };
+            
+            // 将新分支添加到当前分支的子分支中
+            currentBranch.children.push(newBranchId);
+            
+            // 切换到新分支
+            switchBranch(newBranchId);
+            
+            // 隐藏摘要模态框
+            hideSummary();
+            
+            // 清除选择
+            clearMessageSelection();
+        }
+    </script>
+</body>
+</html>
