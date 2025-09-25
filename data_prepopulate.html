@@ -1,806 +1,2732 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据预填充 - 数据扩展平台</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <!-- 侧边栏 -->
-    <div class="sidebar" id="sidebar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI模型预填充 - 画布式工作流编辑器</title>
+    <!-- 引入Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- 引入Font Awesome图标 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* 基础布局样式 */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 220px;
+        height: 100vh;
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        padding-top: 20px;
+        z-index: 1000;
+        overflow-y: auto;
+        transition: all 0.3s ease;
+      }
+
+      .main-content {
+        margin-left: 220px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbar {
+        border-bottom: 1px solid #dee2e6;
+        z-index: 900;
+      }
+
+      .canvas-container {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background-color: #f5f5f5;
+      }
+
+      /* 画布样式 */
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: 0 0;
+        cursor: move;
+        background-size: 20px 20px;
+        background-image: linear-gradient(
+            to right,
+            #e0e0e0 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+        min-width: 2000px;
+        min-height: 2000px;
+      }
+
+      /* 节点样式 */
+      .node {
+        position: absolute;
+        width: 280px;
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: move;
+        transition: all 0.3s ease;
+        z-index: 100;
+      }
+
+      .node:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+      }
+
+      .node.dragging {
+        opacity: 0.8;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .node-header {
+        padding: 12px 16px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .node-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .node-title {
+        font-weight: 500;
+        flex: 1;
+        margin: 0 12px;
+      }
+
+      .node-status {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+      }
+
+      .node-status.pending {
+        background-color: #f8f9fa;
+        color: #6c757d;
+      }
+
+      .node-status.in-progress {
+        background-color: #e3f2fd;
+        color: #0277bd;
+      }
+
+      .node-status.completed {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .node-status.error {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+
+      .node-content {
+        padding: 12px 16px;
+      }
+
+      .dimension-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .dimension-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .dimension-icon {
+        margin-right: 8px;
+        color: #007bff;
+      }
+
+      .tools-container {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #dee2e6;
+      }
+
+      .tool-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .tool-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .tool-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .tool-icon {
+        margin-right: 8px;
+        color: #007bff;
+      }
+
+      .tool-actions button {
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        margin-left: 4px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .tool-actions button:hover {
+        background-color: #dee2e6;
+        color: #007bff;
+      }
+
+      .add-tool-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 6px;
+        background-color: transparent;
+        border: 1px dashed #007bff;
+        border-radius: 4px;
+        color: #007bff;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s ease;
+      }
+
+      .add-tool-btn:hover {
+        background-color: #e3f2fd;
+        border-style: solid;
+      }
+
+      /* 连接线样式 */
+      .connection {
+        position: absolute;
+        height: 2px;
+        background-color: #007bff;
+        z-index: 50;
+        transform-origin: 0 50%;
+      }
+
+      .connection:after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: -4px;
+        width: 10px;
+        height: 10px;
+        background-color: #007bff;
+        border-radius: 50%;
+      }
+
+      /* 工具栏按钮样式 */
+      .toolbar {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        padding: 8px;
+        z-index: 200;
+      }
+
+      .toolbar-btn {
+        display: block;
+        width: 40px;
+        height: 40px;
+        background-color: transparent;
+        border: none;
+        border-radius: 4px;
+        color: #6c757d;
+        cursor: pointer;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .toolbar-btn:last-child {
+        margin-bottom: 0;
+      }
+
+      .toolbar-btn:hover {
+        background-color: #f8f9fa;
+        color: #007bff;
+      }
+
+      /* 模态框样式 */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+
+      .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .close-btn:hover {
+        background-color: #f8f9fa;
+        color: #000;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .modal-footer {
+        padding: 16px 20px;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      .modal-footer button {
+        margin-left: 8px;
+      }
+
+      /* 工具选择卡片样式 */
+      .tool-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 12px;
+      }
+
+      .tool-card:hover {
+        border-color: #007bff;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+      }
+
+      .tool-card.selected {
+        border-color: #007bff;
+        background-color: #e3f2fd;
+      }
+
+      .tool-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .tool-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-right: 12px;
+      }
+
+      .tool-card-title {
+        font-weight: 500;
+        margin: 0;
+      }
+
+      .tool-card-desc {
+        color: #6c757d;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      /* 表单样式 */
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+
+      /* 选择列表样式 */
+      .select-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 4px;
+      }
+
+      .select-item {
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        transition: background-color 0.2s ease;
+      }
+
+      .select-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .select-item:hover {
+        background-color: #f8f9fa;
+      }
+
+      .select-item.selected {
+        background-color: #007bff;
+        color: white;
+      }
+
+      /* 提示框样式 */
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        z-index: 3000;
+        animation: slideIn 0.3s ease;
+      }
+
+      .toast i {
+        margin-right: 8px;
+      }
+
+      .toast-success {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .toast-info {
+        background-color: #e3f2fd;
+        color: #0277bd;
+      }
+
+      .toast-warning {
+        background-color: #fff3e0;
+        color: #ef6c00;
+      }
+
+      .toast-error {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 侧边栏导航 -->
+    <div class="sidebar">
         <div class="sidebar-header">
-            <h3>数据扩展平台</h3>
-            <button id="toggle-sidebar" class="btn btn-light">
-                <i class="fas fa-bars"></i>
-            </button>
+            <h1>DataAnnotate</h1>
         </div>
-        <nav class="nav flex-column">
-            <a class="nav-link" href="index.html">
-                <i class="fas fa-home mr-2"></i>首页
-            </a>
-            <a class="nav-link" href="dashboard.html">
-                <i class="fas fa-chart-bar mr-2"></i>仪表盘
-            </a>
-            <a class="nav-link" href="task_market.html">
-                <i class="fas fa-store mr-2"></i>任务市场
-            </a>
-            <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle active" href="#" id="taskFlowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-tasks mr-2"></i>任务执行流程
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link " href="index.html">
+                    <i class="nav-icon fas fa-home"></i>
+                    <span>平台首页</span>
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="taskFlowDropdown">
-                    <li><a class="dropdown-item" href="dimension_design.html">维度定义工具</a></li>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="task_market.html">
+                    <i class="nav-icon fas fa-shopping-bag"></i>
+                    <span>任务市场</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-tasks"></i>
+                    <span>我的任务</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <div class="nav-link dropdown-toggle cursor-pointer" data-bs-toggle="dropdown">
+                    <i class="nav-icon fas fa-project-diagram"></i>
+                    <span>任务执行流程</span>
+                </div>
+                <ul class="dropdown-menu w-100">
+                    <li><a class="dropdown-item " href="dimension_design.html">维度定义工具</a></li>
                     <li><a class="dropdown-item active" href="data_prepopulate.html">数据预填充</a></li>
                     <li><a class="dropdown-item" href="data_cleaning.html">清洗工作台</a></li>
                     <li><a class="dropdown-item" href="work_order.html">工单发布</a></li>
                     <li><a class="dropdown-item" href="result_submit.html">结果提交</a></li>
                 </ul>
-            </div>
-            <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="supportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-cogs mr-2"></i>支撑模块
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-chart-bar"></i>
+                    <span>数据统计</span>
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="supportDropdown">
-                    <li><a class="dropdown-item" href="user_management.html">用户 & 权限管理</a></li>
-                    <li><a class="dropdown-item" href="model_management.html">AI 模型管理</a></li>
-                    <li><a class="dropdown-item" href="system_tools.html">系统工具</a></li>
-                </ul>
-            </div>
-        </nav>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-cog"></i>
+                    <span>系统设置</span>
+                </a>
+            </li>
+        </ul>
     </div>
 
     <!-- 主内容区域 -->
-    <div class="main-content" id="main-content">
-        <!-- 顶部导航栏 -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-                <div class="user-info">
-                    <span class="welcome">欢迎，管理员</span>
-                    <button class="btn btn-sm btn-outline-secondary ml-2">
-                        <i class="fas fa-user-circle"></i>
-                    </button>
-                </div>
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge bg-danger">3</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
-                        <li><a class="dropdown-item" href="#">您有3个待处理工单</a></li>
-                        <li><a class="dropdown-item" href="#">新的任务已发布</a></li>
-                        <li><a class="dropdown-item" href="#">系统将于明天进行维护</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <!-- 页面内容 -->
+    <div class="main-content">
+      <!-- 顶部导航栏 -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-white">
         <div class="container-fluid">
-            <div class="content-section" id="data-prepopulate">
-                <div class="task-header mb-4">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <h1>数据预填充</h1>
-                            <div class="task-info">
-                                <span class="task-name">当前任务：心电图数据扩展</span>
-                                <span class="task-id">DS-2024-006</span>
-                                <span class="task-status">
-                                    <span class="badge bg-info">进行中</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-right">
-                            <div class="model-info">
-                                <span>使用模型：医学大模型 v2.0</span>
-                                <button class="btn btn-sm btn-outline-secondary ml-2">切换模型</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 任务进度条 -->
-                <div class="task-progress mb-4">
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="progress-step completed">
-                                <div class="step-circle">1</div>
-                                <div class="step-name">维度定义</div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="progress-step active">
-                                <div class="step-circle">2</div>
-                                <div class="step-name">数据预填充</div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="progress-step">
-                                <div class="step-circle">3</div>
-                                <div class="step-name">数据清洗</div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="progress-step">
-                                <div class="step-circle">4</div>
-                                <div class="step-name">工单发布</div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="progress-step">
-                                <div class="step-circle">5</div>
-                                <div class="step-name">结果提交</div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="progress-time">
-                                <span>剩余时间：25天</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 质量评估 -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="card-title mb-0">预填充质量评估</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="quality-metric">
-                                    <div class="metric-value">92%</div>
-                                    <div class="metric-label">平均置信度</div>
-                                    <div class="metric-trend">
-                                        <i class="fas fa-arrow-up text-success"></i> 3% 较上一批次
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="quality-metric">
-                                    <div class="metric-value">95%</div>
-                                    <div class="metric-label">填充完成率</div>
-                                    <div class="metric-trend">
-                                        <i class="fas fa-arrow-up text-success"></i> 2% 较上一批次
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="quality-metric">
-                                    <div class="metric-value">5%</div>
-                                    <div class="metric-label">数据缺失率</div>
-                                    <div class="metric-trend">
-                                        <i class="fas fa-arrow-down text-success"></i> 1% 较上一批次
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="quality-metric">
-                                    <div class="metric-value">88%</div>
-                                    <div class="metric-label">字段准确率</div>
-                                    <div class="metric-trend">
-                                        <i class="fas fa-arrow-up text-success"></i> 4% 较上一批次
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <div class="chart-container">
-                                    <h5 class="chart-title">置信度分布</h5>
-                                    <canvas id="confidenceChart"></canvas>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="chart-container">
-                                    <h5 class="chart-title">字段填充率</h5>
-                                    <canvas id="fillRateChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 批量操作和筛选 -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4 class="card-title mb-0">数据列表</h4>
-                                <div class="total-count">共 5,000 条数据，当前显示第 1-50 条</div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <select class="form-control">
-                                            <option value="all">全部数据</option>
-                                            <option value="low-confidence">低置信度(&lt;70%)</option>
-                                            <option value="medium-confidence">中等置信度(70-90%)</option>
-                                            <option value="high-confidence">高置信度(&gt;90%)</option>
-                                            <option value="missing-data">含缺失数据</option>
-                                            <option value="no-missing-data">无缺失数据</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <select class="form-control">
-                                            <option value="50">50条/页</option>
-                                            <option value="100">100条/页</option>
-                                            <option value="200">200条/页</option>
-                                            <option value="500">500条/页</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4 text-right">
-                                        <button class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-redo-alt"></i> 重新预填充
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <!-- 批量操作工具栏 -->
-                        <div class="batch-operations mb-3">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="select-all">
-                                <label class="form-check-label" for="select-all">全选</label>
-                            </div>
-                            <span class="selected-count">已选择 0 项</span>
-                            <div class="operation-buttons ml-3">
-                                <button class="btn btn-outline-secondary btn-sm" disabled>
-                                    <i class="fas fa-check-circle"></i> 批量确认
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" disabled>
-                                    <i class="fas fa-ticket-alt"></i> 批量发工单
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" disabled>
-                                    <i class="fas fa-undo"></i> 批量重置
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 数据对比表格 -->
-                        <div class="data-comparison">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50px;"></th>
-                                        <th>ID</th>
-                                        <th>病人ID</th>
-                                        <th>检测日期</th>
-                                        <th>原始数据</th>
-                                        <th>AI预填充结果</th>
-                                        <th>置信度</th>
-                                        <th>缺失字段</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><input type="checkbox" class="data-select"></td>
-                                        <td>1</td>
-                                        <td>PT-2024-00123</td>
-                                        <td>2024-01-15</td>
-                                        <td class="raw-data">
-                                            <div class="waveform-mini">
-                                                <!-- 波形图预览 -->
-                                                <svg width="80" height="30" viewBox="0 0 80 30">
-                                                    <path d="M0,15 Q5,10 10,15 Q15,20 20,15 Q25,10 30,15 Q35,20 40,15 Q45,10 50,15 Q55,20 60,15 Q65,10 70,15 Q75,20 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
-                                                </svg>
-                                            </div>
-                                        </td>
-                                        <td class="ai-result">
-                                            <div class="field-group mini">
-                                                <div class="field-label">心率：</div>
-                                                <div>72次/分</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">节律：</div>
-                                                <div>窦性心律</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">结论：</div>
-                                                <div>大致正常心电图</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="confidence-badge high">96%</div>
-                                        </td>
-                                        <td>0</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">确认</button>
-                                            <button class="btn btn-sm btn-primary">详情</button>
-                                            <button class="btn btn-sm btn-warning">发工单</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox" class="data-select"></td>
-                                        <td>2</td>
-                                        <td>PT-2024-00124</td>
-                                        <td>2024-01-15</td>
-                                        <td class="raw-data">
-                                            <div class="waveform-mini">
-                                                <!-- 波形图预览 -->
-                                                <svg width="80" height="30" viewBox="0 0 80 30">
-                                                    <path d="M0,15 Q5,12 10,15 Q15,18 20,15 Q25,10 30,15 Q35,18 40,15 Q45,12 50,15 Q55,18 60,15 Q65,10 70,15 Q75,18 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
-                                                </svg>
-                                            </div>
-                                        </td>
-                                        <td class="ai-result">
-                                            <div class="field-group mini">
-                                                <div class="field-label">心率：</div>
-                                                <div>68次/分</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">节律：</div>
-                                                <div>窦性心律</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">结论：</div>
-                                                <div>正常心电图</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="confidence-badge high">98%</div>
-                                        </td>
-                                        <td>0</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">确认</button>
-                                            <button class="btn btn-sm btn-primary">详情</button>
-                                            <button class="btn btn-sm btn-warning">发工单</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox" class="data-select"></td>
-                                        <td>3</td>
-                                        <td>PT-2024-00125</td>
-                                        <td>2024-01-16</td>
-                                        <td class="raw-data">
-                                            <div class="waveform-mini">
-                                                <!-- 波形图预览 -->
-                                                <svg width="80" height="30" viewBox="0 0 80 30">
-                                                    <path d="M0,15 Q5,5 10,15 Q15,25 20,15 Q25,5 30,15 Q35,25 40,15 Q45,5 50,15 Q55,25 60,15 Q65,5 70,15 Q75,25 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
-                                                </svg>
-                                            </div>
-                                        </td>
-                                        <td class="ai-result">
-                                            <div class="field-group mini">
-                                                <div class="field-label">心率：</div>
-                                                <div>95次/分</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">节律：</div>
-                                                <div>窦性心动过速</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">结论：</div>
-                                                <div>异常心电图</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="confidence-badge medium">85%</div>
-                                        </td>
-                                        <td>1</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">确认</button>
-                                            <button class="btn btn-sm btn-primary">详情</button>
-                                            <button class="btn btn-sm btn-warning">发工单</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox" class="data-select"></td>
-                                        <td>4</td>
-                                        <td>PT-2024-00126</td>
-                                        <td>2024-01-16</td>
-                                        <td class="raw-data">
-                                            <div class="waveform-mini">
-                                                <!-- 波形图预览 -->
-                                                <svg width="80" height="30" viewBox="0 0 80 30">
-                                                    <path d="M0,15 Q7,10 14,15 Q21,20 28,15 Q35,10 42,15 Q49,20 56,15 Q63,10 70,15 Q77,20 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
-                                                </svg>
-                                            </div>
-                                        </td>
-                                        <td class="ai-result">
-                                            <div class="field-group mini">
-                                                <div class="field-label">心率：</div>
-                                                <div>58次/分</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">节律：</div>
-                                                <div>窦性心动过缓</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">结论：</div>
-                                                <div class="missing-field">[缺失]</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="confidence-badge low">65%</div>
-                                        </td>
-                                        <td>2</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">确认</button>
-                                            <button class="btn btn-sm btn-primary">详情</button>
-                                            <button class="btn btn-sm btn-warning">发工单</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="checkbox" class="data-select"></td>
-                                        <td>5</td>
-                                        <td>PT-2024-00127</td>
-                                        <td>2024-01-17</td>
-                                        <td class="raw-data">
-                                            <div class="waveform-mini">
-                                                <!-- 波形图预览 -->
-                                                <svg width="80" height="30" viewBox="0 0 80 30">
-                                                    <path d="M0,15 Q5,12 10,15 Q15,20 20,15 Q25,15 30,15 Q35,18 40,15 Q45,12 50,15 Q55,20 60,15 Q65,15 70,15 Q75,18 80,15" fill="none" stroke="#6c757d" stroke-width="1"/>
-                                                </svg>
-                                            </div>
-                                        </td>
-                                        <td class="ai-result">
-                                            <div class="field-group mini">
-                                                <div class="field-label">心率：</div>
-                                                <div>75次/分</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">节律：</div>
-                                                <div>窦性心律</div>
-                                            </div>
-                                            <div class="field-group mini">
-                                                <div class="field-label">结论：</div>
-                                                <div>ST段轻度改变，建议结合临床</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="confidence-badge high">92%</div>
-                                        </td>
-                                        <td>0</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">确认</button>
-                                            <button class="btn btn-sm btn-primary">详情</button>
-                                            <button class="btn btn-sm btn-warning">发工单</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- 分页 -->
-                        <div class="pagination justify-content-center mt-4">
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">5</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="processing-stats">
-                                    <span class="stat-item">已确认：1,250 条</span>
-                                    <span class="stat-item">待处理：3,750 条</span>
-                                    <span class="stat-item">已发工单：128 条</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6 text-right">
-                                <button class="btn btn-secondary">上一步</button>
-                                <button class="btn btn-primary">下一步</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <h4 class="mb-0">AI模型预填充 - 画布式工作流编辑器</h4>
+          <div class="ml-auto">
+            <button class="btn btn-primary" id="save-workflow-btn">
+              <i class="fa fa-save mr-1"></i>保存工作流
+            </button>
+            <button
+              class="btn btn-outline-secondary ml-2"
+              id="reset-workflow-btn"
+            >
+              <i class="fa fa-undo mr-1"></i>重置
+            </button>
+            <button class="btn btn-outline-secondary ml-2" id="view-data-btn">
+              <i class="fa fa-eye mr-1"></i>查看数据
+            </button>
+            <button class="btn btn-success ml-2" id="execute-workflow-btn">
+              <i class="fa fa-play mr-1"></i>执行工作流
+            </button>
+          </div>
         </div>
+      </nav>
+
+      <!-- 扩展器类型选择 -->
+      <div class="p-4 bg-light border-bottom">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">选择扩展器类型</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-3 mb-4">
+                <div class="expander-card" id="ruleExpander">
+                  <i class="fa fa-code"></i>
+                  <h6>规则扩展器</h6>
+                  <p class="text-sm text-muted">
+                    使用SQL表达式或内置函数创建衍生字段
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-3 mb-4">
+                <div class="expander-card" id="externalDataConnector">
+                  <i class="fa fa-plug"></i>
+                  <h6>外部数据连接器</h6>
+                  <p class="text-sm text-muted">
+                    连接外部API或数据库获取新字段
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-3 mb-4">
+                <div class="expander-card" id="internalDataConnector">
+                  <i class="fa fa-database"></i>
+                  <h6>内部数据连接器</h6>
+                  <p class="text-sm text-muted">从工作台自有数据库中提取数据</p>
+                </div>
+              </div>
+              <div class="col-md-3 mb-4">
+                <div class="expander-card" id="aiFiller">
+                  <i class="fa fa-magic"></i>
+                  <h6>AI填充器</h6>
+                  <p class="text-sm text-muted">
+                    使用预训练模型或自定义模型生成特征
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 画布容器 -->
+      <div class="canvas-container">
+        <!-- 画布区域 -->
+        <div id="canvas"></div>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+          <button class="toolbar-btn" id="zoom-in-btn" title="放大">
+            <i class="fas fa-search-plus"></i>
+          </button>
+          <button class="toolbar-btn" id="zoom-out-btn" title="缩小">
+            <i class="fas fa-search-minus"></i>
+          </button>
+          <button class="toolbar-btn" id="zoom-reset-btn" title="重置视图">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- 数据详情模态框 -->
-    <div class="modal fade" id="data-detail-modal" tabindex="-1" role="dialog" aria-labelledby="data-detail-modal-label" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="data-detail-modal-label">数据详情 - 对比视图</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <!-- 左侧原始数据 -->
-                        <div class="col-md-6">
-                            <div class="data-section">
-                                <div class="section-header">
-                                    <h6>原始数据</h6>
-                                    <div class="data-id">ID: PT-2024-00123</div>
-                                </div>
-                                <div class="section-content">
-                                    <div class="field-group">
-                                        <div class="field-label">病人ID：</div>
-                                        <div class="field-value">PT-2024-00123</div>
-                                    </div>
-                                    <div class="field-group">
-                                        <div class="field-label">检测日期：</div>
-                                        <div class="field-value">2024-01-15</div>
-                                    </div>
-                                    <div class="field-group">
-                                        <div class="field-label">心电图波形：</div>
-                                        <div class="waveform-preview">
-                                            <!-- 波形图预览 -->
-                                            <svg width="100%" height="100" viewBox="0 0 500 100">
-                                                <path d="M0,50 Q12.5,40 25,50 Q37.5,60 50,50 Q62.5,40 75,50 Q87.5,60 100,50 Q112.5,40 125,50 Q137.5,60 150,50 Q162.5,40 175,50 Q187.5,60 200,50 Q212.5,40 225,50 Q237.5,60 250,50 Q262.5,40 275,50 Q287.5,60 300,50 Q312.5,40 325,50 Q337.5,60 350,50 Q362.5,40 375,50 Q387.5,60 400,50 Q412.5,40 425,50 Q437.5,60 450,50 Q462.5,40 475,50 Q487.5,60 500,50" fill="none" stroke="#6c757d" stroke-width="2"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="field-group">
-                                        <div class="field-label">临床记录：</div>
-                                        <div class="field-value">45岁男性患者，因常规体检行心电图检查。既往体健，无高血压、糖尿病病史，无家族性心脏病史。</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 右侧AI预填充结果 -->
-                        <div class="col-md-6">
-                            <div class="data-section">
-                                <div class="section-header">
-                                    <h6>AI预填充结果</h6>
-                                    <div class="confidence-score">置信度：96%</div>
-                                </div>
-                                <div class="section-content">
-                                    <div class="dimension-group">
-                                        <div class="dimension-title">基本信息</div>
-                                        <div class="field-group">
-                                            <div class="field-label">病人ID：</div>
-                                            <div class="field-value">PT-2024-00123</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">检测日期：</div>
-                                            <div class="field-value">2024-01-15</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">年龄：</div>
-                                            <div class="field-value">45</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">性别：</div>
-                                            <div class="field-value">男</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="dimension-group">
-                                        <div class="dimension-title">心电图波形分析</div>
-                                        <div class="field-group">
-                                            <div class="field-label">心率：</div>
-                                            <div class="field-value">72次/分</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">节律：</div>
-                                            <div class="field-value">窦性心律，节律整齐</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">P波分析：</div>
-                                            <div class="field-value">形态正常，时限0.10秒，振幅0.25mV</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">QRS波分析：</div>
-                                            <div class="field-value">形态正常，时限0.08秒</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">ST段分析：</div>
-                                            <div class="field-value">无明显偏移</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">T波分析：</div>
-                                            <div class="field-value">形态正常，振幅0.3mV</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="dimension-group">
-                                        <div class="dimension-title">异常识别</div>
-                                        <div class="field-group">
-                                            <div class="field-label">异常类型：</div>
-                                            <div class="field-value">未发现明显异常</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="dimension-group">
-                                        <div class="dimension-title">初步诊断</div>
-                                        <div class="field-group">
-                                            <div class="field-label">诊断结论：</div>
-                                            <div class="field-value">大致正常心电图</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">诊断依据：</div>
-                                            <div class="field-value">心率在正常范围内，各波形参数均符合正常标准，无明显ST-T改变</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="dimension-group">
-                                        <div class="dimension-title">临床建议</div>
-                                        <div class="field-group">
-                                            <div class="field-label">进一步检查建议：</div>
-                                            <div class="field-value">定期体检，必要时复查心电图</div>
-                                        </div>
-                                        <div class="field-group">
-                                            <div class="field-label">随访建议：</div>
-                                            <div class="field-value">每年进行一次心电图检查</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- AI分析和修改建议 -->
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="ai-analysis">
-                                <div class="analysis-header">
-                                    <i class="fas fa-robot text-primary"></i>
-                                    <span>AI分析说明</span>
-                                </div>
-                                <div class="analysis-content">
-                                    <p>本次分析基于医学大模型v2.0，对心电图波形进行了多维度分析。分析结果显示，该心电图波形规则，各参数均在正常范围内，未发现明显异常。AI对心率、节律、P波、QRS波、ST段和T波的分析结果置信度较高。</p>
-                                    <p class="highlight">建议：该条数据AI分析结果质量良好，可以直接确认通过。</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary">修改</button>
-                    <button type="button" class="btn btn-warning">发工单</button>
-                    <button type="button" class="btn btn-success">确认结果</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                </div>
-            </div>
+    <!-- 工具选择模态框 -->
+    <div class="modal" id="tool-select-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">选择工具</h5>
+          <button type="button" class="close-btn" id="close-tool-select-modal">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+        <div class="modal-body">
+          <div class="tool-card" data-tool-type="data-rule">
+            <div class="tool-card-header">
+              <div class="tool-card-icon">
+                <i class="fas fa-calculator"></i>
+              </div>
+              <h6 class="tool-card-title">数据规则定义工具</h6>
+            </div>
+            <p class="tool-card-desc">
+              使用数学表达式或业务规则定义数据处理逻辑
+            </p>
+          </div>
+          <div class="tool-card" data-tool-type="data-cleaning">
+            <div class="tool-card-header">
+              <div class="tool-card-icon">
+                <i class="fas fa-broom"></i>
+              </div>
+              <h6 class="tool-card-title">数据清洗工具</h6>
+            </div>
+            <p class="tool-card-desc">处理缺失值、异常值，标准化或规范化数据</p>
+          </div>
+          <div class="tool-card" data-tool-type="annotation-model">
+            <div class="tool-card-header">
+              <div class="tool-card-icon">
+                <i class="fas fa-robot"></i>
+              </div>
+              <h6 class="tool-card-title">标注模型</h6>
+            </div>
+            <p class="tool-card-desc">使用预训练模型自动标注数据</p>
+          </div>
+          <div class="tool-card" data-tool-type="custom-tool">
+            <div class="tool-card-header">
+              <div class="tool-card-icon">
+                <i class="fas fa-wrench"></i>
+              </div>
+              <h6 class="tool-card-title">自定义工具</h6>
+            </div>
+            <p class="tool-card-desc">使用自定义脚本或代码处理数据</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="cancel-tool-select"
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="confirm-tool-select"
+          >
+            确认
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- 批量操作确认模态框 -->
-    <div class="modal fade" id="batch-operation-modal" tabindex="-1" role="dialog" aria-labelledby="batch-operation-modal-label" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="batch-operation-modal-label">批量操作确认</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="operation-info">
-                        <div class="info-item">
-                            <span class="info-label">操作类型：</span>
-                            <span class="info-value">批量确认</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">选择项数：</span>
-                            <span class="info-value">15 条</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">平均置信度：</span>
-                            <span class="info-value">92%</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">缺失字段数：</span>
-                            <span class="info-value">0</span>
-                        </div>
-                    </div>
-                    <div class="operation-warning">
-                        <i class="fas fa-exclamation-triangle text-warning"></i>
-                        <span>批量确认后，这些数据将直接进入结果提交阶段，无法撤销。请确认您已检查这些数据的质量。</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-success">确认操作</button>
-                </div>
-            </div>
+    <!-- 工具配置模态框 -->
+    <div class="modal" id="tool-config-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tool-config-title">配置工具</h5>
+          <button type="button" class="close-btn" id="close-tool-config-modal">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+        <div class="modal-body">
+          <input type="hidden" id="config-node-id" />
+          <input type="hidden" id="config-tool-id" />
+          <input type="hidden" id="config-tool-type" />
+
+          <div class="form-group">
+            <label for="tool-name" class="form-label">工具名称</label>
+            <input
+              type="text"
+              class="form-control"
+              id="tool-name"
+              placeholder="输入工具名称"
+            />
+          </div>
+
+          <!-- 数据规则定义配置 -->
+          <div class="tool-config-content" id="data-rule-config">
+            <div class="form-group">
+              <label for="rule-formula" class="form-label">计算公式/规则</label>
+              <textarea
+                class="form-control"
+                id="rule-formula"
+                rows="3"
+                placeholder="输入计算公式，例如：(max_value - min_value) / avg_value"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="output-field" class="form-label">输出字段名称</label>
+              <input
+                type="text"
+                class="form-control"
+                id="output-field"
+                placeholder="输入输出字段名称"
+              />
+            </div>
+          </div>
+
+          <!-- 数据清洗配置 -->
+          <div class="tool-config-content" id="data-cleaning-config">
+            <div class="form-group">
+              <label for="cleaning-method" class="form-label">清洗方法</label>
+              <select class="form-control" id="cleaning-method">
+                <option value="missing-values">处理缺失值</option>
+                <option value="outliers">处理异常值</option>
+                <option value="normalization">数据标准化</option>
+                <option value="standardization">数据规范化</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cleaning-params" class="form-label">清洗参数</label>
+              <textarea
+                class="form-control"
+                id="cleaning-params"
+                rows="2"
+                placeholder="输入清洗参数，例如：{'strategy': 'mean'}"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- 标注模型配置 -->
+          <div class="tool-config-content" id="annotation-model-config">
+            <div class="form-group">
+              <label for="model-name" class="form-label">模型名称</label>
+              <select class="form-control" id="model-name">
+                <option value="ecg-classification">ECG分类模型</option>
+                <option value="image-segmentation">图像分割模型</option>
+                <option value="text-classification">文本分类模型</option>
+                <option value="custom">自定义模型</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="model-threshold" class="form-label">置信度阈值</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                class="form-control"
+                id="model-threshold"
+                value="0.8"
+              />
+            </div>
+            <div class="form-group">
+              <label for="annotation-target" class="form-label"
+                >标注目标字段</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="annotation-target"
+                placeholder="输入要标注的目标字段"
+              />
+            </div>
+          </div>
+
+          <!-- 自定义工具配置 -->
+          <div class="tool-config-content" id="custom-tool-config">
+            <div class="form-group">
+              <label for="custom-tool-type" class="form-label"
+                >自定义工具类型</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="custom-tool-type"
+                placeholder="输入工具类型"
+              />
+            </div>
+            <div class="form-group">
+              <label for="custom-tool-script" class="form-label"
+                >脚本/代码</label
+              >
+              <textarea
+                class="form-control"
+                id="custom-tool-script"
+                rows="4"
+                placeholder="输入自定义脚本或代码"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="custom-tool-desc" class="form-label">工具描述</label>
+              <textarea
+                class="form-control"
+                id="custom-tool-desc"
+                rows="2"
+                placeholder="输入工具描述"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="cancel-tool-config"
+          >
+            取消
+          </button>
+          <button type="button" class="btn btn-primary" id="save-tool-config">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 扩展器配置模态框 -->
+    <div class="modal" id="expander-config-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="expander-config-title">配置扩展器</h5>
+          <button
+            type="button"
+            class="close-btn"
+            id="close-expander-config-modal"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="config-expander-type" />
+
+          <!-- 规则扩展器配置 -->
+          <div class="expander-config-content" id="rule-expander-config">
+            <div class="form-group">
+              <label for="dimensionName">维度名称</label>
+              <input
+                type="text"
+                class="form-control"
+                id="dimensionName"
+                placeholder="输入新维度的名称"
+              />
+            </div>
+            <div class="form-group">
+              <label for="dimensionDescription">维度描述</label>
+              <textarea
+                class="form-control"
+                id="dimensionDescription"
+                rows="2"
+                placeholder="输入新维度的描述"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="expressionType">表达式类型</label>
+              <select class="form-control" id="expressionType">
+                <option value="sql">SQL表达式</option>
+                <option value="function">内置函数</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="expression">表达式</label>
+              <textarea
+                class="form-control"
+                id="expression"
+                rows="3"
+                placeholder="输入SQL表达式或函数调用"
+              ></textarea>
+              <small class="form-text text-muted"
+                >示例: AVG(heart_rate) OVER (PARTITION BY patient_id)</small
+              >
+            </div>
+            <div class="form-group">
+              <label for="dataType">数据类型</label>
+              <select class="form-control" id="dataType">
+                <option value="string">字符串</option>
+                <option value="integer">整数</option>
+                <option value="float">浮点数</option>
+                <option value="boolean">布尔值</option>
+                <option value="date">日期</option>
+                <option value="time">时间</option>
+                <option value="datetime">日期时间</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>可用函数</label>
+              <div class="function-category">
+                <h6>数学函数</h6>
+                <div class="function-item">ABS()</div>
+                <div class="function-item">AVG()</div>
+                <div class="function-item">MAX()</div>
+                <div class="function-item">MIN()</div>
+                <div class="function-item">SUM()</div>
+                <div class="function-item">ROUND()</div>
+              </div>
+              <div class="function-category">
+                <h6>字符串函数</h6>
+                <div class="function-item">CONCAT()</div>
+                <div class="function-item">SUBSTRING()</div>
+                <div class="function-item">LOWER()</div>
+                <div class="function-item">UPPER()</div>
+                <div class="function-item">LENGTH()</div>
+              </div>
+              <div class="function-category">
+                <h6>日期函数</h6>
+                <div class="function-item">DATE()</div>
+                <div class="function-item">YEAR()</div>
+                <div class="function-item">MONTH()</div>
+                <div class="function-item">DAY()</div>
+                <div class="function-item">DATEDIFF()</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="dependency">依赖维度</label>
+              <select class="form-control" id="dependency" multiple>
+                <option value="image_data">图像数据</option>
+                <option value="sample_id">样本ID</option>
+                <option value="collection_date">采集日期</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>预览</label>
+              <div class="bg-light p-3 rounded">
+                <div class="text-sm">计算结果预览将显示在此处</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 外部数据连接器配置 -->
+          <div
+            class="expander-config-content"
+            id="external-data-connector-config"
+          >
+            <div class="form-group">
+              <label for="external-connector-name" class="form-label"
+                >维度名称</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="external-connector-name"
+                placeholder="输入新维度的名称"
+              />
+            </div>
+            <div class="form-group">
+              <label for="external-connector-desc" class="form-label"
+                >维度描述</label
+              >
+              <textarea
+                class="form-control"
+                id="external-connector-desc"
+                rows="2"
+                placeholder="输入新维度的描述"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="external-connector-type" class="form-label"
+                >连接器类型</label
+              >
+              <select class="form-control" id="external-connector-type">
+                <option value="api">API调用</option>
+                <option value="database">数据库连接</option>
+              </select>
+            </div>
+            <div class="form-group" id="api-connector-section">
+              <label for="api-url" class="form-label">API URL</label>
+              <input
+                type="text"
+                class="form-control"
+                id="api-url"
+                placeholder="例如: https://api.medicaldatabase.com/patient-info"
+              />
+            </div>
+            <div class="form-group" id="api-key-section">
+              <label for="api-key" class="form-label">API Key</label>
+              <input
+                type="text"
+                class="form-control"
+                id="api-key"
+                placeholder="输入API密钥"
+              />
+            </div>
+            <div class="form-group">
+              <label for="external-join-key" class="form-label">连接键</label>
+              <div class="row">
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="本数据集字段"
+                    value="patient_id"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="外部数据源字段"
+                    value="id"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="external-fields" class="form-label"
+                >选择外部字段</label
+              >
+              <select class="form-control" id="external-fields" multiple>
+                <option value="patient_age">年龄</option>
+                <option value="patient_gender">性别</option>
+                <option value="patient_history">病史</option>
+                <option value="medication">用药情况</option>
+                <option value="lab_results">实验室检查结果</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 内部数据连接器配置 -->
+          <div
+            class="expander-config-content"
+            id="internal-data-connector-config"
+          >
+            <div class="form-group">
+              <label for="internal-connector-name" class="form-label"
+                >维度名称</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="internal-connector-name"
+                placeholder="输入新维度的名称"
+              />
+            </div>
+            <div class="form-group">
+              <label for="internal-connector-desc" class="form-label"
+                >维度描述</label
+              >
+              <textarea
+                class="form-control"
+                id="internal-connector-desc"
+                rows="2"
+                placeholder="输入新维度的描述"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="internal-database" class="form-label"
+                >选择数据库</label
+              >
+              <select class="form-control" id="internal-database">
+                <option value="patient_records">患者记录数据库</option>
+                <option value="medical_history">病史数据库</option>
+                <option value="treatment_records">治疗记录数据库</option>
+                <option value="lab_test_results">实验室检查结果数据库</option>
+                <option value="imaging_studies">影像研究数据库</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="internal-table" class="form-label">选择数据表</label>
+              <select class="form-control" id="internal-table">
+                <option value="patients">患者信息表</option>
+                <option value="visits">就诊记录表</option>
+                <option value="diagnoses">诊断表</option>
+                <option value="procedures">手术记录表</option>
+                <option value="medications">用药记录表</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="internal-join-key" class="form-label">连接键</label>
+              <div class="row">
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="本数据集字段"
+                    value="patient_id"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="内部数据源字段"
+                    value="patient_id"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="internal-fields" class="form-label"
+                >选择内部字段</label
+              >
+              <select class="form-control" id="internal-fields" multiple>
+                <option value="birth_date">出生日期</option>
+                <option value="gender">性别</option>
+                <option value="height">身高</option>
+                <option value="weight">体重</option>
+                <option value="blood_type">血型</option>
+                <option value="allergies">过敏史</option>
+                <option value="previous_conditions">既往病史</option>
+                <option value="current_medications">当前用药</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- AI填充器配置 -->
+          <div class="expander-config-content" id="ai-filler-config">
+            <div class="form-group">
+              <label for="ai-filler-name" class="form-label">维度名称</label>
+              <input
+                type="text"
+                class="form-control"
+                id="ai-filler-name"
+                placeholder="输入新维度的名称"
+              />
+            </div>
+            <div class="form-group">
+              <label for="ai-filler-desc" class="form-label">维度描述</label>
+              <textarea
+                class="form-control"
+                id="ai-filler-desc"
+                rows="2"
+                placeholder="输入新维度的描述"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="ai-filler-model-type" class="form-label"
+                >模型类型</label
+              >
+              <select class="form-control" id="ai-filler-model-type">
+                <option value="preset">预置模型</option>
+                <option value="custom">自定义模型</option>
+              </select>
+            </div>
+            <div class="form-group" id="preset-model-section">
+              <label for="preset-model" class="form-label">选择预置模型</label>
+              <select class="form-control" id="preset-model">
+                <option value="cnn">卷积神经网络 (图像特征)</option>
+                <option value="sentence_transformer">
+                  SentenceTransformer (文本向量)
+                </option>
+                <option value="clip">CLIP (多模态特征)</option>
+                <option value="yolov5">YOLOv5 (目标检测)</option>
+              </select>
+            </div>
+            <div
+              class="form-group"
+              id="custom-model-section"
+              style="display: none"
+            >
+              <label for="custom-model-file" class="form-label"
+                >上传自定义模型 (ONNX格式)</label
+              >
+              <input
+                type="file"
+                class="form-control-file"
+                id="custom-model-file"
+              />
+              <small class="form-text text-muted">支持ONNX格式的模型文件</small>
+            </div>
+            <div class="form-group">
+              <label for="input-dimension" class="form-label">输入维度</label>
+              <select class="form-control" id="input-dimension">
+                <option value="image_data">图像数据</option>
+                <option value="metadata">元数据</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="output-dimension-type" class="form-label"
+                >输出数据类型</label
+              >
+              <select class="form-control" id="output-dimension-type">
+                <option value="vector">向量</option>
+                <option value="embedding">嵌入</option>
+                <option value="classification">分类</option>
+                <option value="regression">回归值</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>模型参数配置</label>
+              <div class="bg-light p-3 rounded">
+                <div class="form-group">
+                  <label for="batch-size" class="form-label">批大小</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="batch-size"
+                    value="32"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="confidence-threshold" class="form-label"
+                    >置信度阈值</label
+                  >
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    id="confidence-threshold"
+                    value="0.5"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="cancel-expander-config"
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="test-expander-config"
+          >
+            测试配置
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            id="save-expander-config"
+          >
+            保存配置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据查看模态框 -->
+    <div class="modal" id="data-view-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Mock数据查看</h5>
+          <button type="button" class="close-btn" id="close-data-view-modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-4">
+            <h6>基础数据：</h6>
+            <div class="data-card">
+              <div class="data-row">
+                <div class="data-label">病人ID：</div>
+                <div class="data-value">PT-2024-00123</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">检测日期：</div>
+                <div class="data-value">2024-01-15</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">年龄：</div>
+                <div class="data-value">45岁</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">性别：</div>
+                <div class="data-value">男</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">检测时长：</div>
+                <div class="data-value">10分钟</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h6>波形特征数据：</h6>
+            <div class="data-card">
+              <div class="data-row">
+                <div class="data-label">心率范围：</div>
+                <div class="data-value">60-100 BPM</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">RR间期数据：</div>
+                <div class="data-value calculated">
+                  780ms, 820ms, 800ms, 790ms, 810ms
+                </div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">平均心率：</div>
+                <div class="data-value calculated">75 BPM</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">QRS波宽度：</div>
+                <div class="data-value calculated">90 ms</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">PR间期：</div>
+                <div class="data-value calculated">160 ms</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">QT间期：</div>
+                <div class="data-value calculated">400 ms</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h6>诊断数据：</h6>
+            <div class="data-card">
+              <div class="data-row">
+                <div class="data-label">心率状态：</div>
+                <div class="data-value">正常</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">节律状态：</div>
+                <div class="data-value">窦性心律</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">异常类型：</div>
+                <div class="data-value">无</div>
+              </div>
+              <div class="data-row">
+                <div class="data-label">诊断结论：</div>
+                <div class="data-value">正常心电图</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="close-data-view">
+            关闭
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 确认执行模态框 -->
+    <div class="modal" id="execute-confirm-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">确认执行工作流</h5>
+          <button
+            type="button"
+            class="close-btn"
+            id="close-execute-confirm-modal"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle mr-2"></i>
+            系统将按照定义的工作流执行数据预填充，执行过程中可能需要人工干预。
+          </div>
+          <div class="mb-4">
+            <h6>执行设置：</h6>
+            <div class="form-group">
+              <label for="execute-mode" class="form-label">执行模式</label>
+              <select class="form-control" id="execute-mode">
+                <option value="auto">自动执行</option>
+                <option value="step-by-step">分步执行</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="execute-priority" class="form-label"
+                >执行优先级</label
+              >
+              <select class="form-control" id="execute-priority">
+                <option value="normal">正常</option>
+                <option value="high">高</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancel-execute">
+            取消
+          </button>
+          <button type="button" class="btn btn-primary" id="confirm-execute">
+            确认执行
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- 自定义脚本 -->
-    <script src="js/common.js"></script>
-    <script src="js/data_prepopulate.js"></script>
     <script>
-        // 初始化图表
-        document.addEventListener('DOMContentLoaded', function() {
-            // 置信度分布图
-            const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
-            const confidenceChart = new Chart(confidenceCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['0-50%', '51-70%', '71-80%', '81-90%', '91-100%'],
-                    datasets: [{
-                        label: '数据量',
-                        data: [50, 150, 500, 1800, 2500],
-                        backgroundColor: [
-                            'rgba(220, 53, 69, 0.7)',
-                            'rgba(255, 193, 7, 0.7)',
-                            'rgba(108, 117, 125, 0.7)',
-                            'rgba(0, 123, 255, 0.7)',
-                            'rgba(40, 167, 69, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(220, 53, 69, 1)',
-                            'rgba(255, 193, 7, 1)',
-                            'rgba(108, 117, 125, 1)',
-                            'rgba(0, 123, 255, 1)',
-                            'rgba(40, 167, 69, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
+      document.addEventListener("DOMContentLoaded", function () {
+        // 画布相关变量
+        const canvas = document.getElementById("canvas");
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let currentNode = null;
+        let scale = 1;
+        let pan = { x: 0, y: 0 };
+        let lastPan = { x: 0, y: 0 };
+
+        // 模态框相关变量
+        const toolSelectModal = document.getElementById("tool-select-modal");
+        const toolConfigModal = document.getElementById("tool-config-modal");
+        const expanderConfigModal = document.getElementById(
+          "expander-config-modal"
+        );
+        const dataViewModal = document.getElementById("data-view-modal");
+        const executeConfirmModal = document.getElementById(
+          "execute-confirm-modal"
+        );
+
+        // 当前选中的节点和工具
+        let selectedNodeId = null;
+        let selectedToolType = null;
+        let selectedToolId = null;
+        let selectedExpanderType = null;
+
+        // 工作流数据模型
+        let workflowData = {
+          nodes: [
+            {
+              id: 1,
+              title: "基础心电图数据",
+              x: 100,
+              y: 100,
+              status: "completed",
+              dimensions: [
+                { icon: "fa-file-medical", label: "病人ID：PT-2024-00123" },
+                { icon: "fa-calendar-alt", label: "检测日期：2024-01-15" },
+                { icon: "fa-heartbeat", label: "心率数据：60-100 BPM" },
+                { icon: "fa-chart-line", label: "原始波形数据" },
+              ],
+              tools: [],
+            },
+            {
+              id: 2,
+              title: "波形特征分析",
+              x: 400,
+              y: 100,
+              status: "pending",
+              dimensions: [
+                { icon: "fa-tachometer-alt", label: "平均心率：75 BPM" },
+                { icon: "fa-sync", label: "RR间期：800 ms" },
+                { icon: "fa-project-diagram", label: "QRS波宽度：90 ms" },
+              ],
+              tools: [],
+              dependencies: [1],
+            },
+            {
+              id: 3,
+              title: "异常识别",
+              x: 700,
+              y: 100,
+              status: "pending",
+              dimensions: [
+                { icon: "fa-exclamation-triangle", label: "异常波形检测：无" },
+                { icon: "fa-stethoscope", label: "异常类型判断：正常窦性心律" },
+              ],
+              tools: [],
+              dependencies: [2],
+            },
+            {
+              id: 4,
+              title: "初步诊断",
+              x: 400,
+              y: 300,
+              status: "pending",
+              dimensions: [
+                { icon: "fa-file-medical-alt", label: "诊断结论：正常心电图" },
+                {
+                  icon: "fa-book-medical",
+                  label: "诊断依据：所有参数在正常范围内",
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '数据量'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: '置信度范围'
-                            }
-                        }
-                    }
-                }
+              ],
+              tools: [],
+              dependencies: [2, 3],
+            },
+            {
+              id: 5,
+              title: "临床建议",
+              x: 700,
+              y: 300,
+              status: "pending",
+              dimensions: [
+                {
+                  icon: "fa-laptop-medical",
+                  label: "进一步检查建议：年度体检",
+                },
+                {
+                  icon: "fa-clipboard-list",
+                  label: "随访建议：无特殊随访需求",
+                },
+              ],
+              tools: [],
+              dependencies: [4],
+            },
+          ],
+        };
+
+        // 工具类型配置
+        const toolTypes = {
+          "data-rule": {
+            name: "数据规则定义工具",
+            icon: "fa-calculator",
+            configTemplate: "data-rule-config",
+          },
+          "data-cleaning": {
+            name: "数据清洗工具",
+            icon: "fa-broom",
+            configTemplate: "data-cleaning-config",
+          },
+          "annotation-model": {
+            name: "标注模型",
+            icon: "fa-robot",
+            configTemplate: "annotation-model-config",
+          },
+          "custom-tool": {
+            name: "自定义工具",
+            icon: "fa-wrench",
+            configTemplate: "custom-tool-config",
+          },
+        };
+
+        // 初始化画布
+        function initializeCanvas() {
+          // 渲染所有节点
+          renderNodes();
+          // 渲染连接线
+          renderConnections();
+
+          // 绑定画布事件
+          canvas.addEventListener("mousedown", handleCanvasMouseDown);
+          canvas.addEventListener("mousemove", handleCanvasMouseMove);
+          canvas.addEventListener("mouseup", handleCanvasMouseUp);
+          canvas.addEventListener("mouseleave", handleCanvasMouseUp);
+
+          // 绑定缩放事件
+          document
+            .getElementById("zoom-in-btn")
+            .addEventListener("click", function () {
+              scale = Math.min(scale + 0.1, 2);
+              updateCanvasTransform();
             });
 
-            // 字段填充率图
-            const fillRateCtx = document.getElementById('fillRateChart').getContext('2d');
-            const fillRateChart = new Chart(fillRateCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['基本信息', '波形分析', '异常识别', '初步诊断', '临床建议'],
-                    datasets: [{
-                        label: '填充率',
-                        data: [98, 95, 90, 88, 85],
-                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                        borderColor: 'rgba(0, 123, 255, 1)',
-                        pointBackgroundColor: 'rgba(0, 123, 255, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        r: {
-                            angleLines: {
-                                display: true
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 100
-                        }
-                    }
+          document
+            .getElementById("zoom-out-btn")
+            .addEventListener("click", function () {
+              scale = Math.max(scale - 0.1, 0.5);
+              updateCanvasTransform();
+            });
+
+          document
+            .getElementById("zoom-reset-btn")
+            .addEventListener("click", function () {
+              scale = 1;
+              pan = { x: 0, y: 0 };
+              updateCanvasTransform();
+            });
+
+          // 绑定工具栏按钮事件
+          document
+            .getElementById("save-workflow-btn")
+            .addEventListener("click", saveWorkflow);
+          document
+            .getElementById("reset-workflow-btn")
+            .addEventListener("click", resetWorkflow);
+          document
+            .getElementById("view-data-btn")
+            .addEventListener("click", openDataViewModal);
+          document
+            .getElementById("execute-workflow-btn")
+            .addEventListener("click", openExecuteConfirmModal);
+
+          // 绑定模态框事件
+          document
+            .getElementById("close-tool-select-modal")
+            .addEventListener("click", closeToolSelectModal);
+          document
+            .getElementById("cancel-tool-select")
+            .addEventListener("click", closeToolSelectModal);
+          document
+            .getElementById("confirm-tool-select")
+            .addEventListener("click", confirmToolSelect);
+
+          document
+            .getElementById("close-tool-config-modal")
+            .addEventListener("click", closeToolConfigModal);
+          document
+            .getElementById("cancel-tool-config")
+            .addEventListener("click", closeToolConfigModal);
+          document
+            .getElementById("save-tool-config")
+            .addEventListener("click", saveToolConfig);
+
+          document
+            .getElementById("close-data-view-modal")
+            .addEventListener("click", closeDataViewModal);
+          document
+            .getElementById("close-data-view")
+            .addEventListener("click", closeDataViewModal);
+
+          document
+            .getElementById("close-execute-confirm-modal")
+            .addEventListener("click", closeExecuteConfirmModal);
+          document
+            .getElementById("cancel-execute")
+            .addEventListener("click", closeExecuteConfirmModal);
+          document
+            .getElementById("confirm-execute")
+            .addEventListener("click", () => {
+              confirmExecute()
+              setTimeout(() => {
+                location.href = './execution-engine.html'
+              }, 200);
+            });
+
+          // 工具选择卡片点击事件
+          document.querySelectorAll(".tool-card").forEach((card) => {
+            card.addEventListener("click", function () {
+              document
+                .querySelectorAll(".tool-card")
+                .forEach((c) => c.classList.remove("selected"));
+              this.classList.add("selected");
+              selectedToolType = this.getAttribute("data-tool-type");
+            });
+          });
+
+          // 扩展器选择卡片点击事件
+          document.querySelectorAll(".expander-card").forEach((card) => {
+            card.addEventListener("click", function () {
+              const expanderId = this.id;
+              openExpanderConfigModal(expanderId);
+            });
+          });
+
+          // 扩展器配置模态框事件
+          document
+            .getElementById("close-expander-config-modal")
+            .addEventListener("click", closeExpanderConfigModal);
+          document
+            .getElementById("cancel-expander-config")
+            .addEventListener("click", closeExpanderConfigModal);
+          document
+            .getElementById("test-expander-config")
+            .addEventListener("click", testExpanderConfig);
+          document
+            .getElementById("save-expander-config")
+            .addEventListener("click", saveExpanderConfig);
+
+          // AI填充器模型类型切换
+          document
+            .getElementById("ai-filler-model-type")
+            .addEventListener("change", function () {
+              if (this.value === "custom") {
+                document.getElementById("preset-model-section").style.display =
+                  "none";
+                document.getElementById("custom-model-section").style.display =
+                  "block";
+              } else {
+                document.getElementById("preset-model-section").style.display =
+                  "block";
+                document.getElementById("custom-model-section").style.display =
+                  "none";
+              }
+            });
+
+          // 外部数据连接器类型切换
+          document
+            .getElementById("external-connector-type")
+            .addEventListener("change", function () {
+              if (this.value === "database") {
+                document.getElementById("api-connector-section").style.display =
+                  "none";
+                document.getElementById("api-key-section").style.display =
+                  "none";
+                // 这里可以添加数据库连接表单的显示逻辑
+              } else {
+                document.getElementById("api-connector-section").style.display =
+                  "block";
+                document.getElementById("api-key-section").style.display =
+                  "block";
+              }
+            });
+        }
+
+        // 渲染节点
+        function renderNodes() {
+          canvas.innerHTML = "";
+
+          workflowData.nodes.forEach((node) => {
+            const nodeEl = document.createElement("div");
+            nodeEl.className = "node";
+            nodeEl.dataset.nodeId = node.id;
+            nodeEl.style.left = `${node.x}px`;
+            nodeEl.style.top = `${node.y}px`;
+
+            // 设置节点状态样式
+            let statusText = "待处理";
+            let statusClass = "pending";
+            let statusIcon = "fa-clock";
+
+            if (node.status === "completed") {
+              statusText = "已完成";
+              statusClass = "completed";
+              statusIcon = "fa-check-circle";
+            } else if (node.status === "in-progress") {
+              statusText = "处理中";
+              statusClass = "in-progress";
+              statusIcon = "fa-spinner fa-spin";
+            } else if (node.status === "error") {
+              statusText = "需人工处理";
+              statusClass = "error";
+              statusIcon = "fa-exclamation-circle";
+            }
+
+            // 节点内容
+            nodeEl.innerHTML = `
+                        <div class="node-header">
+                            <div class="node-icon">
+                                <i class="fas ${getNodeIcon(node.id)}"></i>
+                            </div>
+                            <div class="node-title">${node.title}</div>
+                            <div class="node-status ${statusClass}">
+                                <i class="fas ${statusIcon}"></i> ${statusText}
+                            </div>
+                        </div>
+                        <div class="node-content">
+                            ${renderNodeDimensions(node.dimensions)}
+                            <div class="tools-container">
+                                ${renderNodeTools(node.tools)}
+                                <button class="add-tool-btn" data-node-id="${
+                                  node.id
+                                }">
+                                    <i class="fas fa-plus"></i> 添加工具
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+            // 绑定节点拖动事件
+            nodeEl.addEventListener("mousedown", function (e) {
+              e.stopPropagation();
+              isDragging = true;
+              currentNode = nodeEl;
+              const rect = nodeEl.getBoundingClientRect();
+              dragOffset.x = e.clientX - rect.left;
+              dragOffset.y = e.clientY - rect.top;
+              nodeEl.classList.add("dragging");
+            });
+
+            canvas.appendChild(nodeEl);
+          });
+
+          // 绑定添加工具按钮事件
+          document.querySelectorAll(".add-tool-btn").forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              selectedNodeId = parseInt(this.getAttribute("data-node-id"));
+              openToolSelectModal();
+            });
+          });
+
+          // 绑定工具操作按钮事件
+          document
+            .querySelectorAll(".tool-actions .edit-btn")
+            .forEach((btn) => {
+              btn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const toolId = parseInt(
+                  this.closest(".tool-item").getAttribute("data-tool-id")
+                );
+                const nodeId = parseInt(
+                  this.closest(".node").getAttribute("data-node-id")
+                );
+                editTool(nodeId, toolId);
+              });
+            });
+
+          document
+            .querySelectorAll(".tool-actions .delete-btn")
+            .forEach((btn) => {
+              btn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const toolId = parseInt(
+                  this.closest(".tool-item").getAttribute("data-tool-id")
+                );
+                const nodeId = parseInt(
+                  this.closest(".node").getAttribute("data-node-id")
+                );
+                deleteTool(nodeId, toolId);
+              });
+            });
+        }
+
+        // 获取节点图标
+        function getNodeIcon(nodeId) {
+          const icons = [
+            "fa-database",
+            "fa-wave-square",
+            "fa-search",
+            "fa-stethoscope",
+            "fa-user-md",
+          ];
+          return icons[nodeId - 1] || "fa-circle";
+        }
+
+        // 渲染节点维度
+        function renderNodeDimensions(dimensions) {
+          if (!dimensions || dimensions.length === 0) return "";
+
+          return dimensions
+            .map(
+              (dim) => `
+                    <div class="dimension-item">
+                        <div class="dimension-icon"><i class="fas ${dim.icon}"></i></div>
+                        <div>${dim.label}</div>
+                    </div>
+                `
+            )
+            .join("");
+        }
+
+        // 渲染节点工具
+        function renderNodeTools(tools) {
+          if (!tools || tools.length === 0) return "";
+
+          return tools
+            .map((tool) => {
+              const toolType = toolTypes[tool.type];
+              return `
+                        <div class="tool-item" data-tool-id="${tool.id}">
+                            <div class="tool-info">
+                                <div class="tool-icon"><i class="fas ${toolType.icon}"></i></div>
+                                <div>${tool.name}</div>
+                            </div>
+                            <div class="tool-actions">
+                                <button class="edit-btn" title="编辑"><i class="fas fa-edit"></i></button>
+                                <button class="delete-btn" title="删除"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+                    `;
+            })
+            .join("");
+        }
+
+        // 渲染连接线
+        function renderConnections() {
+          workflowData.nodes.forEach((node) => {
+            if (node.dependencies && node.dependencies.length > 0) {
+              node.dependencies.forEach((depId) => {
+                const depNode = workflowData.nodes.find((n) => n.id === depId);
+                if (depNode) {
+                  createConnection(depNode, node);
                 }
+              });
+            }
+          });
+        }
+
+        // 创建连接线
+        function createConnection(sourceNode, targetNode) {
+          const sourceEl = document.querySelector(
+            `.node[data-node-id="${sourceNode.id}"]`
+          );
+          const targetEl = document.querySelector(
+            `.node[data-node-id="${targetNode.id}"]`
+          );
+
+          if (sourceEl && targetEl) {
+            const sourceRect = sourceEl.getBoundingClientRect();
+            const targetRect = targetEl.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+
+            // 计算连接线起点和终点（相对于画布）
+            const sourceX =
+              sourceRect.left - canvasRect.left + sourceRect.width;
+            const sourceY =
+              sourceRect.top - canvasRect.top + sourceRect.height / 2;
+            const targetX = targetRect.left - canvasRect.left;
+            const targetY =
+              targetRect.top - canvasRect.top + targetRect.height / 2;
+
+            // 创建连接线元素
+            const connectionEl = document.createElement("div");
+            connectionEl.className = "connection";
+
+            // 计算连接线长度和角度
+            const length = Math.sqrt(
+              Math.pow(targetX - sourceX, 2) + Math.pow(targetY - sourceY, 2)
+            );
+            const angle =
+              (Math.atan2(targetY - sourceY, targetX - sourceX) * 180) /
+              Math.PI;
+
+            // 设置连接线样式
+            connectionEl.style.width = `${length}px`;
+            connectionEl.style.left = `${sourceX}px`;
+            connectionEl.style.top = `${sourceY}px`;
+            connectionEl.style.transform = `rotate(${angle}deg)`;
+
+            canvas.appendChild(connectionEl);
+          }
+        }
+
+        // 更新画布变换
+        function updateCanvasTransform() {
+          canvas.style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${scale})`;
+          canvas.style.transformOrigin = "0 0";
+        }
+
+        // 处理画布鼠标按下事件
+        function handleCanvasMouseDown(e) {
+          if (e.target === canvas && e.button === 0) {
+            // 左键点击画布空白处
+            isDragging = true;
+            lastPan = { x: e.clientX, y: e.clientY };
+          }
+        }
+
+        // 处理画布鼠标移动事件
+        function handleCanvasMouseMove(e) {
+          if (isDragging) {
+            if (currentNode) {
+              // 拖动节点
+              const canvasRect = canvas.getBoundingClientRect();
+              const x = e.clientX - canvasRect.left - dragOffset.x;
+              const y = e.clientY - canvasRect.top - dragOffset.y;
+
+              // 更新节点位置
+              currentNode.style.left = `${x}px`;
+              currentNode.style.top = `${y}px`;
+
+              // 更新节点数据
+              const nodeId = parseInt(currentNode.getAttribute("data-node-id"));
+              const node = workflowData.nodes.find((n) => n.id === nodeId);
+              if (node) {
+                node.x = x;
+                node.y = y;
+              }
+
+              // 清除旧连接线并重新渲染
+              clearConnections();
+              renderConnections();
+            } else {
+              // 拖动画布
+              const deltaX = e.clientX - lastPan.x;
+              const deltaY = e.clientY - lastPan.y;
+              pan.x += deltaX;
+              pan.y += deltaY;
+              lastPan = { x: e.clientX, y: e.clientY };
+              updateCanvasTransform();
+            }
+          }
+        }
+
+        // 处理画布鼠标松开事件
+        function handleCanvasMouseUp() {
+          isDragging = false;
+          currentNode = null;
+          document.querySelectorAll(".node.dragging").forEach((node) => {
+            node.classList.remove("dragging");
+          });
+        }
+
+        // 清除所有连接线
+        function clearConnections() {
+          document.querySelectorAll(".connection").forEach((conn) => {
+            conn.remove();
+          });
+        }
+
+        // 打开工具选择模态框
+        function openToolSelectModal() {
+          selectedToolType = null;
+          document.querySelectorAll(".tool-card").forEach((card) => {
+            card.classList.remove("selected");
+          });
+          toolSelectModal.style.display = "flex";
+        }
+
+        // 关闭工具选择模态框
+        function closeToolSelectModal() {
+          toolSelectModal.style.display = "none";
+        }
+
+        // 确认选择工具
+        function confirmToolSelect() {
+          if (selectedToolType) {
+            openToolConfigModal(selectedNodeId, null, selectedToolType);
+            closeToolSelectModal();
+          } else {
+            showToast("请选择一个工具", "warning");
+          }
+        }
+
+        // 打开工具配置模态框
+        function openToolConfigModal(nodeId, toolId, toolType = null) {
+          // 重置表单
+          document
+            .querySelectorAll(".tool-config-content")
+            .forEach((content) => {
+              content.style.display = "none";
+            });
+
+          // 保存当前节点和工具ID
+          document.getElementById("config-node-id").value = nodeId;
+          document.getElementById("config-tool-id").value = toolId;
+
+          // 显示对应的配置表单
+          const node = workflowData.nodes.find((n) => n.id === nodeId);
+
+          if (toolId) {
+            // 编辑模式
+            const tool = node.tools.find((t) => t.id === toolId);
+            if (tool) {
+              document.getElementById("tool-config-title").textContent =
+                "编辑工具";
+              document.getElementById("tool-name").value = tool.name;
+              document.getElementById("config-tool-type").value = tool.type;
+
+              // 显示对应工具类型的配置
+              const configTemplate = toolTypes[tool.type].configTemplate;
+              document.getElementById(configTemplate).style.display = "block";
+
+              // 加载工具配置
+              if (tool.config) {
+                loadToolConfig(tool.type, tool.config);
+              }
+            }
+          } else {
+            // 新增模式
+            document.getElementById("tool-config-title").textContent =
+              "添加工具";
+            document.getElementById("tool-name").value =
+              toolTypes[toolType].name;
+            document.getElementById("config-tool-type").value = toolType;
+
+            // 显示对应工具类型的配置
+            const configTemplate = toolTypes[toolType].configTemplate;
+            document.getElementById(configTemplate).style.display = "block";
+          }
+
+          toolConfigModal.style.display = "flex";
+        }
+
+        // 加载工具配置
+        function loadToolConfig(toolType, config) {
+          if (toolType === "data-rule") {
+            document.getElementById("rule-formula").value =
+              config.formula || "";
+            document.getElementById("output-field").value =
+              config.outputField || "";
+          } else if (toolType === "data-cleaning") {
+            document.getElementById("cleaning-method").value =
+              config.method || "missing-values";
+            document.getElementById("cleaning-params").value = JSON.stringify(
+              config.params || {},
+              null,
+              2
+            );
+          } else if (toolType === "annotation-model") {
+            document.getElementById("model-name").value =
+              config.modelName || "ecg-classification";
+            document.getElementById("model-threshold").value =
+              config.threshold || 0.8;
+            document.getElementById("annotation-target").value =
+              config.targetField || "";
+          } else if (toolType === "custom-tool") {
+            document.getElementById("custom-tool-type").value =
+              config.toolType || "";
+            document.getElementById("custom-tool-script").value =
+              config.script || "";
+            document.getElementById("custom-tool-desc").value =
+              config.description || "";
+          }
+        }
+
+        // 保存工具配置
+        function saveToolConfig() {
+          const nodeId = parseInt(
+            document.getElementById("config-node-id").value
+          );
+          const toolId = document.getElementById("config-tool-id").value;
+          const toolType = document.getElementById("config-tool-type").value;
+          const toolName = document.getElementById("tool-name").value;
+
+          if (!toolName.trim()) {
+            showToast("工具名称不能为空", "error");
+            return;
+          }
+
+          // 获取配置
+          const config = getToolConfig(toolType);
+
+          // 更新工作流数据
+          const node = workflowData.nodes.find((n) => n.id === nodeId);
+
+          if (toolId) {
+            // 编辑现有工具
+            const tool = node.tools.find((t) => t.id === parseInt(toolId));
+            if (tool) {
+              tool.name = toolName;
+              tool.config = config;
+            }
+          } else {
+            // 添加新工具
+            const newTool = {
+              id: Date.now(), // 简单的ID生成
+              type: toolType,
+              name: toolName,
+              config: config,
+            };
+            node.tools.push(newTool);
+          }
+
+          // 重新渲染节点
+          renderNodes();
+
+          // 关闭模态框
+          closeToolConfigModal();
+
+          // 显示成功提示
+          showToast("工具配置已保存", "success");
+        }
+
+        // 获取工具配置
+        function getToolConfig(toolType) {
+          if (toolType === "data-rule") {
+            return {
+              formula: document.getElementById("rule-formula").value,
+              outputField: document.getElementById("output-field").value,
+            };
+          } else if (toolType === "data-cleaning") {
+            return {
+              method: document.getElementById("cleaning-method").value,
+              params: document.getElementById("cleaning-params").value
+                ? JSON.parse(document.getElementById("cleaning-params").value)
+                : {},
+            };
+          } else if (toolType === "annotation-model") {
+            return {
+              modelName: document.getElementById("model-name").value,
+              threshold: parseFloat(
+                document.getElementById("model-threshold").value
+              ),
+              targetField: document.getElementById("annotation-target").value,
+            };
+          } else if (toolType === "custom-tool") {
+            return {
+              toolType: document.getElementById("custom-tool-type").value,
+              script: document.getElementById("custom-tool-script").value,
+              description: document.getElementById("custom-tool-desc").value,
+            };
+          }
+          return {};
+        }
+
+        // 编辑工具
+        function editTool(nodeId, toolId) {
+          const node = workflowData.nodes.find((n) => n.id === nodeId);
+          const tool = node.tools.find((t) => t.id === toolId);
+          if (tool) {
+            openToolConfigModal(nodeId, toolId);
+          }
+        }
+
+        // 删除工具
+        function deleteTool(nodeId, toolId) {
+          const node = workflowData.nodes.find((n) => n.id === nodeId);
+          node.tools = node.tools.filter((t) => t.id !== toolId);
+          renderNodes();
+          showToast("工具已删除", "info");
+        }
+
+        // 关闭工具配置模态框
+        function closeToolConfigModal() {
+          toolConfigModal.style.display = "none";
+        }
+
+        // 打开扩展器配置模态框
+        function openExpanderConfigModal(expanderType) {
+          // 重置表单
+          document
+            .querySelectorAll(".expander-config-content")
+            .forEach((content) => {
+              content.style.display = "none";
+            });
+
+          // 保存当前扩展器类型
+          document.getElementById("config-expander-type").value = expanderType;
+
+          // 设置模态框标题
+          let title = "配置扩展器";
+          if (expanderType === "ruleExpander") {
+            title = "配置规则扩展器";
+            document.getElementById("rule-expander-config").style.display =
+              "block";
+          } else if (expanderType === "externalDataConnector") {
+            title = "配置外部数据连接器";
+            document.getElementById(
+              "external-data-connector-config"
+            ).style.display = "block";
+          } else if (expanderType === "internalDataConnector") {
+            title = "配置内部数据连接器";
+            document.getElementById(
+              "internal-data-connector-config"
+            ).style.display = "block";
+          } else if (expanderType === "aiFiller") {
+            title = "配置AI填充器";
+            document.getElementById("ai-filler-config").style.display = "block";
+          }
+
+          document.getElementById("expander-config-title").textContent = title;
+          expanderConfigModal.style.display = "flex";
+        }
+
+        // 关闭扩展器配置模态框
+        function closeExpanderConfigModal() {
+          expanderConfigModal.style.display = "none";
+        }
+
+        // 测试扩展器配置
+        function testExpanderConfig() {
+          const expanderType = document.getElementById(
+            "config-expander-type"
+          ).value;
+
+          // 这里可以添加测试逻辑
+          // 模拟测试结果
+          showToast(`扩展器配置测试成功`, "success");
+        }
+
+        // 保存扩展器配置
+        function saveExpanderConfig() {
+          const expanderType = document.getElementById(
+            "config-expander-type"
+          ).value;
+
+          // 获取配置
+          let config = null;
+
+          if (expanderType === "ruleExpander") {
+            config = {
+              name: document.getElementById("rule-expander-name").value,
+              description: document.getElementById("rule-expander-desc").value,
+              expression: document.getElementById("rule-expander-expression")
+                .value,
+              datatype: document.getElementById("rule-expander-datatype").value,
+              inputFields: Array.from(
+                document.getElementById("rule-expander-input").selectedOptions
+              ).map((option) => option.value),
+            };
+          } else if (expanderType === "externalDataConnector") {
+            config = {
+              name: document.getElementById("external-connector-name").value,
+              description: document.getElementById("external-connector-desc")
+                .value,
+              connectorType: document.getElementById("external-connector-type")
+                .value,
+              apiUrl: document.getElementById("api-url").value,
+              apiKey: document.getElementById("api-key").value,
+              joinKey: "patient_id", // 简化示例
+              externalFields: Array.from(
+                document.getElementById("external-fields").selectedOptions
+              ).map((option) => option.value),
+            };
+          } else if (expanderType === "internalDataConnector") {
+            config = {
+              name: document.getElementById("internal-connector-name").value,
+              description: document.getElementById("internal-connector-desc")
+                .value,
+              database: document.getElementById("internal-database").value,
+              table: document.getElementById("internal-table").value,
+              joinKey: "patient_id", // 简化示例
+              internalFields: Array.from(
+                document.getElementById("internal-fields").selectedOptions
+              ).map((option) => option.value),
+            };
+          } else if (expanderType === "aiFiller") {
+            config = {
+              name: document.getElementById("ai-filler-name").value,
+              description: document.getElementById("ai-filler-desc").value,
+              modelType: document.getElementById("ai-filler-model-type").value,
+              modelName: document.getElementById("preset-model").value,
+              inputDimension: document.getElementById("input-dimension").value,
+              outputDimensionType: document.getElementById(
+                "output-dimension-type"
+              ).value,
+              params: {
+                batchSize: parseInt(
+                  document.getElementById("batch-size").value
+                ),
+                confidenceThreshold: parseFloat(
+                  document.getElementById("confidence-threshold").value
+                ),
+              },
+            };
+          }
+
+          // 检查必填字段
+          if (!config.name.trim()) {
+            showToast("维度名称不能为空", "error");
+            return;
+          }
+
+          // 模拟保存配置
+          console.log("保存扩展器配置:", config);
+
+          // 关闭模态框
+          closeExpanderConfigModal();
+
+          // 显示成功提示
+          showToast(`扩展器配置已保存`, "success");
+        }
+
+        // 打开数据查看模态框
+        function openDataViewModal() {
+          dataViewModal.style.display = "flex";
+        }
+
+        // 关闭数据查看模态框
+        function closeDataViewModal() {
+          dataViewModal.style.display = "none";
+        }
+
+        // 打开执行确认模态框
+        function openExecuteConfirmModal() {
+          executeConfirmModal.style.display = "flex";
+        }
+
+        // 关闭执行确认模态框
+        function closeExecuteConfirmModal() {
+          executeConfirmModal.style.display = "none";
+        }
+
+        // 确认执行工作流
+        function confirmExecute() {
+          const executeMode = document.getElementById("execute-mode").value;
+          const executePriority =
+            document.getElementById("execute-priority").value;
+
+          // 模拟执行工作流
+          simulateWorkflowExecution(executeMode);
+
+          // 关闭模态框
+          closeExecuteConfirmModal();
+
+          // 显示提示
+          showToast(
+            `工作流已开始执行（${
+              executeMode === "auto" ? "自动模式" : "分步模式"
+            }）`,
+            "info"
+          );
+        }
+
+        // 模拟工作流执行
+        function simulateWorkflowExecution(mode) {
+          if (mode === "auto") {
+            // 自动执行所有节点
+            let index = 0;
+            const interval = setInterval(() => {
+              if (index < workflowData.nodes.length) {
+                const node = workflowData.nodes[index];
+
+                // 检查依赖节点是否已完成
+                if (
+                  !node.dependencies ||
+                  node.dependencies.every((depId) => {
+                    const depNode = workflowData.nodes.find(
+                      (n) => n.id === depId
+                    );
+                    return depNode && depNode.status === "completed";
+                  })
+                ) {
+                  // 更新节点状态
+                  node.status = "in-progress";
+                  renderNodes();
+                  clearConnections();
+                  renderConnections();
+
+                  // 模拟处理时间
+                  setTimeout(() => {
+                    node.status = "completed";
+                    renderNodes();
+                    clearConnections();
+                    renderConnections();
+                  }, 1000);
+
+                  index++;
+                }
+              } else {
+                clearInterval(interval);
+                showToast("工作流执行完成！", "success");
+              }
+            }, 500);
+          } else {
+            // 分步执行（简化示例）
+            const firstPendingNode = workflowData.nodes.find(
+              (n) => n.status === "pending"
+            );
+            if (firstPendingNode) {
+              firstPendingNode.status = "in-progress";
+              renderNodes();
+              clearConnections();
+              renderConnections();
+
+              // 模拟处理时间
+              setTimeout(() => {
+                firstPendingNode.status = "completed";
+                renderNodes();
+                clearConnections();
+                renderConnections();
+                showToast("当前节点执行完成，请继续执行下一步", "info");
+              }, 1500);
+            } else {
+              showToast("工作流已全部执行完成！", "success");
+            }
+          }
+        }
+
+        // 保存工作流
+        function saveWorkflow() {
+          // 模拟保存
+          const workflowJson = JSON.stringify(workflowData, null, 2);
+          console.log("保存工作流:", workflowJson);
+
+          // 显示成功提示
+          showToast("工作流已保存", "success");
+        }
+
+        // 重置工作流
+        function resetWorkflow() {
+          // 重置节点状态
+          workflowData.nodes.forEach((node) => {
+            if (node.id !== 1) {
+              // 保留第一个节点的完成状态
+              node.status = "pending";
+            }
+          });
+
+          // 重新渲染
+          renderNodes();
+          clearConnections();
+          renderConnections();
+
+          // 显示提示
+          showToast("工作流已重置", "info");
+        }
+
+        // 显示提示框
+        function showToast(message, type = "info") {
+          const toast = document.createElement("div");
+          toast.className = `toast toast-${type}`;
+
+          let iconClass = "fa-info-circle";
+          if (type === "success") iconClass = "fa-check-circle";
+          else if (type === "warning") iconClass = "fa-exclamation-triangle";
+          else if (type === "error") iconClass = "fa-exclamation-circle";
+
+          toast.innerHTML = `
+                            <i class="fas ${iconClass}"></i>
+                            <span>${message}</span>
+                        `;
+
+          document.body.appendChild(toast);
+
+          // 3秒后自动移除
+          setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transition = "opacity 0.3s ease";
+            setTimeout(() => {
+              document.body.removeChild(toast);
+            }, 300);
+          }, 3000);
+        }
+
+        // 初始化画布
+        initializeCanvas();
+
+        // 绑定全局事件监听器
+        document.addEventListener("DOMContentLoaded", function () {
+          // 绑定工具栏按钮事件
+          document
+            .getElementById("btn-add-tool")
+            .addEventListener("click", function () {
+              showToast("请先选择一个节点", "info");
+            });
+
+          document
+            .getElementById("btn-data-view")
+            .addEventListener("click", openDataViewModal);
+          document
+            .getElementById("btn-execute")
+            .addEventListener("click", openExecuteConfirmModal);
+          document
+            .getElementById("btn-save")
+            .addEventListener("click", saveWorkflow);
+          document
+            .getElementById("btn-reset")
+            .addEventListener("click", resetWorkflow);
+
+          // 绑定扩展器类型选择事件
+          document.querySelectorAll(".expander-type-card").forEach((card) => {
+            card.addEventListener("click", function () {
+              const expanderType = this.getAttribute("data-type");
+              openExpanderConfigModal(expanderType);
+            });
+          });
+
+          // 绑定工具选择卡片事件
+          document.querySelectorAll(".tool-card").forEach((card) => {
+            card.addEventListener("click", function () {
+              // 移除其他卡片的选中状态
+              document.querySelectorAll(".tool-card").forEach((c) => {
+                c.classList.remove("selected");
+              });
+              // 添加当前卡片的选中状态
+              this.classList.add("selected");
+              // 保存选中的工具类型
+              selectedToolType = this.getAttribute("data-type");
+            });
+          });
+
+          // 绑定模态框关闭按钮事件
+          document.querySelectorAll(".close-modal").forEach((button) => {
+            button.addEventListener("click", function () {
+              const modalId = this.closest(".modal").id;
+              if (modalId === "tool-select-modal") closeToolSelectModal();
+              else if (modalId === "tool-config-modal") closeToolConfigModal();
+              else if (modalId === "expander-config-modal")
+                closeExpanderConfigModal();
+              else if (modalId === "data-view-modal") closeDataViewModal();
+              else if (modalId === "execute-confirm-modal")
+                closeExecuteConfirmModal();
+            });
+          });
+
+          // 点击模态框背景关闭模态框
+          document.querySelectorAll(".modal").forEach((modal) => {
+            modal.addEventListener("click", function (e) {
+              if (e.target === this) {
+                const modalId = this.id;
+                if (modalId === "tool-select-modal") closeToolSelectModal();
+                else if (modalId === "tool-config-modal")
+                  closeToolConfigModal();
+                else if (modalId === "expander-config-modal")
+                  closeExpanderConfigModal();
+                else if (modalId === "data-view-modal") closeDataViewModal();
+                else if (modalId === "execute-confirm-modal")
+                  closeExecuteConfirmModal();
+              }
+            });
+          });
+
+          // 防止模态框内容点击事件冒泡到背景
+          document.querySelectorAll(".modal-content").forEach((content) => {
+            content.addEventListener("click", function (e) {
+              e.stopPropagation();
+            });
+          });
+
+          // 绑定工具配置表单事件
+          document
+            .getElementById("btn-confirm-tool-config")
+            .addEventListener("click", saveToolConfig);
+          document
+            .getElementById("btn-cancel-tool-config")
+            .addEventListener("click", closeToolConfigModal);
+
+          // 绑定扩展器配置表单事件
+          document
+            .getElementById("btn-test-expander-config")
+            .addEventListener("click", testExpanderConfig);
+          document
+            .getElementById("btn-confirm-expander-config")
+            .addEventListener("click", saveExpanderConfig);
+          document
+            .getElementById("btn-cancel-expander-config")
+            .addEventListener("click", closeExpanderConfigModal);
+
+          // 绑定执行确认表单事件
+          document
+            .getElementById("btn-confirm-execute")
+            .addEventListener("click", confirmExecute);
+          document
+            .getElementById("btn-cancel-execute")
+            .addEventListener("click", closeExecuteConfirmModal);
+
+          // 绑定工具选择确认事件
+          document
+            .getElementById("btn-confirm-tool-select")
+            .addEventListener("click", confirmToolSelect);
+          document
+            .getElementById("btn-cancel-tool-select")
+            .addEventListener("click", closeToolSelectModal);
+
+          // 绑定AI填充器模型类型切换事件
+          document
+            .getElementById("ai-filler-model-type")
+            .addEventListener("change", function () {
+              const modelType = this.value;
+              document.getElementById("preset-model-container").style.display =
+                modelType === "preset" ? "block" : "none";
+              document.getElementById("custom-model-container").style.display =
+                modelType === "custom" ? "block" : "none";
+            });
+
+          // 绑定外部数据连接器类型切换事件
+          document
+            .getElementById("external-connector-type")
+            .addEventListener("change", function () {
+              const connectorType = this.value;
+              if (connectorType === "rest-api") {
+                document.getElementById("api-url-container").style.display =
+                  "block";
+                document.getElementById("api-key-container").style.display =
+                  "block";
+              } else if (connectorType === "websocket") {
+                document.getElementById("api-url-container").style.display =
+                  "block";
+                document.getElementById("api-key-container").style.display =
+                  "block";
+              } else {
+                document.getElementById("api-url-container").style.display =
+                  "none";
+                document.getElementById("api-key-container").style.display =
+                  "none";
+              }
+            });
+
+          // 画布缩放控制
+          document
+            .getElementById("zoom-in")
+            .addEventListener("click", function () {
+              zoom += 0.1;
+              updateCanvasTransform();
+            });
+
+          document
+            .getElementById("zoom-out")
+            .addEventListener("click", function () {
+              if (zoom > 0.3) {
+                zoom -= 0.1;
+                updateCanvasTransform();
+              }
+            });
+
+          document
+            .getElementById("zoom-reset")
+            .addEventListener("click", function () {
+              zoom = 1;
+              pan.x = 0;
+              pan.y = 0;
+              updateCanvasTransform();
             });
         });
+      });
     </script>
-</body>
+  </body>
 </html>
