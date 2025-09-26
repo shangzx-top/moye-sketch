@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>标注清洗任务管理 - 数据扩展平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #1abc9c;
+            --secondary-color: #95a5a6;
+            --light-bg: #f8f9fa;
+        }
+        
+        .task-card {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .split-step {
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: white;
+        }
+        
+        .split-step.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .step-number.completed {
+            background-color: var(--success-color);
+        }
+        
+        .step-number.pending {
+            background-color: var(--secondary-color);
+        }
+        
+        .recipient-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #e8f4fd;
+            border-radius: 20px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .recipient-tag .remove-btn {
+            margin-left: 8px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        .recipient-tag .remove-btn:hover {
+            color: var(--danger-color);
+        }
+        
+        /* 模态框动画 */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 300ms, transform 300ms;
+        }
+        
+        .modal-exit {
+            opacity: 1;
+        }
+        
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>数据扩展平台</h3>
+            <button id="toggle-sidebar" class="btn btn-light">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="nav flex-column">
+            <a class="dropdown-item active" href="index2.html"><i class="fas fa-store mr-2"></i>标注清洗任务管理</a>
+            <a class="nav-link" href="task_market.html">
+                <i class="fas fa-store mr-2"></i>任务市场
+            </a>
+        </nav>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content" id="main-content">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <span class="welcome">欢迎，管理员</span>
+                    <button class="btn btn-sm btn-outline-secondary ml-2">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-danger">3</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                        <li><a class="dropdown-item" href="#">您有3个待处理工单</a></li>
+                        <li><a class="dropdown-item" href="#">新的任务已发布</a></li>
+                        <li><a class="dropdown-item" href="#">系统将于明天进行维护</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div class="container-fluid">
+            <div class="content-section" id="annotation-cleaning-task">
+                <h1 class="mb-4">标注清洗任务管理</h1>
+
+                <!-- 任务概览统计 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-primary">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="metric-title">原始任务总数</div>
+                                <div class="metric-value">12</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 2</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="metric-title">已拆分任务</div>
+                                <div class="metric-value">8</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 3</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-warning">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <div class="metric-title">待拆分任务</div>
+                                <div class="metric-value">4</div>
+                                <div class="metric-change"><i class="fas fa-arrow-down text-danger"></i> 1</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card metric-card">
+                            <div class="card-body">
+                                <div class="metric-icon bg-info">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <div class="metric-title">已创建子任务</div>
+                                <div class="metric-value">56</div>
+                                <div class="metric-change"><i class="fas fa-arrow-up text-success"></i> 12</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务搜索和筛选 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">原始任务搜索与筛选</h4>
+                        <p>【这里的数据展示需要做一个接口数据聚合, 二次拆分的任务由 moye 保存展示】</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <input type="text" class="form-control" placeholder="搜索任务名称或关键词">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control">
+                                    <option value="all">全部状态</option>
+                                    <option value="pending">待拆分</option>
+                                    <option value="split">已拆分</option>
+                                    <option value="completed">已完成</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control">
+                                    <option value="all">全部类型</option>
+                                    <option value="text">文本数据</option>
+                                    <option value="image">图像数据</option>
+                                    <option value="medical">医疗数据</option>
+                                    <option value="structured">结构化数据</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control">
+                                    <option value="all">全部优先级</option>
+                                    <option value="high">高</option>
+                                    <option value="medium">中</option>
+                                    <option value="low">低</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <button class="btn btn-primary w-100">搜索</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 原始任务列表 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">原始任务列表</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>任务ID</th>
+                                        <th>任务名称</th>
+                                        <th>数据量</th>
+                                        <th>任务标签</th>
+                                        <th>面向人群/组织</th>
+                                        <th>优先级</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>HT-2024-001</td>
+                                        <td>医疗影像标注数据集</td>
+                                        <td>500,000</td>
+                                        <td>
+                                            <span class="task-tag bg-primary text-white">医疗数据</span>
+                                            <span class="task-tag bg-secondary text-white">图像识别</span>
+                                        </td>
+                                        <td>专业医疗机构</td>
+                                        <td><span class="badge bg-danger">高</span></td>
+                                        <td><span class="badge bg-warning">待拆分</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="openSplitModal('HT-2024-001', '医疗影像标注数据集', 500000)">
+                                                <i class="fas fa-project-diagram"></i> 任务拆分
+                                            </button>
+                                            <button class="btn btn-sm btn-info ml-2">
+                                                <i class="fas fa-eye"></i> 查看详情
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>HT-2024-002</td>
+                                        <td>智能客服对话数据清洗</td>
+                                        <td>1,200,000</td>
+                                        <td>
+                                            <span class="task-tag bg-info text-white">文本数据</span>
+                                            <span class="task-tag bg-warning text-white">自然语言处理</span>
+                                        </td>
+                                        <td>数据清洗团队</td>
+                                        <td><span class="badge bg-danger">高</span></td>
+                                        <td><span class="badge bg-warning">待拆分</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="openSplitModal('HT-2024-002', '智能客服对话数据清洗', 1200000)">
+                                                <i class="fas fa-project-diagram"></i> 任务拆分
+                                            </button>
+                                            <button class="btn btn-sm btn-info ml-2">
+                                                <i class="fas fa-eye"></i> 查看详情
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>HT-2024-003</td>
+                                        <td>用户行为日志标注</td>
+                                        <td>800,000</td>
+                                        <td>
+                                            <span class="task-tag bg-info text-white">文本数据</span>
+                                            <span class="task-tag bg-success text-white">用户行为</span>
+                                        </td>
+                                        <td>数据分析师团队</td>
+                                        <td><span class="badge bg-warning">中</span></td>
+                                        <td><span class="badge bg-success">已拆分</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-project-diagram"></i> 拆分详情
+                                            </button>
+                                            <button class="btn btn-sm btn-info ml-2">
+                                                <i class="fas fa-eye"></i> 查看详情
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>HT-2024-004</td>
+                                        <td>电商产品评论情感分析</td>
+                                        <td>650,000</td>
+                                        <td>
+                                            <span class="task-tag bg-info text-white">文本数据</span>
+                                            <span class="task-tag bg-warning text-white">情感分析</span>
+                                        </td>
+                                        <td>数据标注团队</td>
+                                        <td><span class="badge bg-warning">中</span></td>
+                                        <td><span class="badge bg-success">已拆分</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-project-diagram"></i> 拆分详情
+                                            </button>
+                                            <button class="btn btn-sm btn-info ml-2">
+                                                <i class="fas fa-eye"></i> 查看详情
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>HT-2024-005</td>
+                                        <td>自动驾驶场景分类标注</td>
+                                        <td>350,000</td>
+                                        <td>
+                                            <span class="task-tag bg-secondary text-white">图像识别</span>
+                                            <span class="task-tag bg-danger text-white">自动驾驶</span>
+                                        </td>
+                                        <td>AI研发团队</td>
+                                        <td><span class="badge bg-danger">高</span></td>
+                                        <td><span class="badge bg-warning">待拆分</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="openSplitModal('HT-2024-005', '自动驾驶场景分类标注', 350000)">
+                                                <i class="fas fa-project-diagram"></i> 任务拆分
+                                            </button>
+                                            <button class="btn btn-sm btn-info ml-2">
+                                                <i class="fas fa-eye"></i> 查看详情
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>HT-2024-006</td>
+                                        <td>金融风控数据清洗</td>
+                                        <td>420,000</td>
+                                        <td>
+                                            <span class="task-tag bg-info text-white">结构化数据</span>
+                                            <span class="task-tag bg-danger text-white">金融风控</span>
+                                        </td>
+                                        <td>金融风控团队</td>
+                                        <td><span class="badge bg-danger">高</span></td>
+                                        <td><span class="badge bg-success">已拆分</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-project-diagram"></i> 拆分详情
+                                            </button>
+                                            <button class="btn btn-sm btn-info ml-2">
+                                                <i class="fas fa-eye"></i> 查看详情
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务拆分模态框 -->
+    <div class="modal fade" id="splitTaskModal" tabindex="-1" aria-labelledby="splitTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="splitTaskModalLabel">原始任务拆分</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="splitTaskForm">
+                        <!-- 任务基本信息 -->
+                        <div class="mb-4">
+                            <h6>任务基本信息</h6>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="taskId" class="form-label">任务ID</label>
+                                    <input type="text" class="form-control" id="taskId" readonly>
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label for="taskName" class="form-label">任务名称</label>
+                                    <input type="text" class="form-control" id="taskName" readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="totalDataAmount" class="form-label">总数据量</label>
+                                    <input type="text" class="form-control" id="totalDataAmount" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 步骤指示器 -->
+                        <div class="mb-4">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <div class="step-number active">1</div>
+                                    <div class="step-name">选择拆分方式</div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="step-number pending">2</div>
+                                    <div class="step-name">配置子任务</div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="step-number pending">3</div>
+                                    <div class="step-name">分配与发布</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 步骤内容 -->
+                        <div class="split-steps">
+                            <!-- 步骤1：选择拆分方式 -->
+                            <div class="split-step active" id="step1">
+                                <h6><span class="step-number active">1</span>选择拆分方式</h6>
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">拆分方式</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="splitMethod" id="splitByCount" value="byCount" checked>
+                                            <label class="form-check-label" for="splitByCount">
+                                                按数量拆分：指定每个子任务的数据量
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="splitMethod" id="splitByNumTasks" value="byNumTasks">
+                                            <label class="form-check-label" for="splitByNumTasks">
+                                                按任务数量拆分：指定子任务数量
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="splitMethod" id="splitByCategory" value="byCategory">
+                                            <label class="form-check-label" for="splitByCategory">
+                                                按类别拆分：根据数据类别自动分组
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="splitMethod" id="splitByComplexity" value="byComplexity">
+                                            <label class="form-check-label" for="splitByComplexity">
+                                                按复杂度拆分：根据数据复杂度自动分组
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div id="splitByCountConfig" class="mb-3">
+                                        <label for="subTaskSize" class="form-label">每个子任务数据量</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="subTaskSize" min="1" placeholder="请输入每个子任务的数据量">
+                                            <span class="input-group-text">条/任务</span>
+                                        </div>
+                                        <div class="mt-2 text-sm text-gray-600">
+                                            <span id="estimatedTasks">预估子任务数量：0</span>
+                                        </div>
+                                    </div>
+
+                                    <div id="splitByNumTasksConfig" class="mb-3" style="display: none;">
+                                        <label for="numSubTasks" class="form-label">子任务数量</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="numSubTasks" min="1" placeholder="请输入子任务数量">
+                                            <span class="input-group-text">个任务</span>
+                                        </div>
+                                        <div class="mt-2 text-sm text-gray-600">
+                                            <span id="estimatedSizePerTask">预估每个子任务数据量：0</span>
+                                        </div>
+                                    </div>
+
+                                    <div id="splitByCategoryConfig" class="mb-3" style="display: none;">
+                                        <label class="form-label">选择分类维度</label>
+                                        <select class="form-control">
+                                            <option value="contentType">内容类型</option>
+                                            <option value="sourceSystem">来源系统</option>
+                                            <option value="dataFormat">数据格式</option>
+                                            <option value="timeRange">时间范围</option>
+                                        </select>
+                                    </div>
+
+                                    <div id="splitByComplexityConfig" class="mb-3" style="display: none;">
+                                        <label class="form-label">选择复杂度分级</label>
+                                        <select class="form-control">
+                                            <option value="3">3级（简单、中等、复杂）</option>
+                                            <option value="5">5级（非常简单、简单、中等、复杂、非常复杂）</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 步骤2：配置子任务 -->
+                            <div class="split-step" id="step2" style="display: none;">
+                                <h6><span class="step-number">2</span>配置子任务</h6>
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">子任务基本信息</label>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="subTaskPrefix" class="form-label">子任务名称前缀</label>
+                                                <input type="text" class="form-control" id="subTaskPrefix" placeholder="请输入子任务名称前缀">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="subTaskPriority" class="form-label">子任务优先级</label>
+                                                <select class="form-control" id="subTaskPriority">
+                                                    <option value="high">高</option>
+                                                    <option value="medium">中</option>
+                                                    <option value="low">低</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="subTaskDeadline" class="form-label">子任务截止日期</label>
+                                        <input type="date" class="form-control" id="subTaskDeadline">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="subTaskDescription" class="form-label">子任务描述</label>
+                                        <textarea class="form-control" id="subTaskDescription" rows="3" placeholder="请输入子任务描述"></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">子任务标签</label>
+                                        <div>
+                                            <span class="task-tag bg-primary text-white">医疗数据</span>
+                                            <span class="task-tag bg-secondary text-white">图像识别</span>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ml-2">添加标签</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 步骤3：分配与发布 -->
+                            <div class="split-step" id="step3" style="display: none;">
+                                <h6><span class="step-number">3</span>分配与发布</h6>
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">分配方式</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="assignMethod" id="assignToOrg" value="toOrg" checked>
+                                            <label class="form-check-label" for="assignToOrg">
+                                                分配给指定组织
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="assignMethod" id="assignToUserType" value="toUserType">
+                                            <label class="form-check-label" for="assignToUserType">
+                                                分配给指定类别的用户
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div id="assignToOrgConfig" class="mb-3">
+                                        <label class="form-label">选择组织</label>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <select class="form-control">
+                                                    <option value="org1">医疗影像标注团队</option>
+                                                    <option value="org2">数据清洗团队A</option>
+                                                    <option value="org3">数据清洗团队B</option>
+                                                    <option value="org4">数据标注众包平台</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <button type="button" class="btn btn-sm btn-primary w-100">添加组织</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="assignToUserTypeConfig" class="mb-3" style="display: none;">
+                                        <label class="form-label">选择用户类别</label>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <select class="form-control">
+                                                    <option value="type1">高级数据标注师</option>
+                                                    <option value="type2">中级数据标注师</option>
+                                                    <option value="type3">初级数据标注师</option>
+                                                    <option value="type4">医疗领域专家</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <button type="button" class="btn btn-sm btn-primary w-100">添加用户类别</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">已选择的接收方</label>
+                                        <div id="selectedRecipients">
+                                            <!-- 示例接收方 -->
+                                            <span class="recipient-tag">
+                                                医疗影像标注团队
+                                                <span class="remove-btn"><i class="fas fa-times"></i></span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="publishComment" class="form-label">发布说明</label>
+                                        <textarea class="form-control" id="publishComment" rows="2" placeholder="请输入发布说明"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="prevStepBtn" class="btn btn-secondary" style="display: none;">上一步</button>
+                    <button type="button" id="nextStepBtn" class="btn btn-primary">下一步</button>
+                    <button type="button" id="submitSplitBtn" class="btn btn-success" style="display: none;">确认拆分并发布</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义脚本 -->
+    <script src="js/common.js"></script>
+    <script>
+        // 打开任务拆分模态框
+        function openSplitModal(taskId, taskName, totalDataAmount) {
+            document.getElementById('taskId').value = taskId;
+            document.getElementById('taskName').value = taskName;
+            document.getElementById('totalDataAmount').value = totalDataAmount.toLocaleString();
+            document.getElementById('subTaskPrefix').value = taskName + '-子任务';
+            
+            // 重置步骤
+            resetSteps();
+            
+            // 显示模态框
+            const splitTaskModal = new bootstrap.Modal(document.getElementById('splitTaskModal'));
+            splitTaskModal.show();
+        }
+
+        // 重置步骤
+        function resetSteps() {
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step3').classList.remove('active');
+            
+            document.getElementById('prevStepBtn').style.display = 'none';
+            document.getElementById('nextStepBtn').style.display = 'block';
+            document.getElementById('submitSplitBtn').style.display = 'none';
+            
+            // 重置步骤指示器
+            document.querySelectorAll('.step-number').forEach((step, index) => {
+                if (index === 0) {
+                    step.classList.remove('pending', 'completed');
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active', 'completed');
+                    step.classList.add('pending');
+                }
+            });
+        }
+
+        // 切换到下一步
+        function nextStep() {
+            const currentStep = getCurrentStep();
+            
+            if (currentStep === 1) {
+                // 验证第一步
+                const isValid = validateStep1();
+                if (!isValid) return;
+                
+                // 切换到第二步
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step2').style.display = 'block';
+                document.getElementById('step2').classList.add('active');
+                
+                // 更新步骤指示器
+                document.querySelectorAll('.step-number')[0].classList.remove('active');
+                document.querySelectorAll('.step-number')[0].classList.add('completed');
+                document.querySelectorAll('.step-number')[1].classList.remove('pending');
+                document.querySelectorAll('.step-number')[1].classList.add('active');
+                
+                // 显示上一步按钮
+                document.getElementById('prevStepBtn').style.display = 'block';
+            } else if (currentStep === 2) {
+                // 验证第二步
+                const isValid = validateStep2();
+                if (!isValid) return;
+                
+                // 切换到第三步
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step3').style.display = 'block';
+                document.getElementById('step3').classList.add('active');
+                
+                // 更新步骤指示器
+                document.querySelectorAll('.step-number')[1].classList.remove('active');
+                document.querySelectorAll('.step-number')[1].classList.add('completed');
+                document.querySelectorAll('.step-number')[2].classList.remove('pending');
+                document.querySelectorAll('.step-number')[2].classList.add('active');
+                
+                // 切换按钮显示
+                document.getElementById('nextStepBtn').style.display = 'none';
+                document.getElementById('submitSplitBtn').style.display = 'block';
+            }
+        }
+
+        // 切换到上一步
+        function prevStep() {
+            const currentStep = getCurrentStep();
+            
+            if (currentStep === 2) {
+                // 切换到第一步
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step1').style.display = 'block';
+                document.getElementById('step1').classList.add('active');
+                
+                // 更新步骤指示器
+                document.querySelectorAll('.step-number')[1].classList.remove('active');
+                document.querySelectorAll('.step-number')[1].classList.add('pending');
+                document.querySelectorAll('.step-number')[0].classList.remove('completed');
+                document.querySelectorAll('.step-number')[0].classList.add('active');
+                
+                // 隐藏上一步按钮
+                document.getElementById('prevStepBtn').style.display = 'none';
+            } else if (currentStep === 3) {
+                // 切换到第二步
+                document.getElementById('step3').style.display = 'none';
+                document.getElementById('step3').classList.remove('active');
+                document.getElementById('step2').style.display = 'block';
+                document.getElementById('step2').classList.add('active');
+                
+                // 更新步骤指示器
+                document.querySelectorAll('.step-number')[2].classList.remove('active');
+                document.querySelectorAll('.step-number')[2].classList.add('pending');
+                document.querySelectorAll('.step-number')[1].classList.remove('completed');
+                document.querySelectorAll('.step-number')[1].classList.add('active');
+                
+                // 切换按钮显示
+                document.getElementById('submitSplitBtn').style.display = 'none';
+                document.getElementById('nextStepBtn').style.display = 'block';
+            }
+        }
+
+        // 获取当前步骤
+        function getCurrentStep() {
+            if (document.getElementById('step1').style.display !== 'none') return 1;
+            if (document.getElementById('step2').style.display !== 'none') return 2;
+            if (document.getElementById('step3').style.display !== 'none') return 3;
+            return 1;
+        }
+
+        // 验证第一步
+        function validateStep1() {
+            const splitMethod = document.querySelector('input[name="splitMethod"]:checked').value;
+            
+            if (splitMethod === 'byCount') {
+                const subTaskSize = document.getElementById('subTaskSize').value;
+                if (!subTaskSize || subTaskSize <= 0) {
+                    alert('请输入有效的每个子任务数据量');
+                    return false;
+                }
+            } else if (splitMethod === 'byNumTasks') {
+                const numSubTasks = document.getElementById('numSubTasks').value;
+                if (!numSubTasks || numSubTasks <= 0) {
+                    alert('请输入有效的子任务数量');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // 验证第二步
+        function validateStep2() {
+            const subTaskPrefix = document.getElementById('subTaskPrefix').value;
+            const subTaskDeadline = document.getElementById('subTaskDeadline').value;
+            
+            if (!subTaskPrefix) {
+                alert('请输入子任务名称前缀');
+                return false;
+            }
+            
+            if (!subTaskDeadline) {
+                alert('请选择子任务截止日期');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 提交拆分任务
+        function submitSplitTask() {
+            // 显示确认对话框
+            if (confirm('确认要拆分此原始任务并发布子任务吗？')) {
+                // 模拟提交过程
+                alert('任务拆分成功！子任务已发布。');
+                
+                // 关闭模态框
+                const splitTaskModal = bootstrap.Modal.getInstance(document.getElementById('splitTaskModal'));
+                splitTaskModal.hide();
+                
+                // 刷新页面或更新任务状态
+                location.reload();
+            }
+        }
+
+        // 初始化事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            // 拆分方式切换
+            document.querySelectorAll('input[name="splitMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('splitByCountConfig').style.display = 'none';
+                    document.getElementById('splitByNumTasksConfig').style.display = 'none';
+                    document.getElementById('splitByCategoryConfig').style.display = 'none';
+                    document.getElementById('splitByComplexityConfig').style.display = 'none';
+                    
+                    if (this.value === 'byCount') {
+                        document.getElementById('splitByCountConfig').style.display = 'block';
+                    } else if (this.value === 'byNumTasks') {
+                        document.getElementById('splitByNumTasksConfig').style.display = 'block';
+                    } else if (this.value === 'byCategory') {
+                        document.getElementById('splitByCategoryConfig').style.display = 'block';
+                    } else if (this.value === 'byComplexity') {
+                        document.getElementById('splitByComplexityConfig').style.display = 'block';
+                    }
+                });
+            });
+
+            // 分配方式切换
+            document.querySelectorAll('input[name="assignMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'toOrg') {
+                        document.getElementById('assignToOrgConfig').style.display = 'block';
+                        document.getElementById('assignToUserTypeConfig').style.display = 'none';
+                    } else if (this.value === 'toUserType') {
+                        document.getElementById('assignToOrgConfig').style.display = 'none';
+                        document.getElementById('assignToUserTypeConfig').style.display = 'block';
+                    }
+                });
+            });
+
+            // 子任务大小变化时计算预估任务数量
+            document.getElementById('subTaskSize').addEventListener('input', function() {
+                const totalDataAmount = parseInt(document.getElementById('totalDataAmount').value.replace(/,/g, ''));
+                const subTaskSize = parseInt(this.value);
+                
+                if (subTaskSize > 0) {
+                    const estimatedTasks = Math.ceil(totalDataAmount / subTaskSize);
+                    document.getElementById('estimatedTasks').textContent = `预估子任务数量：${estimatedTasks}`;
+                }
+            });
+
+            // 子任务数量变化时计算预估每个任务数据量
+            document.getElementById('numSubTasks').addEventListener('input', function() {
+                const totalDataAmount = parseInt(document.getElementById('totalDataAmount').value.replace(/,/g, ''));
+                const numSubTasks = parseInt(this.value);
+                
+                if (numSubTasks > 0) {
+                    const estimatedSizePerTask = Math.ceil(totalDataAmount / numSubTasks);
+                    document.getElementById('estimatedSizePerTask').textContent = `预估每个子任务数据量：${estimatedSizePerTask.toLocaleString()}`;
+                }
+            });
+
+            // 按钮事件监听
+            document.getElementById('nextStepBtn').addEventListener('click', nextStep);
+            document.getElementById('prevStepBtn').addEventListener('click', prevStep);
+            document.getElementById('submitSplitBtn').addEventListener('click', submitSplitTask);
+        });
+    </script>
+</body>
+</html>
